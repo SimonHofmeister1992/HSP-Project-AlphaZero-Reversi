@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# change tools version
+sed s/'<Project ToolsVersion="14.0"'/'<Project ToolsVersion="12.0"'/1 ./ReversiXT_Client/ReversiXT_Client.csproj > out
+rm -rf ./ReversiXT_Client/ReversiXT_Client.csproj
+mv out ./ReversiXT_Client/ReversiXT_Client.csproj
+
+# compile
+xbuild ./ReversiXT_Client/ReversiXT_Client.csproj
+
+# copy binary file
+rm -rf ./bin
+mkdir ./bin
+cp ./ReversiXT_Client/obj/Debug/ReversiXT_Client.exe ./bin
+mv ./bin/ReversiXT_Client.exe ./bin/client12
