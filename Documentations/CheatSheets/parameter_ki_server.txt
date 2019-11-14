@@ -1,0 +1,6 @@
+Aufruf: ./server_nogl -m $1 -t $2 -d $3
+
+- wobei $1 den Pfad zur SpielMap in Form einer .txt oder .map angibt
+- wobei $2 die Zeit in Sekunden repräsentiert, die jeder Client pro Runde zusätzlich zur verbleibenden Restzeit bekommt
+- wobei $3 die maximal erlaubte Suchtiefe für die Trees in den Clients angibt (maximale Vorrausschau von $3 Zügen durch alle Spieler)
+	=> Zug durch Spieler 1, 2, 3, 4, 1, 2 ergibt eine Suchtiefe von 6 (Anzahl der Züge)

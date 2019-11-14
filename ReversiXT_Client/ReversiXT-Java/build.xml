@@ -1,0 +1,47 @@
+<project name="ReverixKI" default="full">
+
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="bin/src"/>
+        <javac srcdir="src" destdir="bin/src">
+        	<exclude name = "unit/*.java"/>
+        </javac>
+		<mkdir dir="bin/GUI"/>
+        <javac srcdir="GUI" destdir="bin/GUI">
+        	<exclude name = "unit/*.java"/>
+        </javac>
+    </target>
+
+    <target name="jar">
+        <jar destfile="bin/client12.jar" basedir="bin/src">
+            <manifest>
+                <attribute name="Main-Class" value="src.Main"/>
+            </manifest>
+        </jar>
+	<delete dir="bin/src"/>
+    </target>
+	
+	<target name="full">
+		<delete dir="bin"/>
+		<mkdir dir="bin/src"/>
+        <javac srcdir="src" destdir="bin/src">
+        	<exclude name = "unit/*.java"/>
+        </javac>
+        <jar destfile="bin/client12.jar" basedir="bin/src">
+            <manifest>
+                <attribute name="Main-Class" value="src.Main"/>
+            </manifest>
+        </jar>
+		<delete dir="bin/src"/>
+		<delete dir="bin/GUI"/>
+    </target>
+	
+
+    <target name="run">
+        <java jar="bin/client12.jar" fork="true"/>
+    </target>
+
+</project>
