@@ -1,0 +1,6 @@
+1) install java 1.8 or higher
+2) install maven
+3) build application with: mvn clean compile package
+4) run application with: java -jar target/ReversiAlphaGo-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+
+HINT: the "normal" .jar will not work. the jar-with-dependencies is needed
