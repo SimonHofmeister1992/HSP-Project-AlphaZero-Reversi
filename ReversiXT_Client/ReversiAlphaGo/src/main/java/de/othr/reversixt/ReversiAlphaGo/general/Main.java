@@ -6,6 +6,8 @@ package de.othr.reversixt.ReversiAlphaGo.general;
  */
 public class Main 
 {
+    public static boolean QUIET_MODE = Boolean.FALSE;
+
     public static void main( String[] args )
     {
         System.out.println( "Hello World!" );
