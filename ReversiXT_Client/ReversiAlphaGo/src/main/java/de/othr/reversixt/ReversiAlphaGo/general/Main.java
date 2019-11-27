@@ -6,6 +6,10 @@ import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 
 import java.io.IOException;
 
+/**
+ * Hello world!
+ *
+ */
 public class Main
 {
     public static boolean QUIET_MODE = Boolean.FALSE;
