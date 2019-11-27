@@ -1,10 +1,16 @@
 package de.othr.reversixt.ReversiAlphaGo.general;
 
+import de.othr.reversixt.ReversiAlphaGo.agent.Agent;
+import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
+import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
+
+import java.io.IOException;
+
 /**
  * Hello world!
  *
  */
-public class Main 
+public class Main
 {
     public static boolean QUIET_MODE = Boolean.FALSE;
     private static String ip = "127.0.0.1"; // localhost
@@ -13,11 +19,60 @@ public class Main
 
     public static void main( String[] args )
     {
-        /**********************************
+        /* ********************************
          *         Commandline options
          */
         CLI cli = new CLI(args);
         setValuesFromCLI(cli);
+
+        /* ********************************
+         *     Create instances for game
+         */
+
+        ServerCommunicator serverCommunicator = new ServerCommunicator(groupNumber);
+        Environment environment = new Environment();
+        Agent agent = new Agent(environment, serverCommunicator);
+        /* *********************************
+         *         Connect to server
+         */
+
+        serverInit(ip, port, serverCommunicator, environment);
+
+        /* ********************************
+         *             Game itself
+         */
+        int msgType;
+        while((msgType=serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME && !environment.isPlayerDisqualified(agent.getPlayerIcon())){
+                switch (msgType) {
+                    case IMsgType.INITIAL_MAP:
+                        environment.parseRawMap(serverCommunicator.getRawMap());
+                        break;
+                    case IMsgType.PLAYER_ICON:
+                        agent.setPlayerIcon(serverCommunicator.getPlayerIcon());
+                        break;
+                    case IMsgType.TURN_REQUEST:
+                        agent.play();
+                        break;
+                    case IMsgType.DISQUALIFIED_PLAYER:
+                        environment.disqualifyPlayer(serverCommunicator.getDisqualifiedPlayer());
+                        break;
+                    case IMsgType.END_OF_FIRST_PHASE:
+                        environment.increasePhaseNumber();
+                        break;
+                    default:
+                        break;
+                }
+        }
+
+        /* ********************************
+         *             END OF GAME
+         */
+
+        if(!QUIET_MODE && environment.isPlayerDisqualified(agent.getPlayerIcon())){
+            System.err.println("Agent got disqualified");
+        }
+        if(!QUIET_MODE) System.out.println("Game finished");
+
     }
 
     private static void setValuesFromCLI(CLI cli){
@@ -27,4 +82,29 @@ public class Main
         if(cli.hasOption(ICLIOptions.PORT)) port = Integer.parseInt(cli.getOptionValue(ICLIOptions.PORT));
     }
 
+    private static void serverInit(String IP, int port, ServerCommunicator serverComm, Environment environment)
+    {
+        try {serverComm.connect(IP, port);}
+        catch(IOException ServerError)
+        {
+            //if(!quietMode)System.out.println("Server error. Aborting");
+            if(!Main.QUIET_MODE)System.err.println("Server error. Aborting");
+            //ServerError.printStackTrace();
+            serverComm.cleanup();
+        }
+        int msgType = serverComm.waitOnServer();
+        if (msgType == IMsgType.INITIAL_MAP) //got map from server
+        {
+            if(!Main.QUIET_MODE)System.out.println("Got Map from Server");
+            if(!Main.QUIET_MODE)System.out.println("everything seems good, starting game...");
+            environment.parseRawMap(serverComm.getRawMap());
+        }
+        else //something went wrong!!
+        {
+            System.err.println("First message was not MAP");
+            System.err.println("Aborting!!");
+            serverComm.cleanup();
+        }
+    }
 }
+
