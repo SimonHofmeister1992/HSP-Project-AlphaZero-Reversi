@@ -1,24 +1,19 @@
 package de.othr.reversixt.ReversiAlphaGo.environment;
 
-import java.util.ArrayList;
-
 public class Environment {
 
     private int phase;
-    private int dummyDisqualifyCounter=0;
     private int numOfPlayers;
-    private int numOfOverrideStonesInGame;
-    private int numOfBombsInGame;
-    private int strengthOfBombsInGame;
-    private int playgroundHeight;
-    private int playgroundWidth;
-    private char[][] playground;
-    ArrayList<Transition> transitions;
+    private int numOfOverrideStones;
+    private int numOfBombs;
+    private int strengthOfBombs;
+    private int dummyDisqualifyCounter=0;
+    private Playground playground;
+    private Player[] players;
 
 
     public Environment(){
         setPhase(IPhase.TURN_PHASE);
-        transitions=new ArrayList<Transition>();
     }
 
     public void parseRawMap(String rawMap) {
@@ -26,54 +21,69 @@ public class Environment {
         if(!rawMap.isEmpty()){
             for(String rawMapLine : rawMap.split("\n")){
 
-                if(line==0) numOfPlayers=Integer.parseInt(rawMapLine);
-                else if(line==1) numOfOverrideStonesInGame=Integer.parseInt(rawMapLine);
+                if(line==0) {
+                    this.numOfPlayers=Integer.parseInt(rawMapLine.trim());
+                    this.playground=new Playground(Integer.parseInt(rawMapLine.trim()));
+                    this.players = new Player[numOfPlayers];
+                }
+                else if(line==1)  setNumOfOverrideStones(Integer.parseInt(rawMapLine.trim()));
                 else if(line==2) {
                     String[] columns = rawMapLine.split(" ");
-                    numOfBombsInGame=Integer.parseInt(columns[0]);
-                    strengthOfBombsInGame=Integer.parseInt(columns[1]);
+                    this.setNumOfBombs(Integer.parseInt(columns[0].trim()));
+                    this.setStrengthOfBombs(Integer.parseInt(columns[1].trim()));
                 }
                 else if(line==3) {
                     String[] columns = rawMapLine.split(" ");
-                    playgroundHeight=Integer.parseInt(columns[0]);
-                    playgroundWidth=Integer.parseInt(columns[1]);
-                    playground = new char[playgroundHeight][playgroundWidth];
+                    this.playground.setPlaygroundHeight(Integer.parseInt(columns[0].trim()));
+                    this.playground.setPlaygroundWidth(Integer.parseInt(columns[1].trim()));
+                    this.playground.initPlayground(playground.getPlaygroundHeight(), playground.getPlaygroundWidth());
                 }
 
-                else if (line >3 && line <= playgroundHeight + 3){
+                else if (line >3 && line <= playground.getPlaygroundHeight() + 3){
                     String[] columns = rawMapLine.split(" ");
-                    for(int column = 0; column < columns.length; column++){
-                        playground[line][column] = columns[column].charAt(0);
+                    for(int column = 0; column < columns.length-1; column++){
+                        playground.setSymbolOnPlaygroundPosition(line-4,column,columns[column].charAt(0));
                     }
                 }
 
-                else if (line > playgroundHeight + 3){
+                else if (line > playground.getPlaygroundHeight() + 3){
                     String[] transitionParts = rawMapLine.split("->");
                     String[] fromTransition = transitionParts[0].split(" ");
                     String[] toTransition = transitionParts[1].split(" ");
-                    transitions.add(new Transition(Integer.parseInt(fromTransition[0]),
-                            Integer.parseInt(fromTransition[1]),
-                            Integer.parseInt(fromTransition[2]),
-                            Integer.parseInt(toTransition[0]),
-                            Integer.parseInt(toTransition[1]),
-                            Integer.parseInt(toTransition[2])));
+                    TransitionPart first=new TransitionPart(Integer.parseInt(fromTransition[0].trim()),
+                            Integer.parseInt(fromTransition[1].trim()),
+                            Integer.parseInt(fromTransition[2].trim()));
+                    TransitionPart second=new TransitionPart(Integer.parseInt(toTransition[1].trim()),
+                            Integer.parseInt(toTransition[2].trim()),
+                            Integer.parseInt(toTransition[3].trim()));
+                    playground.addTransition(first,second);
                 }
 
                 line++;
             }
+            for(int i = 0; i < numOfPlayers; i++){
+                players[i] = new Player((char) (i+48), numOfOverrideStones, numOfBombs);
+            }
         }
     }
 
-    // TODO: THIS IS ONLY A DUMMY!!! senseful disqualifier needed
-    public void disqualifyPlayer(char playerIcon){
-
+    public void updatePlayground(int[] enemyTurn){
+        this.playground.updatePlayground(enemyTurn);
     }
-    // TODO: THIS IS ONLY A DUMMY!!! senseful disqualifier needed
+
+    public void disqualifyPlayer(char playerIcon){
+        for(Player p : players){
+            if(p.getSymbol()==playerIcon) p.setDisqualified(Boolean.TRUE);
+        }
+    }
+
     public boolean isPlayerDisqualified(char playerIcon){
-        dummyDisqualifyCounter++;
-        boolean isDisqualified = false;
-        if(dummyDisqualifyCounter>=15) isDisqualified = true;
-        return isDisqualified;
+        for(Player p : players){
+            if(p.getSymbol()==playerIcon) {
+                return p.isDisqualified();
+            }
+        }
+        return Boolean.FALSE;
     }
 
     public void increasePhaseNumber() {
@@ -83,8 +93,40 @@ public class Environment {
     public int getPhase() {
         return phase;
     }
-
     public void setPhase(int phase) {
         this.phase = phase;
+    }
+
+    public Playground getPlayground() {
+        return playground;
+    }
+
+    public int getNumOfOverrideStones() {
+        return numOfOverrideStones;
+    }
+    public void setNumOfOverrideStones(int numOfOverrideStones) {
+        this.numOfOverrideStones = numOfOverrideStones;
+    }
+
+    public int getNumOfBombs() {
+        return numOfBombs;
+    }
+    public void setNumOfBombs(int numOfBombs) {
+        this.numOfBombs = numOfBombs;
+    }
+
+    public int getStrengthOfBombs() {
+        return strengthOfBombs;
+    }
+    public void setStrengthOfBombs(int strengthOfBombs) {
+        this.strengthOfBombs = strengthOfBombs;
+    }
+
+    public int getNumOfPlayers() {
+        return numOfPlayers;
+    }
+
+    public Player[] getPlayers() {
+        return players;
     }
 }

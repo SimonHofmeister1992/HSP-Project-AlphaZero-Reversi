@@ -46,6 +46,9 @@ public class Main
                     case IMsgType.PLAYER_ICON:
                         agent.setPlayerIcon(serverCommunicator.getPlayerIcon());
                         break;
+                    case IMsgType.ENEMY_TURN:
+                        environment.updatePlayground(serverCommunicator.getEnemyTurn());
+                        break;
                     case IMsgType.TURN_REQUEST:
                         agent.play();
                         break;
