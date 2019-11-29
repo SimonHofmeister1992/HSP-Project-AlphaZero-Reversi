@@ -6,7 +6,7 @@ public class TransitionPart {
     private int column;
     private int direction;
 
-    public TransitionPart(int row, int column, int direction){
+    public TransitionPart(int column, int row, int direction){
         this.row=row;
         this.column=column;
         this.direction=direction;
@@ -25,5 +25,17 @@ public class TransitionPart {
     @Override
     public int hashCode() {
         return (row+" "+column+" "+direction).hashCode();
+    }
+
+    public int getColumn() {
+        return column;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getDirection() {
+        return direction;
     }
 }

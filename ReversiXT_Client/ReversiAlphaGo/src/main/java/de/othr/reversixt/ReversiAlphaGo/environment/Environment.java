@@ -7,13 +7,13 @@ public class Environment {
     private int numOfOverrideStones;
     private int numOfBombs;
     private int strengthOfBombs;
-    private int dummyDisqualifyCounter=0;
     private Playground playground;
     private Player[] players;
 
 
     public Environment(){
         setPhase(IPhase.TURN_PHASE);
+        this.playground=new Playground();
     }
 
     public void parseRawMap(String rawMap) {
@@ -23,7 +23,6 @@ public class Environment {
 
                 if(line==0) {
                     this.numOfPlayers=Integer.parseInt(rawMapLine.trim());
-                    this.playground=new Playground(Integer.parseInt(rawMapLine.trim()));
                     this.players = new Player[numOfPlayers];
                 }
                 else if(line==1)  setNumOfOverrideStones(Integer.parseInt(rawMapLine.trim()));
@@ -62,13 +61,16 @@ public class Environment {
                 line++;
             }
             for(int i = 0; i < numOfPlayers; i++){
-                players[i] = new Player((char) (i+48), numOfOverrideStones, numOfBombs);
+                players[i] = new Player((char) (i+49), numOfOverrideStones, numOfBombs);
             }
         }
     }
 
-    public void updatePlayground(int[] enemyTurn){
-        this.playground.updatePlayground(enemyTurn);
+    public void updatePlayground(Turn turn){
+        if(getPhase()==IPhase.TURN_PHASE){
+            Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
+            if(player != null) this.playground.updatePlaygroundPhase1(turn, player, numOfPlayers);
+        }
     }
 
     public void disqualifyPlayer(char playerIcon){
@@ -101,6 +103,10 @@ public class Environment {
         return playground;
     }
 
+    public void setPlayground(Playground playground) {
+        this.playground = playground.getCloneOfPlayground();
+    }
+
     public int getNumOfOverrideStones() {
         return numOfOverrideStones;
     }
@@ -129,4 +135,16 @@ public class Environment {
     public Player[] getPlayers() {
         return players;
     }
+
+    public Player getPlayerByPlayerIcon(char icon){
+        Player player = null;
+        for(Player p : players){
+            if(p.getSymbol()==icon) {
+                player=p;
+                break;
+            }
+        }
+        return player;
+    }
+
 }

@@ -10,6 +10,7 @@ public class Player {
         this.symbol=symbol;
         this.remainingOverrideStones=remainingOverrideStones;
         this.remainingBombs=remainingBombs;
+        this.isDisqualified = Boolean.FALSE;
     }
 
     public char getSymbol() {

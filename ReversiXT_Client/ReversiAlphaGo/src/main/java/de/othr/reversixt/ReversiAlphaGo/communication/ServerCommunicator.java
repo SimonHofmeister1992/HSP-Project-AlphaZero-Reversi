@@ -1,5 +1,6 @@
 package de.othr.reversixt.ReversiAlphaGo.communication;
 
+import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import de.othr.reversixt.ReversiAlphaGo.general.IMsgType;
 import de.othr.reversixt.ReversiAlphaGo.general.Main;
 
@@ -31,7 +32,7 @@ public class ServerCommunicator {
     private int phase;
     private int maxDepth;
     private int timeLimit;
-    private int[] enemyTurn = new int[4]; //enemy turn info (player number, y, x coordinate, special field info)
+    private Turn enemyTurn = new Turn();
     private char disqPlayer;
 
 
@@ -73,7 +74,7 @@ public class ServerCommunicator {
         return this.maxDepth;
     }
 
-    public int[] getEnemyTurn()
+    public Turn getEnemyTurn()
     {
         return this.enemyTurn;
     }
@@ -189,10 +190,11 @@ public class ServerCommunicator {
             }
             else if (msgType == IMsgType.ENEMY_TURN) //enemyTurn
             {
-                this.enemyTurn[2] = this.inStream.readUnsignedShort() + 1; //enemy x
-                this.enemyTurn[1] = this.inStream.readUnsignedShort() + 1; //enemy y
-                this.enemyTurn[3] = this.inStream.read(); //enemy special
-                this.enemyTurn[0] = this.inStream.read(); //enemy icon
+                this.enemyTurn.setColumn(this.inStream.readUnsignedShort());
+                this.enemyTurn.setRow(this.inStream.readUnsignedShort());
+                this.enemyTurn.setSpecialFieldInfo(this.inStream.read());
+                this.enemyTurn.setPlayerIcon((char)(this.inStream.read()+48));
+
             }
             else if (msgType == IMsgType.DISQUALIFIED_PLAYER) //disqualified
             {

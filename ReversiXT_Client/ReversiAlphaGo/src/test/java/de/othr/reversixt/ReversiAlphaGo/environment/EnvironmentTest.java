@@ -96,21 +96,159 @@ public class EnvironmentTest
         Player p1 = environment.getPlayers()[0];
         Player p2 = environment.getPlayers()[1];
 
-        assertTrue("the symbol of player 1 is incorrect, expected: '0', got: " + p1.symbol,p1.symbol=='0');
+        assertTrue("the symbol of player 1 is incorrect, expected: '1', got: " + p1.getSymbol(),p1.getSymbol()=='1');
         assertTrue("the number of bombs of player 1 is incorrect, expected: " + NUM_OF_BOMBS + ", got: " + p1.getRemainingBombs(),p1.getRemainingBombs()==NUM_OF_BOMBS);
         assertTrue("the number of overrides of player 1 is incorrect, expected: " + NUM_OF_OVERRIDES + ", got: " + p1.getRemainingOverrideStones(),p1.getRemainingOverrideStones()==NUM_OF_OVERRIDES);
 
-        assertTrue("the symbol of player 2 is incorrect, expected: '1', got: " + p2.symbol,p2.symbol=='1');
+        assertTrue("the symbol of player 2 is incorrect, expected: '2', got: " + p2.getSymbol(),p2.getSymbol()=='2');
         assertTrue("the number of bombs of player 2 is incorrect, expected: " + NUM_OF_BOMBS + ", got: " + p2.getRemainingBombs(),p2.getRemainingBombs()==NUM_OF_BOMBS);
         assertTrue("the number of overrides of player 2 is incorrect, expected: " + NUM_OF_OVERRIDES + ", got: " + p2.getRemainingOverrideStones(),p2.getRemainingOverrideStones()==NUM_OF_OVERRIDES);
 
     }
 
+    public void testUpdatePlayground(){
+        String METHOD_NAME = "testUpdatePlayground: ";
+        testParseRawMap();
+        char[][] expectedResultingPlayground;
+        Playground savedPlayground = environment.getPlayground().getCloneOfPlayground();
+
+        // test normal turn
+
+        Turn turn = new Turn('1', 5,2,0); // set onto '0'
+        expectedResultingPlayground = new char[][]{
+                {'0', '0', '0', '1', '0', '0'},
+                {'0', '0', '0', '2', '0', '0'},
+                {'0', '0', 'c', '0', '0', '0'},
+                {'0', 'b', '1', '2', 'x', '0'},
+                {'0', '1', '1', '1', '1', '0'},
+                {'0', '0', 'i', '1', '0', '0'},
+                {'b', '0', '0', '1', '0', '0'}
+        };
+        environment.updatePlayground(turn);
+        assertTrue(CLASS_NAME + METHOD_NAME+ "normal turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
+
+        // test 'x' turn
+
+        environment.setPlayground(savedPlayground);
+
+        turn = new Turn('1', 4,5,0); // set onto 'x'
+        expectedResultingPlayground = new char[][]{
+                {'0', '0', '0', '1', '0', '0'},
+                {'0', '0', '0', '2', '0', '0'},
+                {'0', '0', 'c', '0', '0', '0'},
+                {'0', 'b', '1', '1', '1', '0'},
+                {'0', '0', '2', '1', '1', '0'},
+                {'0', '0', 'i', '1', '0', '0'},
+                {'b', '0', '0', '1', '0', '0'}
+        };
+        environment.updatePlayground(turn);
+        assertTrue(CLASS_NAME + METHOD_NAME+ "'x' turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
+        assertTrue(CLASS_NAME + METHOD_NAME+ "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('1').getRemainingOverrideStones()==NUM_OF_OVERRIDES-1);
+
+        // test 'b' turn: wish Bombs
+
+        environment.setPlayground(savedPlayground);
+
+        turn = new Turn('2', 4,2,20); // set onto 'b'
+        expectedResultingPlayground = new char[][]{
+                {'0', '0', '0', '1', '0', '0'},
+                {'0', '0', '0', '2', '0', '0'},
+                {'0', '0', 'c', '0', '0', '0'},
+                {'0', '2', '2', '2', 'x', '0'},
+                {'0', '0', '2', '1', '1', '0'},
+                {'0', '0', 'i', '1', '0', '0'},
+                {'b', '0', '0', '1', '0', '0'}
+        };
+        environment.updatePlayground(turn);
+        assertTrue(CLASS_NAME + METHOD_NAME+ "b turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
+        assertTrue(CLASS_NAME + METHOD_NAME+ "number of bombs not increased",environment.getPlayerByPlayerIcon('2').getRemainingBombs()==NUM_OF_BOMBS+1);
+
+        // test 'b' turn: wish Overrides
+
+        environment.setPlayground(savedPlayground);
+
+        turn = new Turn('2', 4,2,21); // set onto 'b'
+        expectedResultingPlayground = new char[][]{
+                {'0', '0', '0', '1', '0', '0'},
+                {'0', '0', '0', '2', '0', '0'},
+                {'0', '0', 'c', '0', '0', '0'},
+                {'0', '2', '2', '2', 'x', '0'},
+                {'0', '0', '2', '1', '1', '0'},
+                {'0', '0', 'i', '1', '0', '0'},
+                {'b', '0', '0', '1', '0', '0'}
+        };
+        environment.updatePlayground(turn);
+        assertTrue(CLASS_NAME + METHOD_NAME+ "b turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
+        assertTrue(CLASS_NAME + METHOD_NAME+ "number of overrides not increased",environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones()==NUM_OF_OVERRIDES+1);
+
+        // test 'c' turn
+
+        environment.setPlayground(savedPlayground);
+
+        turn = new Turn('2', 3,3,1); // set onto 'c' // switch with player 1
+        expectedResultingPlayground = new char[][]{
+                {'0', '0', '0', '2', '0', '0'},
+                {'0', '0', '0', '1', '0', '0'},
+                {'0', '0', '1', '0', '0', '0'},
+                {'0', 'b', '1', '1', 'x', '0'},
+                {'0', '0', '1', '2', '2', '0'},
+                {'0', '0', 'i', '2', '0', '0'},
+                {'b', '0', '0', '2', '0', '0'}
+        };
+        environment.updatePlayground(turn);
+        assertTrue(CLASS_NAME + METHOD_NAME+ "c turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
+
+        // test 'i' turn
+
+        environment.setPlayground(savedPlayground);
+
+        turn = new Turn('1', 6,3,0); // player 1 set onto 'i'
+        expectedResultingPlayground = new char[][]{
+                {'0', '0', '0', '2', '0', '0'},
+                {'0', '0', '0', '1', '0', '0'},
+                {'0', '0', 'c', '0', '0', '0'},
+                {'0', 'b', '2', '1', 'x', '0'},
+                {'0', '0', '2', '2', '2', '0'},
+                {'0', '0', '2', '2', '0', '0'},
+                {'b', '0', '0', '2', '0', '0'}
+        };
+        environment.updatePlayground(turn);
+        assertTrue(CLASS_NAME + METHOD_NAME+ "i turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
+
+        // test 'transition' turn: use override
+
+        environment.setPlayground(savedPlayground);
+
+        turn = new Turn('2', 6,4,0); // using override
+        expectedResultingPlayground = new char[][]{
+                {'0', '0', '0', '2', '0', '0'},
+                {'0', '0', '0', '2', '0', '0'},
+                {'0', '0', 'c', '0', '0', '0'},
+                {'0', 'b', '1', '2', 'x', '0'},
+                {'0', '0', '2', '2', '1', '0'},
+                {'0', '0', 'i', '2', '0', '0'},
+                {'b', '0', '0', '2', '0', '0'}
+        };
+        environment.updatePlayground(turn);
+        assertTrue(CLASS_NAME + METHOD_NAME+ "transition turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
+        assertTrue(CLASS_NAME + METHOD_NAME+ "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones()==NUM_OF_OVERRIDES);
+    }
 
     public Environment getEnvironment() {
         return environment;
     }
     public void setEnvironment(Environment environment) {
         this.environment = environment;
+    }
+
+    public boolean arePlaygroundsIdentical(char[][] p1, char[][] p2){
+        for(int row = 0; row < environment.getPlayground().getPlaygroundHeight(); row++){
+            for(int col = 0; col < environment.getPlayground().getPlaygroundWidth(); col++){
+                if(p1[row][col] != p2[row][col]){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
