@@ -130,14 +130,9 @@ public class ServerCommunicator {
         return decodeMessage();
     }
 
-    public void sendOwnTurn(int row, int col) //sends own turn to server
+    public void sendOwnTurn(Turn turn) //sends own turn to server
     {
-        sendTurn(row, col, 0);
-    }
-
-    public void sendOwnTurn(int row, int col, int special) //sends own turn to server, special is special stone, num of player to switch, 20 for bomb, 21 for overwrite
-    {
-        sendTurn(row, col, special);
+    	sendTurn(turn.getRow(), turn.getColumn(), turn.getSpecialFieldInfo());
     }
 
     public void cleanup()
@@ -190,8 +185,8 @@ public class ServerCommunicator {
             }
             else if (msgType == IMsgType.ENEMY_TURN) //enemyTurn
             {
-                this.enemyTurn.setColumn(this.inStream.readUnsignedShort());
-                this.enemyTurn.setRow(this.inStream.readUnsignedShort());
+                this.enemyTurn.setColumn(this.inStream.readUnsignedShort()+1);
+                this.enemyTurn.setRow(this.inStream.readUnsignedShort()+1);
                 this.enemyTurn.setSpecialFieldInfo(this.inStream.read());
                 this.enemyTurn.setPlayerIcon((char)(this.inStream.read()+48));
 
@@ -263,11 +258,11 @@ public class ServerCommunicator {
     private void sendTurn(int y, int x, int special)
     {
         byte[] data = new byte[5];
-        //x--;
+        x--;
         byte[] buff = ByteBuffer.allocate(2).putShort((short) x).array(); //put x in data (because of transitioned coordinates)
         data[0] = buff[0];
         data[1] = buff[1];
-        //y--;
+        y--;
         buff = ByteBuffer.allocate(2).putShort((short) y).array(); //put y - 1 in data (because of transitioned coordinates)
         data[2] = buff[0];
         data[3] = buff[1];

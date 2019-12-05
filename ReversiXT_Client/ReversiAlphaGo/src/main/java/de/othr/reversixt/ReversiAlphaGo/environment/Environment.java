@@ -3,6 +3,7 @@ package de.othr.reversixt.ReversiAlphaGo.environment;
 public class Environment {
 
     private int phase;
+    private int turn;
     private int numOfPlayers;
     private int numOfOverrideStones;
     private int numOfBombs;
@@ -13,6 +14,7 @@ public class Environment {
 
     public Environment(){
         setPhase(IPhase.TURN_PHASE);
+        turn = 1;
         this.playground=new Playground();
     }
 
@@ -71,6 +73,7 @@ public class Environment {
             Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
             if(player != null) this.playground.updatePlaygroundPhase1(turn, player, numOfPlayers);
         }
+        this.turn++;
     }
 
     public void disqualifyPlayer(char playerIcon){
@@ -147,4 +150,53 @@ public class Environment {
         return player;
     }
 
+    public int getTurn() {
+		return turn;
+	}
+    
+    public boolean validateTurn(Turn turn) {
+    	int row=turn.getRow()-1;
+    	int col=turn.getColumn()-1;
+    	Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
+    	boolean isTurnValid = false;
+    	int numOfColoredFields;
+    	char actualSymbol;
+   	if(!(row >= 0 && row < getPlayground().getPlaygroundHeight() 
+    			&& col >= 0 && col < getPlayground().getPlaygroundWidth())) return false;
+    		
+    	char startSymbol = getPlayground().getSymbolOnPlaygroundPosition(row, col);
+    	if(startSymbol == '-') return false;
+    	else if((startSymbol == 'x' || (startSymbol >= '1' && startSymbol <= '8'))
+    			&& player.getRemainingOverrideStones() <= 0) return false;
+    	else {
+    		int[] newPos = new int[4];
+    		for(int direction = 0; direction < 8; direction++) {
+    			numOfColoredFields=0;
+    			newPos[0] = row; 
+    			newPos[1] = col; 
+    			newPos[2] = direction; 
+    			while(true) {
+    				newPos = getPlayground().getNewPosition(newPos, newPos[0], newPos[1], newPos[2]);
+    				if(!(newPos[0] >= 0 && newPos[0] < getPlayground().getPlaygroundHeight() 
+    						&& newPos[1] >= 0 && newPos[1] < getPlayground().getPlaygroundWidth())) break;
+    				actualSymbol = getPlayground().getSymbolOnPlaygroundPosition(newPos[0], newPos[1]);
+    				if(newPos[0]==row && newPos[1]==col) break;
+    				else if(actualSymbol == player.getSymbol() && numOfColoredFields > 0) return true;
+    				else if(actualSymbol == player.getSymbol() 
+    						|| actualSymbol=='x' 
+    						|| actualSymbol=='c' 
+    						|| actualSymbol=='i' 
+    						|| actualSymbol=='b' 
+    						|| actualSymbol=='0' 
+    						|| actualSymbol=='-') break;
+    				else {
+     					numOfColoredFields++;
+    				}
+    			}
+    			
+    		}
+    	}
+    	return isTurnValid;
+    }
+    
 }

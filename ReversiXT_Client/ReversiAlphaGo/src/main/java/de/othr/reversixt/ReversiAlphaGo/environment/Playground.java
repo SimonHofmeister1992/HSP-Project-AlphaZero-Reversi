@@ -98,10 +98,10 @@ public class Playground {
             newPosition = new int[3];
 
             // gather fields which shall be recolored by direction 
-            // (see C:\Users\Simon\Simon\Uni\master\semester1\projektmodul1\project\hsp-ws19-g03-reversiml\Documentations\CheatSheets\kurzSpezifikation.pdf)
+            // (see: Documentations\CheatSheets\kurzSpezifikation.pdf)
             while(true){
                 newPosition = getNewPosition(newPosition, actualRow, actualColumn, actualDirection); // row, col, direction
-                if(newPosition==null || (newPosition[0]==startRow && newPosition[1]==startColumn)) return;
+                if(newPosition==null || (newPosition[0]==startRow && newPosition[1]==startColumn)) break;
                 else{
                     actualRow=newPosition[0];
                     actualColumn=newPosition[1];
@@ -170,11 +170,11 @@ public class Playground {
 
     }
 
-    private int[] getNewPosition(int[] newPosition, int row, int col, int direction) {
-        TransitionPart tp = getTransitionedPosition(new TransitionPart(col+1, row+1, direction));
+    protected int[] getNewPosition(int[] newPosition, int row, int col, int direction) {
+        TransitionPart tp = getTransitionedPosition(new TransitionPart(col, row, direction));
         if (tp != null) {
-            newPosition[0] = tp.getRow()-1;
-            newPosition[1] = tp.getColumn()-1;
+            newPosition[0] = tp.getRow();
+            newPosition[1] = tp.getColumn();
             newPosition[2] = (tp.getDirection()+4)%8;
             return newPosition;
         } else {
@@ -212,5 +212,16 @@ public class Playground {
             }
         }
         return p;
+    }
+    
+    public void printPlayground() {
+    	for(int row = 0; row < getPlaygroundHeight(); row++) {
+    		for(int col = 0; col < getPlaygroundWidth(); col++) {
+    			System.out.print(playground[row][col] + " ");
+    		}
+    		System.out.println();
+    	}
+		System.out.println();
+		System.out.println();
     }
 }

@@ -19,7 +19,7 @@ public class EnvironmentTest
     private final int STRENGTH_OF_BOMBS = 3;
     private final int PLAYGROUND_HEIGHT = 7;
     private final int PLAYGROUND_WIDTH = 6;
-    private final String TRANSITION = "4 1 0 <-> 4 7 4";
+    private final String TRANSITION = "3 0 0 <-> 3 6 4";
     private final char[][] PLAYGROUND = {
             {'0', '0', '0', '1', '0', '0'},
             {'0', '0', '0', '2', '0', '0'},
@@ -49,11 +49,7 @@ public class EnvironmentTest
         return new TestSuite( EnvironmentTest.class );
     }
 
-
-
-    /**
-     * Rigourous Tests :-)
-     */
+    // test methods
 
     public void testParseRawMap()
     {
@@ -84,8 +80,8 @@ public class EnvironmentTest
         assertTrue(CLASS_NAME+  METHOD_NAME + " playground height incorrect. got:  " + environment.getPlayground().getPlaygroundHeight() + ", expected: " + PLAYGROUND_HEIGHT,environment.getPlayground().getPlaygroundHeight()==PLAYGROUND_HEIGHT);
         assertTrue(CLASS_NAME+  METHOD_NAME + " playground width incorrect. got:  " + environment.getPlayground().getPlaygroundWidth() + ", expected: " + PLAYGROUND_WIDTH,environment.getPlayground().getPlaygroundWidth()==PLAYGROUND_WIDTH);
         assertTrue(CLASS_NAME+  METHOD_NAME + " number of transitions incorrect. got:  " + environment.getPlayground().getTransitions().size() + ", expected: " + 2,environment.getPlayground().getTransitions().size()==2);
-        assertTrue(CLASS_NAME+  METHOD_NAME + " transition 1 for 4 1 0 incorrect. got:  " + environment.getPlayground().getTransitions().get(new TransitionPart(4,1,0)) + ", expected: " + "4 7 4",environment.getPlayground().getTransitions().get(new TransitionPart(4,1,0)).equals(new TransitionPart(4,7,4)));
-        assertTrue(CLASS_NAME+  METHOD_NAME + " transition 1 for 4 7 4 incorrect. got:  " + environment.getPlayground().getTransitions().get(new TransitionPart(4,7,4)) + ", expected: " + "4 1 0",environment.getPlayground().getTransitions().get(new TransitionPart(4,7,4)).equals(new TransitionPart(4,1,0)));
+        assertTrue(CLASS_NAME+  METHOD_NAME + " transition 1 for 3 0 0 incorrect. got:  " + environment.getPlayground().getTransitions().get(new TransitionPart(3,0,0)) + ", expected: " + "3 6 4",environment.getPlayground().getTransitions().get(new TransitionPart(3,0,0)).equals(new TransitionPart(3,6,4)));
+        assertTrue(CLASS_NAME+  METHOD_NAME + " transition 1 for 3 6 4 incorrect. got:  " + environment.getPlayground().getTransitions().get(new TransitionPart(3,6,4)) + ", expected: " + "3 0 0",environment.getPlayground().getTransitions().get(new TransitionPart(3,6,4)).equals(new TransitionPart(3,0,0)));
 
         for(int row = 0; row < PLAYGROUND_HEIGHT; row++){
             for(int col = 0; col < PLAYGROUND_WIDTH; col++){
@@ -230,10 +226,107 @@ public class EnvironmentTest
                 {'b', '0', '0', '2', '0', '0'}
         };
         environment.updatePlayground(turn);
+        environment.getPlayground().printPlayground();
         assertTrue(CLASS_NAME + METHOD_NAME+ "transition turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
         assertTrue(CLASS_NAME + METHOD_NAME+ "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones()==NUM_OF_OVERRIDES);
+    
+        environment.setPlayground(savedPlayground);
     }
 
+    public void testValidateTurn() {
+    	String METHOD_NAME = "testValidateTurn: ";
+    	
+    	testParseRawMap();
+    	
+    	boolean isTurnOfPlayer1Valid, isTurnOfPlayer2Valid;
+    	char[][] mapPlayer1 = new char[PLAYGROUND_HEIGHT][PLAYGROUND_WIDTH];
+    	char[][] mapPlayer2 = new char[PLAYGROUND_HEIGHT][PLAYGROUND_WIDTH];
+    	
+    	Player p1 = environment.getPlayerByPlayerIcon('1');
+    	Player p2 = environment.getPlayerByPlayerIcon('2');
+    	for(int i = 0; i < PLAYGROUND_HEIGHT*PLAYGROUND_WIDTH; i++) {
+    		p1.increaseNumberOfOverrideStones();
+    		p2.increaseNumberOfOverrideStones();
+    	}
+    	
+    	
+    	char[][] mapPlayer1ValidationValues = new char[][] {
+    		{'0', '0', '0', '0', '0', '0'},
+    		{'0', '0', '0', '0', '0', '0'},
+    		{'0', '0', '1', '1', '0', '0'},
+    		{'0', '1', '0', '0', '1', '0'},
+    		{'0', '1', '0', '0', '0', '0'},
+    		{'0', '0', '1', '0', '0', '0'},
+    		{'0', '0', '0', '0', '0', '0'}
+    	};
+    	
+    	
+    	char[][] mapPlayer2ValidationValues = new char[][] {
+    		{'0', '0', '0', '1', '0', '0'},
+    		{'0', '0', '0', '1', '0', '0'},
+    		{'0', '0', '1', '0', '0', '0'},
+    		{'0', '1', '0', '1', '0', '0'},
+    		{'0', '0', '0', '1', '1', '1'},
+    		{'0', '0', '0', '1', '0', '1'},
+    		{'0', '0', '0', '1', '1', '0'}
+    	};
+    	
+    	// test with overrides
+    	Turn turnP1=new Turn('1',0,0,0), turnP2=new Turn('2',0,0,0);
+    	for(int row = 0; row < PLAYGROUND_HEIGHT; row++) {
+    		for(int col = 0; col < PLAYGROUND_WIDTH; col++) {
+    			turnP1.setRow(row+1); turnP1.setColumn(col+1);
+    			turnP2.setRow(row+1); turnP2.setColumn(col+1);
+    			isTurnOfPlayer1Valid = environment.validateTurn(turnP1);
+    			isTurnOfPlayer2Valid = environment.validateTurn(turnP2);
+    			if(isTurnOfPlayer1Valid) mapPlayer1[row][col] = '1';
+    			else mapPlayer1[row][col] = '0';
+    		
+    			if(isTurnOfPlayer2Valid) mapPlayer2[row][col] = '1';
+   			else mapPlayer2[row][col] = '0';
+    		}
+    	}
+    	
+    	assertTrue(CLASS_NAME+METHOD_NAME+"turn validation with overrides for player 1 incorrect", arePlaygroundsIdentical(mapPlayer1, mapPlayer1ValidationValues));
+    	assertTrue(CLASS_NAME+METHOD_NAME+"turn validation with overrides for player 2 incorrect", arePlaygroundsIdentical(mapPlayer2, mapPlayer2ValidationValues));
+ 
+    	// test without overrides
+    	
+    	while(p1.getRemainingOverrideStones() > 0) p1.decreaseNumberOfOverrideStones();
+    	while(p2.getRemainingOverrideStones() > 0) p2.decreaseNumberOfOverrideStones();
+    	
+    	for(int row = 0; row < PLAYGROUND_HEIGHT; row++) {
+    		for(int col = 0; col < PLAYGROUND_WIDTH; col++) {
+    			turnP1.setRow(row+1); turnP1.setColumn(col+1);
+    			turnP2.setRow(row+1); turnP2.setColumn(col+1);
+    			isTurnOfPlayer1Valid = environment.validateTurn(turnP1);
+    			isTurnOfPlayer2Valid = environment.validateTurn(turnP2);
+    			if(isTurnOfPlayer1Valid) mapPlayer1[row][col] = '1';
+    			else mapPlayer1[row][col] = '0';
+    		
+    			if(isTurnOfPlayer2Valid) mapPlayer2[row][col] = '1';
+   			else mapPlayer2[row][col] = '0';
+    		}
+    	}
+    	  	
+    	mapPlayer1ValidationValues[3][4] = '0';
+    	mapPlayer2ValidationValues[0][3] = '0';
+    	mapPlayer2ValidationValues[1][3] = '0';
+    	mapPlayer2ValidationValues[3][3] = '0';
+    	mapPlayer2ValidationValues[4][3] = '0';
+    	mapPlayer2ValidationValues[4][4] = '0';
+    	mapPlayer2ValidationValues[5][3] = '0';
+    	mapPlayer2ValidationValues[6][3] = '0';  	
+    	
+    	assertTrue(CLASS_NAME+METHOD_NAME+"turn validation without overrides for player 1 incorrect", arePlaygroundsIdentical(mapPlayer1, mapPlayer1ValidationValues));
+    	assertTrue(CLASS_NAME+METHOD_NAME+"turn validation without overrides for player 2 incorrect", arePlaygroundsIdentical(mapPlayer2, mapPlayer2ValidationValues));  
+    }
+    
+
+    
+    
+    // non-test methods
+    
     public Environment getEnvironment() {
         return environment;
     }
@@ -241,7 +334,7 @@ public class EnvironmentTest
         this.environment = environment;
     }
 
-    public boolean arePlaygroundsIdentical(char[][] p1, char[][] p2){
+    private boolean arePlaygroundsIdentical(char[][] p1, char[][] p2){
         for(int row = 0; row < environment.getPlayground().getPlaygroundHeight(); row++){
             for(int col = 0; col < environment.getPlayground().getPlaygroundWidth(); col++){
                 if(p1[row][col] != p2[row][col]){
