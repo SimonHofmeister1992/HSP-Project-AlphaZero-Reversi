@@ -44,7 +44,7 @@ public class ServerCommunicator {
     {
         this.groupNumber=grNumber;
         this.phase=1;
-        System.out.println("The used group number for this game is: " + groupNumber);
+        if(!Main.QUIET_MODE)System.out.println("The used group number for this game is: " + groupNumber);
     }
 
 
@@ -171,7 +171,7 @@ public class ServerCommunicator {
 
                 this.rawMap = new String(data);
 
-                System.out.println(this.rawMap);
+                if(!Main.QUIET_MODE)System.out.println(this.rawMap);
             }
             else if (msgType == IMsgType.PLAYER_ICON) //playericon
             {
@@ -202,7 +202,7 @@ public class ServerCommunicator {
             }
             else if (msgType == IMsgType.END_OF_GAME) //end of game
             {
-                System.out.println("Game is over");
+               if(!Main.QUIET_MODE)System.out.println("Game is over");
             }
 
         }

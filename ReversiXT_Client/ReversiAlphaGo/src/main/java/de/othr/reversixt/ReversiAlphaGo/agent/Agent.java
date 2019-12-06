@@ -32,8 +32,11 @@ public class Agent {
         turn.setColumn(turn.getColumn());
         
         serverCommunicator.sendOwnTurn(turn);
-        System.out.println("set to: " + turn.getRow() + " " + turn.getColumn() + ", " + environment.getPlayerByPlayerIcon(turn.getPlayerIcon()).getRemainingOverrideStones());
-        if(!Main.QUIET_MODE) environment.getPlayground().printPlayground();
+        
+        if(!Main.QUIET_MODE) {
+        	System.out.println("agent set stone to: row: " + turn.getRow() + ", col: " + turn.getColumn() + ", remaining overrides" + environment.getPlayerByPlayerIcon(turn.getPlayerIcon()).getRemainingOverrideStones());
+        	environment.getPlayground().printPlayground();
+        }
     }
 
     public Player getPlayer() {

@@ -86,7 +86,6 @@ public class Playground {
         if(turn.getSpecialFieldInfo()==20 && startSymbol == 'b') player.increaseNumberOfBombs();
         else if(turn.getSpecialFieldInfo()==21 && startSymbol == 'b') player.increaseNumberOfOverrideStones();
         if(startSymbol=='x' || (startSymbol>='1' && startSymbol<='8')){
-        	char symbol = playerIcon;
             player.decreaseNumberOfOverrideStones();
         }
 
@@ -121,7 +120,6 @@ public class Playground {
                     // handle special fields which must not be recolored as the whole direction
                     else if(actualSymbolOnPlayground=='0'
                     		|| actualSymbolOnPlayground=='-'
-                            || actualSymbolOnPlayground=='x'
                             || actualSymbolOnPlayground=='i'
                             || actualSymbolOnPlayground=='b'
                             || actualSymbolOnPlayground=='c'){

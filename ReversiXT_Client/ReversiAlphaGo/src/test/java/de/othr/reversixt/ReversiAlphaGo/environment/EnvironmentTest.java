@@ -253,8 +253,8 @@ public class EnvironmentTest
     	char[][] mapPlayer1ValidationValues = new char[][] {
     		{'0', '0', '0', '0', '0', '0'},
     		{'0', '0', '0', '0', '0', '0'},
-    		{'0', '0', '1', '1', '0', '0'},
-    		{'0', '1', '0', '0', '1', '0'},
+    		{'0', '0', '1', '1', '1', '1'},
+    		{'0', '1', '0', '0', '1', '1'},
     		{'0', '1', '0', '0', '0', '0'},
     		{'0', '0', '1', '0', '0', '0'},
     		{'0', '0', '0', '0', '0', '0'}
@@ -265,7 +265,7 @@ public class EnvironmentTest
     		{'0', '0', '0', '1', '0', '0'},
     		{'0', '0', '0', '1', '0', '0'},
     		{'0', '0', '1', '0', '0', '0'},
-    		{'0', '1', '0', '1', '0', '0'},
+    		{'0', '1', '0', '1', '1', '1'},
     		{'0', '0', '0', '1', '1', '1'},
     		{'0', '0', '0', '1', '0', '1'},
     		{'0', '0', '0', '1', '1', '0'}
@@ -285,7 +285,7 @@ public class EnvironmentTest
     			if(isTurnOfPlayer2Valid) mapPlayer2[row][col] = '1';
    			else mapPlayer2[row][col] = '0';
     		}
-    	}
+    	}   	
     	
     	assertTrue(CLASS_NAME+METHOD_NAME+"turn validation with overrides for player 1 incorrect", arePlaygroundsIdentical(mapPlayer1, mapPlayer1ValidationValues));
     	assertTrue(CLASS_NAME+METHOD_NAME+"turn validation with overrides for player 2 incorrect", arePlaygroundsIdentical(mapPlayer2, mapPlayer2ValidationValues));
@@ -309,10 +309,18 @@ public class EnvironmentTest
     		}
     	}
     	  	
+    	for(int row = 0; row < PLAYGROUND_HEIGHT; row++) {
+    		for(int col = 0; col < PLAYGROUND_WIDTH; col++) {
+    			System.out.print(mapPlayer2[row][col]);
+    		}
+    		System.out.println();
+    	}
+    	
     	mapPlayer1ValidationValues[3][4] = '0';
     	mapPlayer2ValidationValues[0][3] = '0';
     	mapPlayer2ValidationValues[1][3] = '0';
     	mapPlayer2ValidationValues[3][3] = '0';
+    	mapPlayer2ValidationValues[3][4] = '0';
     	mapPlayer2ValidationValues[4][3] = '0';
     	mapPlayer2ValidationValues[4][4] = '0';
     	mapPlayer2ValidationValues[5][3] = '0';

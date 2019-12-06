@@ -187,7 +187,6 @@ public class Environment {
     					return true;
     				}
     				else if(actualSymbol == player.getSymbol() 
-    						|| actualSymbol=='x' 
     						|| actualSymbol=='c' 
     						|| actualSymbol=='i' 
     						|| actualSymbol=='b' 
