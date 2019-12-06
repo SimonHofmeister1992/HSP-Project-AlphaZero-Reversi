@@ -6,16 +6,12 @@ import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 
 import java.io.IOException;
 
-/**
- * Hello world!
- *
- */
 public class Main
 {
     public static boolean QUIET_MODE = Boolean.FALSE;
     private static String ip = "127.0.0.1"; // localhost
     private static int port = 7777;
-    private static int groupNumber = 1;
+    private static int groupNumber = 3;
 
     public static void main( String[] args )
     {
@@ -42,13 +38,16 @@ public class Main
          *             Game itself
          */
         int msgType;
-        while((msgType=serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME && !environment.isPlayerDisqualified(agent.getPlayerIcon())){
+        while((msgType=serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME){
                 switch (msgType) {
                     case IMsgType.INITIAL_MAP:
                         environment.parseRawMap(serverCommunicator.getRawMap());
                         break;
                     case IMsgType.PLAYER_ICON:
-                        agent.setPlayerIcon(serverCommunicator.getPlayerIcon());
+                        agent.setPlayer(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()));
+                        break;
+                    case IMsgType.ENEMY_TURN:
+                        environment.updatePlayground(serverCommunicator.getEnemyTurn());
                         break;
                     case IMsgType.TURN_REQUEST:
                         agent.play();
@@ -57,7 +56,7 @@ public class Main
                         environment.disqualifyPlayer(serverCommunicator.getDisqualifiedPlayer());
                         break;
                     case IMsgType.END_OF_FIRST_PHASE:
-                        environment.increasePhaseNumber();
+                        environment.nextPhase();
                         break;
                     default:
                         break;
@@ -68,7 +67,7 @@ public class Main
          *             END OF GAME
          */
 
-        if(!QUIET_MODE && environment.isPlayerDisqualified(agent.getPlayerIcon())){
+        if(!QUIET_MODE && environment.isPlayerDisqualified(agent.getPlayer().getSymbol())){
             System.err.println("Agent got disqualified");
         }
         if(!QUIET_MODE) System.out.println("Game finished");

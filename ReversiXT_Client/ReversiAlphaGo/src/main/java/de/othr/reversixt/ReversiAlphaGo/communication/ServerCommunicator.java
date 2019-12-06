@@ -1,5 +1,6 @@
 package de.othr.reversixt.ReversiAlphaGo.communication;
 
+import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import de.othr.reversixt.ReversiAlphaGo.general.IMsgType;
 import de.othr.reversixt.ReversiAlphaGo.general.Main;
 
@@ -31,7 +32,7 @@ public class ServerCommunicator {
     private int phase;
     private int maxDepth;
     private int timeLimit;
-    private int[] enemyTurn = new int[4]; //enemy turn info (player number, y, x coordinate, special field info)
+    private Turn enemyTurn = new Turn();
     private char disqPlayer;
 
 
@@ -43,7 +44,7 @@ public class ServerCommunicator {
     {
         this.groupNumber=grNumber;
         this.phase=1;
-        System.out.println("The used group number for this game is: " + groupNumber);
+        if(!Main.QUIET_MODE)System.out.println("The used group number for this game is: " + groupNumber);
     }
 
 
@@ -73,7 +74,7 @@ public class ServerCommunicator {
         return this.maxDepth;
     }
 
-    public int[] getEnemyTurn()
+    public Turn getEnemyTurn()
     {
         return this.enemyTurn;
     }
@@ -129,14 +130,9 @@ public class ServerCommunicator {
         return decodeMessage();
     }
 
-    public void sendOwnTurn(int row, int col) //sends own turn to server
+    public void sendOwnTurn(Turn turn) //sends own turn to server
     {
-        sendTurn(row, col, 0);
-    }
-
-    public void sendOwnTurn(int row, int col, int special) //sends own turn to server, special is special stone, num of player to switch, 20 for bomb, 21 for overwrite
-    {
-        sendTurn(row, col, special);
+    	sendTurn(turn.getRow(), turn.getColumn(), turn.getSpecialFieldInfo());
     }
 
     public void cleanup()
@@ -175,7 +171,7 @@ public class ServerCommunicator {
 
                 this.rawMap = new String(data);
 
-                System.out.println(this.rawMap);
+                if(!Main.QUIET_MODE)System.out.println(this.rawMap);
             }
             else if (msgType == IMsgType.PLAYER_ICON) //playericon
             {
@@ -189,10 +185,11 @@ public class ServerCommunicator {
             }
             else if (msgType == IMsgType.ENEMY_TURN) //enemyTurn
             {
-                this.enemyTurn[2] = this.inStream.readUnsignedShort() + 1; //enemy x
-                this.enemyTurn[1] = this.inStream.readUnsignedShort() + 1; //enemy y
-                this.enemyTurn[3] = this.inStream.read(); //enemy special
-                this.enemyTurn[0] = this.inStream.read(); //enemy icon
+                this.enemyTurn.setColumn(this.inStream.readUnsignedShort()+1);
+                this.enemyTurn.setRow(this.inStream.readUnsignedShort()+1);
+                this.enemyTurn.setSpecialFieldInfo(this.inStream.read());
+                this.enemyTurn.setPlayerIcon((char)(this.inStream.read()+48));
+
             }
             else if (msgType == IMsgType.DISQUALIFIED_PLAYER) //disqualified
             {
@@ -205,7 +202,7 @@ public class ServerCommunicator {
             }
             else if (msgType == IMsgType.END_OF_GAME) //end of game
             {
-                System.out.println("Game is over");
+               if(!Main.QUIET_MODE)System.out.println("Game is over");
             }
 
         }
@@ -261,11 +258,11 @@ public class ServerCommunicator {
     private void sendTurn(int y, int x, int special)
     {
         byte[] data = new byte[5];
-        //x--;
+        x--;
         byte[] buff = ByteBuffer.allocate(2).putShort((short) x).array(); //put x in data (because of transitioned coordinates)
         data[0] = buff[0];
         data[1] = buff[1];
-        //y--;
+        y--;
         buff = ByteBuffer.allocate(2).putShort((short) y).array(); //put y - 1 in data (because of transitioned coordinates)
         data[2] = buff[0];
         data[3] = buff[1];
