@@ -51,6 +51,7 @@ public class Playground {
     public void setSymbolOnPlaygroundPosition(int row, int col, char symbol){
         this.playground[row][col]=symbol;
     }
+    // 0 indexed. the upper left corner of the map: row and column are 0/0
     public char getSymbolOnPlaygroundPosition(int row, int col){
         return this.playground[row][col];
     }
@@ -85,6 +86,7 @@ public class Playground {
         if(turn.getSpecialFieldInfo()==20 && startSymbol == 'b') player.increaseNumberOfBombs();
         else if(turn.getSpecialFieldInfo()==21 && startSymbol == 'b') player.increaseNumberOfOverrideStones();
         if(startSymbol=='x' || (startSymbol>='1' && startSymbol<='8')){
+        	char symbol = playerIcon;
             player.decreaseNumberOfOverrideStones();
         }
 

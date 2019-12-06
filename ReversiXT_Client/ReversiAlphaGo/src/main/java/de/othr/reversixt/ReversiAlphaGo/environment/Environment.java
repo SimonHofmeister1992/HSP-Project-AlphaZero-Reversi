@@ -91,7 +91,7 @@ public class Environment {
         return Boolean.FALSE;
     }
 
-    public void increasePhaseNumber() {
+    public void nextPhase() {
         setPhase(getPhase() + 1);
     }
 
@@ -154,9 +154,10 @@ public class Environment {
 		return turn;
 	}
     
+    // 1 indexed. the upper left corner of the turn row and turn column need to be 1/1
     public boolean validateTurn(Turn turn) {
     	int row=turn.getRow()-1;
-    	int col=turn.getColumn()-1;
+    	int col=turn.getColumn()-1;    	
     	Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
     	boolean isTurnValid = false;
     	int numOfColoredFields;
@@ -166,6 +167,7 @@ public class Environment {
     		
     	char startSymbol = getPlayground().getSymbolOnPlaygroundPosition(row, col);
     	if(startSymbol == '-') return false;
+    	else if(startSymbol == 'x' && player.getRemainingOverrideStones() > 0) return true;
     	else if((startSymbol == 'x' || (startSymbol >= '1' && startSymbol <= '8'))
     			&& player.getRemainingOverrideStones() <= 0) return false;
     	else {
@@ -181,7 +183,9 @@ public class Environment {
     						&& newPos[1] >= 0 && newPos[1] < getPlayground().getPlaygroundWidth())) break;
     				actualSymbol = getPlayground().getSymbolOnPlaygroundPosition(newPos[0], newPos[1]);
     				if(newPos[0]==row && newPos[1]==col) break;
-    				else if(actualSymbol == player.getSymbol() && numOfColoredFields > 0) return true;
+    				else if(actualSymbol == player.getSymbol() && numOfColoredFields > 0) {
+    					return true;
+    				}
     				else if(actualSymbol == player.getSymbol() 
     						|| actualSymbol=='x' 
     						|| actualSymbol=='c' 

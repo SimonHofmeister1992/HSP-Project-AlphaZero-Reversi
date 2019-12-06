@@ -56,7 +56,7 @@ public class Main
                         environment.disqualifyPlayer(serverCommunicator.getDisqualifiedPlayer());
                         break;
                     case IMsgType.END_OF_FIRST_PHASE:
-                        environment.increasePhaseNumber();
+                        environment.nextPhase();
                         break;
                     default:
                         break;

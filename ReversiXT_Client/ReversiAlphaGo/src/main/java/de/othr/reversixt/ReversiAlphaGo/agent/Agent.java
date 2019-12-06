@@ -15,23 +15,24 @@ public class Agent {
     public Agent (Environment environment, ServerCommunicator serverCommunicator){
         this.environment = environment;
         this.serverCommunicator = serverCommunicator;
+        
+        
     }
 
-    // TODO: THIS IS ONLY A DUMMY!!!
-    // all actions the agent does on the map are 1 indexed. so the field in the upper left corner is (row:1,col:1)!
+    // choose best turn and send turn to server
+    // all actions the agent does on the map are 1 indexed. 
+    // so the field in the upper left corner is (row:1,col:1)!
     public void play(){
-    	int row, col;
-    	char choice=0;
-    	switch(environment.getTurn()) {
-	    	case 1: row=3; col=5; choice=0; break;
-	    	case 4: row=3; col=2;break;
-	    	default: row=1; col=1;choice='0';
-    	}
-        Turn turn = new Turn(this.player.getSymbol(), row, col, choice);
-        boolean isTurnValid = environment.validateTurn(turn);
-        System.out.println("is turn row: " + row + ", col: " + col + " valid?: " + isTurnValid);
+    	
+    	ITurnChoiceAlgorithm itca = new RandomTurnChoiceAlgorithm(environment, player);
+    	
+        Turn turn = itca.chooseTurn();
+        // here: 1 indexed turns, on algorithm change to 0 indexed: add 1
+        turn.setRow(turn.getRow());
+        turn.setColumn(turn.getColumn());
+        
         serverCommunicator.sendOwnTurn(turn);
-        environment.updatePlayground(turn);
+        System.out.println("set to: " + turn.getRow() + " " + turn.getColumn() + ", " + environment.getPlayerByPlayerIcon(turn.getPlayerIcon()).getRemainingOverrideStones());
         if(!Main.QUIET_MODE) environment.getPlayground().printPlayground();
     }
 
