@@ -73,6 +73,12 @@ public class Environment {
             Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
             if(player != null) this.playground.updatePlaygroundPhase1(turn, player, numOfPlayers);
         }
+        else if(getPhase()==IPhase.BOMB_PHASE) {
+        	Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
+            if(player != null) {
+            	getPlayground().updatePlaygroundPhase2(turn, player, getStrengthOfBombs());            	
+            }
+        }
         this.turn++;
     }
 
