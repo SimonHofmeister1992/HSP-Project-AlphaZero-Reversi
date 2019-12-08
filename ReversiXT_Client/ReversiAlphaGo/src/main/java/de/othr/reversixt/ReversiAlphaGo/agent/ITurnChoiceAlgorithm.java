@@ -4,6 +4,7 @@ import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 
 public interface ITurnChoiceAlgorithm {
 
-	public Turn chooseTurn();
+	public Turn chooseTurnPhase1();
+	public Turn chooseTurnPhase2();
 	
 }

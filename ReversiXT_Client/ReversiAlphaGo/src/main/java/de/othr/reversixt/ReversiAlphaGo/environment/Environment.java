@@ -73,6 +73,12 @@ public class Environment {
             Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
             if(player != null) this.playground.updatePlaygroundPhase1(turn, player, numOfPlayers);
         }
+        else if(getPhase()==IPhase.BOMB_PHASE) {
+        	Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
+            if(player != null) {
+            	getPlayground().updatePlaygroundPhase2(turn, player, getStrengthOfBombs());            	
+            }
+        }
         this.turn++;
     }
 
@@ -154,10 +160,9 @@ public class Environment {
 		return turn;
 	}
     
-    // 1 indexed. the upper left corner of the turn row and turn column need to be 1/1
-    public boolean validateTurn(Turn turn) {
-    	int row=turn.getRow()-1;
-    	int col=turn.getColumn()-1;    	
+    public boolean validateTurnPhase1(Turn turn) {
+    	int row=turn.getRow();
+    	int col=turn.getColumn();    	
     	Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
     	boolean isTurnValid = false;
     	int numOfColoredFields;
@@ -202,4 +207,7 @@ public class Environment {
     	return isTurnValid;
     }
     
+    public boolean validateTurnPhase2(Turn turn) {
+    	return getPlayground().getSymbolOnPlaygroundPosition(turn.getRow(), turn.getColumn())!='-';
+    }
 }

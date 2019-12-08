@@ -2,6 +2,7 @@ package de.othr.reversixt.ReversiAlphaGo.environment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Playground {
     private int playgroundHeight;
@@ -51,7 +52,7 @@ public class Playground {
     public void setSymbolOnPlaygroundPosition(int row, int col, char symbol){
         this.playground[row][col]=symbol;
     }
-    // 0 indexed. the upper left corner of the map: row and column are 0/0
+
     public char getSymbolOnPlaygroundPosition(int row, int col){
         return this.playground[row][col];
     }
@@ -69,8 +70,8 @@ public class Playground {
         ArrayList<int[]> fieldsToColour = new ArrayList<>(); // row, column: overall fields to colour in turn
         ArrayList<int[]> possibleFieldsToColour = new ArrayList<>(); // row, column: fields to colour in actual direction
 
-        int startRow = turn.getRow()-1;
-        int startColumn = turn.getColumn()-1;
+        int startRow = turn.getRow();
+        int startColumn = turn.getColumn();
         int specialFieldInfo = turn.getSpecialFieldInfo(); //0:normal turn, 1-8 and choice: player to switch, 20 and bonus: get bomb, 21 and bonus: get override
         char playerIcon = turn.getPlayerIcon();
 
@@ -170,6 +171,46 @@ public class Playground {
 
     }
 
+    public void updatePlaygroundPhase2(Turn turn, Player player, int strengthOfBombs) {
+        int startRow = turn.getRow();
+        int startColumn = turn.getColumn();
+        player.decreaseNumberOfBombs();
+        List<Turn> l = setBomb(startRow, startColumn, strengthOfBombs);
+        
+        // color map
+        
+        for(Turn t : l) {
+        	setSymbolOnPlaygroundPosition(t.getRow(), t.getColumn(), '-');
+        }
+    }
+    
+    private List<Turn> setBomb(int row, int col, int strengthOfBombs) {
+    	List<Turn> l = new ArrayList<>();
+    	if(strengthOfBombs <= 0) {
+    		Turn t = new Turn();
+    		t.setRow(row);
+    		t.setColumn(col);
+    		l.add(t);
+    		return l;
+    	}
+    	else {
+    		for(int direction = 0; direction < 8; direction++) {
+    			int r, c;
+    			int[] newPos = new int[4];
+    			// calculate new position
+    			int[] actualPos = getNewPosition(newPos, row, col, direction);
+    			r = actualPos[0]; c = actualPos[1];
+    			// validate new position
+    			if(r < 0 || r >= getPlaygroundHeight() || c < 0 || c >= getPlaygroundWidth()
+    					|| getSymbolOnPlaygroundPosition(r, c) == '-') continue;
+    			
+    			// recursive call to get every position
+    			l.addAll(setBomb(r, c, strengthOfBombs-1)); 			
+    		}
+    	}
+    	return l;
+    }
+    
     protected int[] getNewPosition(int[] newPosition, int row, int col, int direction) {
         TransitionPart tp = getTransitionedPosition(new TransitionPart(col, row, direction));
         if (tp != null) {
