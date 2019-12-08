@@ -185,8 +185,10 @@ public class ServerCommunicator {
             }
             else if (msgType == IMsgType.ENEMY_TURN) //enemyTurn
             {
-                this.enemyTurn.setColumn(this.inStream.readUnsignedShort()+1);
-                this.enemyTurn.setRow(this.inStream.readUnsignedShort()+1);
+//                this.enemyTurn.setColumn(this.inStream.readUnsignedShort()+1);
+//                this.enemyTurn.setRow(this.inStream.readUnsignedShort()+1);
+                this.enemyTurn.setColumn(this.inStream.readUnsignedShort());
+                this.enemyTurn.setRow(this.inStream.readUnsignedShort());
                 this.enemyTurn.setSpecialFieldInfo(this.inStream.read());
                 this.enemyTurn.setPlayerIcon((char)(this.inStream.read()+48));
 
@@ -258,11 +260,9 @@ public class ServerCommunicator {
     private void sendTurn(int y, int x, int special)
     {
         byte[] data = new byte[5];
-        x--;
         byte[] buff = ByteBuffer.allocate(2).putShort((short) x).array(); //put x in data (because of transitioned coordinates)
         data[0] = buff[0];
         data[1] = buff[1];
-        y--;
         buff = ByteBuffer.allocate(2).putShort((short) y).array(); //put y - 1 in data (because of transitioned coordinates)
         data[2] = buff[0];
         data[3] = buff[1];

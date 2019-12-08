@@ -52,7 +52,7 @@ public class Playground {
     public void setSymbolOnPlaygroundPosition(int row, int col, char symbol){
         this.playground[row][col]=symbol;
     }
-    // 0 indexed. the upper left corner of the map: row and column are 0/0
+
     public char getSymbolOnPlaygroundPosition(int row, int col){
         return this.playground[row][col];
     }
@@ -70,8 +70,8 @@ public class Playground {
         ArrayList<int[]> fieldsToColour = new ArrayList<>(); // row, column: overall fields to colour in turn
         ArrayList<int[]> possibleFieldsToColour = new ArrayList<>(); // row, column: fields to colour in actual direction
 
-        int startRow = turn.getRow()-1;
-        int startColumn = turn.getColumn()-1;
+        int startRow = turn.getRow();
+        int startColumn = turn.getColumn();
         int specialFieldInfo = turn.getSpecialFieldInfo(); //0:normal turn, 1-8 and choice: player to switch, 20 and bonus: get bomb, 21 and bonus: get override
         char playerIcon = turn.getPlayerIcon();
 
@@ -172,8 +172,8 @@ public class Playground {
     }
 
     public void updatePlaygroundPhase2(Turn turn, Player player, int strengthOfBombs) {
-        int startRow = turn.getRow()-1;
-        int startColumn = turn.getColumn()-1;
+        int startRow = turn.getRow();
+        int startColumn = turn.getColumn();
         player.decreaseNumberOfBombs();
         List<Turn> l = setBomb(startRow, startColumn, strengthOfBombs);
         
@@ -205,7 +205,7 @@ public class Playground {
     					|| getSymbolOnPlaygroundPosition(r, c) == '-') continue;
     			
     			// recursive call to get every position
-    			l.addAll(setBomb(r, c, strengthOfBombs)); 			
+    			l.addAll(setBomb(r, c, strengthOfBombs-1)); 			
     		}
     	}
     	return l;

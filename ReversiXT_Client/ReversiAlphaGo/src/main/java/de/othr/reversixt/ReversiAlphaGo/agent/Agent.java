@@ -2,6 +2,7 @@ package de.othr.reversixt.ReversiAlphaGo.agent;
 
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
+import de.othr.reversixt.ReversiAlphaGo.environment.IPhase;
 import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import de.othr.reversixt.ReversiAlphaGo.general.Main;
@@ -23,11 +24,13 @@ public class Agent {
     // all actions the agent does on the map are 1 indexed. 
     // so the field in the upper left corner is (row:1,col:1)!
     public void play(){
-    	
+    	Turn turn;
     	ITurnChoiceAlgorithm itca = new RandomTurnChoiceAlgorithm(environment, player);
-    	
-        Turn turn = itca.chooseTurn();
-        // here: 1 indexed turns, on algorithm change to 0 indexed: add 1
+    	switch (environment.getPhase()) {
+    	case IPhase.TURN_PHASE: turn = itca.chooseTurnPhase1(); break;
+    	case IPhase.BOMB_PHASE: turn = itca.chooseTurnPhase2(); break;
+    	default: turn = new Turn(player.getSymbol(), 0, 0, 0);
+    	}
         turn.setRow(turn.getRow());
         turn.setColumn(turn.getColumn());
         
