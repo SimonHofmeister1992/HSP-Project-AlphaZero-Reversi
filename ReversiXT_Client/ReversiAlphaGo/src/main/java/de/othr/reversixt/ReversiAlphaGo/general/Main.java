@@ -28,6 +28,7 @@ public class Main
         ServerCommunicator serverCommunicator = new ServerCommunicator(groupNumber);
         Environment environment = new Environment();
         Agent agent = new Agent(environment, serverCommunicator);
+
         /* *********************************
          *         Connect to server
          */
@@ -86,9 +87,7 @@ public class Main
         try {serverComm.connect(IP, port);}
         catch(IOException ServerError)
         {
-            //if(!quietMode)System.out.println("Server error. Aborting");
             if(!Main.QUIET_MODE)System.err.println("Server error. Aborting");
-            //ServerError.printStackTrace();
             serverComm.cleanup();
         }
         int msgType = serverComm.waitOnServer();

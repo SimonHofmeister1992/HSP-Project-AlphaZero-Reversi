@@ -185,8 +185,6 @@ public class ServerCommunicator {
             }
             else if (msgType == IMsgType.ENEMY_TURN) //enemyTurn
             {
-//                this.enemyTurn.setColumn(this.inStream.readUnsignedShort()+1);
-//                this.enemyTurn.setRow(this.inStream.readUnsignedShort()+1);
                 this.enemyTurn.setColumn(this.inStream.readUnsignedShort());
                 this.enemyTurn.setRow(this.inStream.readUnsignedShort());
                 this.enemyTurn.setSpecialFieldInfo(this.inStream.read());
@@ -230,7 +228,7 @@ public class ServerCommunicator {
     {
         //setting other values
         int messageLength=messageData.length;
-        byte[] message = new byte[5+messageLength];
+        byte[] message;
         byte[] lenght = ByteBuffer.allocate(4).putInt(messageLength).array(); //converts messageLenght to byte array
         message = new byte[5+messageLength];
         message[0] = (byte)msgType;

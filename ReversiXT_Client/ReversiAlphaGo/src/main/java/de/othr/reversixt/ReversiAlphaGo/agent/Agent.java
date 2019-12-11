@@ -26,6 +26,7 @@ public class Agent {
     public void play(){
     	Turn turn;
     	ITurnChoiceAlgorithm itca = new RandomTurnChoiceAlgorithm(environment, player);
+
     	switch (environment.getPhase()) {
     	case IPhase.TURN_PHASE: turn = itca.chooseTurnPhase1(); break;
     	case IPhase.BOMB_PHASE: turn = itca.chooseTurnPhase2(); break;
