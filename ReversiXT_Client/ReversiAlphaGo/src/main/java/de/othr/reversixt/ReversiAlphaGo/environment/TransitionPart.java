@@ -6,7 +6,7 @@ public class TransitionPart {
     private int column;
     private int direction;
 
-    public TransitionPart(int column, int row, int direction){
+    TransitionPart(int column, int row, int direction){
         this.row=row;
         this.column=column;
         this.direction=direction;

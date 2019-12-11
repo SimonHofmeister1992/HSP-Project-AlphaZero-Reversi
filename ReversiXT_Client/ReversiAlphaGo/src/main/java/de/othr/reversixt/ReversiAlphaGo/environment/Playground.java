@@ -10,7 +10,7 @@ public class Playground {
     private char[][] playground;
     private HashMap<TransitionPart,TransitionPart> transitions;
 
-    public Playground(){
+    Playground(){
         transitions=new HashMap<>();
     }
 
@@ -30,7 +30,7 @@ public class Playground {
         return playgroundHeight;
     }
 
-    public void setPlaygroundHeight(int playgroundHeight) {
+    void setPlaygroundHeight(int playgroundHeight) {
         this.playgroundHeight = playgroundHeight;
     }
 
@@ -38,18 +38,18 @@ public class Playground {
         return playgroundWidth;
     }
 
-    public void setPlaygroundWidth(int playgroundWidth) {
+    void setPlaygroundWidth(int playgroundWidth) {
         this.playgroundWidth = playgroundWidth;
     }
 
-    public char[][] getPlayground() {
+    char[][] getPlayground() {
         return playground;
     }
-    public void initPlayground(int playgroundHeight, int playgroundWidth){
+    void initPlayground(int playgroundHeight, int playgroundWidth){
         this.playground = new char[playgroundHeight][playgroundWidth];
     }
 
-    public void setSymbolOnPlaygroundPosition(int row, int col, char symbol){
+    void setSymbolOnPlaygroundPosition(int row, int col, char symbol){
         this.playground[row][col]=symbol;
     }
 
@@ -65,7 +65,7 @@ public class Playground {
      * Hints: Updates the playground by recoloring using valid turns; can handle all rules of ReversiXT.
      * 		  Updates the overrides and bombs gained by 'b' fields.
     */
-    public void updatePlaygroundPhase1(Turn turn, Player player, int numOfPlayers) {
+    void updatePlaygroundPhase1(Turn turn, Player player, int numOfPlayers) {
 
         ArrayList<int[]> fieldsToColour = new ArrayList<>(); // row, column: overall fields to colour in turn
         ArrayList<int[]> possibleFieldsToColour = new ArrayList<>(); // row, column: fields to colour in actual direction
@@ -183,8 +183,8 @@ public class Playground {
         	setSymbolOnPlaygroundPosition(t.getRow(), t.getColumn(), '-');
         }
     }
-    
-    private List<Turn> setBomb(int row, int col, int strengthOfBombs) {
+
+    public List<Turn> setBomb(int row, int col, int strengthOfBombs) {
     	List<Turn> l = new ArrayList<>();
     	if(strengthOfBombs <= 0) {
     		Turn t = new Turn();
@@ -196,7 +196,7 @@ public class Playground {
     	else {
     		for(int direction = 0; direction < 8; direction++) {
     			int r, c;
-    			int[] newPos = new int[4];
+    			int[] newPos = new int[3];
     			// calculate new position
     			int[] actualPos = getNewPosition(newPos, row, col, direction);
     			r = actualPos[0]; c = actualPos[1];
@@ -210,8 +210,8 @@ public class Playground {
     	}
     	return l;
     }
-    
-    protected int[] getNewPosition(int[] newPosition, int row, int col, int direction) {
+
+    public int[] getNewPosition(int[] newPosition, int row, int col, int direction) {
         TransitionPart tp = getTransitionedPosition(new TransitionPart(col, row, direction));
         if (tp != null) {
             newPosition[0] = tp.getRow();
@@ -228,7 +228,7 @@ public class Playground {
                 case 5: row++; col--; break;
                 case 6: col--; break;
                 case 7: row--; col--; break;
-                default: newPosition=null;
+                default: newPosition=new int[3];
             }
             newPosition[0]=row;
             newPosition[1]=col;

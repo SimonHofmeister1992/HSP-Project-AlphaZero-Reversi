@@ -12,6 +12,7 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 
 	private  Environment environment;
 	private Player player;
+	private Turn bestTurn;
 	
 	public RandomTurnChoiceAlgorithm(Environment environment, Player player) {
 		this.environment=environment;
@@ -19,7 +20,8 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 	}
 	
 	@Override
-	public Turn chooseTurnPhase1() {
+	public void chooseTurnPhase1() {
+		bestTurn = null;
 		Turn turn;
 		Turn turnToCheck = new Turn(player.getSymbol(), 0, 0, 0);
 		List<Turn> validTurns = new ArrayList<>();
@@ -27,13 +29,13 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			for(int col=0; col < environment.getPlayground().getPlaygroundWidth(); col++) {
 				turnToCheck.setRow(row);
 				turnToCheck.setColumn(col);
-				// validateTurn is dealing with 1 indexed positions. the upper left corner of the map needs to be 1/1.
-				// get symbol on playground position is 0 indexed.
+
 				if(environment.validateTurnPhase1(turnToCheck)) {
 					turn = new Turn(player.getSymbol(), row, col, 0);
 					if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='b') turn.setSpecialFieldInfo(21);
 					if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='c') turn.setSpecialFieldInfo(player.getSymbol()-'0');
 					validTurns.add(turn);
+					setBestTurn(turn);
 				}
 			}
 		}
@@ -50,12 +52,13 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			turn.setSpecialFieldInfo(0);
 			turn.setRow(0);
 			turn.setColumn(0);
+			setBestTurn(bestTurn);
 		}
-		return turn;
+		setBestTurn(turn);
 	}
 	
 	@Override
-	public Turn chooseTurnPhase2() {
+	public void chooseTurnPhase2() {
 		ArrayList<Turn> validTurns = new ArrayList<>();
 		Turn turn;
 		for(int row = 0; row < environment.getPlayground().getPlaygroundHeight(); row++) {
@@ -71,6 +74,7 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			int index = random.nextInt() % validTurns.size();
 			if(index < 0) index *= -1;
 			turn = validTurns.get(index);
+			setBestTurn(turn);
 		}
 		else {
 			turn = new Turn();
@@ -78,7 +82,17 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			turn.setSpecialFieldInfo(0);
 			turn.setRow(0);
 			turn.setColumn(0);
+			setBestTurn(turn);
 		}
-		return turn;
+		setBestTurn(turn);
+	}
+
+	@Override
+	public Turn getBestTurn() {
+		return bestTurn;
+	}
+
+	private void setBestTurn(Turn bestTurn) {
+		this.bestTurn = bestTurn;
 	}
 }

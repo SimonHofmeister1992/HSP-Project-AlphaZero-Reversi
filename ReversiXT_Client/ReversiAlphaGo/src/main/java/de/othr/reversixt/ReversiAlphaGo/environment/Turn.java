@@ -1,9 +1,14 @@
 package de.othr.reversixt.ReversiAlphaGo.environment;
 
-public class Turn {
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+public class Turn implements Future<Turn> {
     private char playerIcon;
-    private int column;
-    private int row;
+    private int column=-1;
+    private int row=-1;
     private int specialFieldInfo; //0:normal turn, 1-8 and choice: player to switch, 20 and bonus: get bomb, 21 and bonus: get override
 
     public Turn (){
@@ -46,5 +51,31 @@ public class Turn {
 
     public void setSpecialFieldInfo(int specialFieldInfo) {
         this.specialFieldInfo = specialFieldInfo;
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return false;
+    }
+
+    @Override
+    public boolean isDone() {
+        if(this.getRow() != -1) return true;
+        else return false;
+    }
+
+    @Override
+    public Turn get() throws InterruptedException, ExecutionException {
+        return this;
+    }
+
+    @Override
+    public Turn get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        return this;
     }
 }

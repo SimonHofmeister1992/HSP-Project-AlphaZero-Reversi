@@ -84,7 +84,7 @@ public class Environment {
 
     public void disqualifyPlayer(char playerIcon){
         for(Player p : players){
-            if(p.getSymbol()==playerIcon) p.setDisqualified(Boolean.TRUE);
+            if(p.getSymbol()==playerIcon) p.disqualify();
         }
     }
 
@@ -104,7 +104,8 @@ public class Environment {
     public int getPhase() {
         return phase;
     }
-    public void setPhase(int phase) {
+
+    void setPhase(int phase) {
         this.phase = phase;
     }
 
@@ -156,15 +157,10 @@ public class Environment {
         return player;
     }
 
-    public int getTurn() {
-		return turn;
-	}
-    
     public boolean validateTurnPhase1(Turn turn) {
     	int row=turn.getRow();
     	int col=turn.getColumn();    	
     	Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
-    	boolean isTurnValid = false;
     	int numOfColoredFields;
     	char actualSymbol;
    	if(!(row >= 0 && row < getPlayground().getPlaygroundHeight() 
@@ -176,7 +172,7 @@ public class Environment {
     	else if((startSymbol == 'x' || (startSymbol >= '1' && startSymbol <= '8'))
     			&& player.getRemainingOverrideStones() <= 0) return false;
     	else {
-    		int[] newPos = new int[4];
+    		int[] newPos = new int[3];
     		for(int direction = 0; direction < 8; direction++) {
     			numOfColoredFields=0;
     			newPos[0] = row; 
@@ -204,7 +200,7 @@ public class Environment {
     			
     		}
     	}
-    	return isTurnValid;
+    	return false;
     }
     
     public boolean validateTurnPhase2(Turn turn) {

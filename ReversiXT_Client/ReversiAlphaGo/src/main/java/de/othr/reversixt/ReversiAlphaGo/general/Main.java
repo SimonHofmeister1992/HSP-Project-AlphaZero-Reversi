@@ -1,10 +1,12 @@
 package de.othr.reversixt.ReversiAlphaGo.general;
 
-import de.othr.reversixt.ReversiAlphaGo.agent.Agent;
+import de.othr.reversixt.ReversiAlphaGo.agent.AgentCallable;
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
+import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 
 import java.io.IOException;
+import java.util.concurrent.*;
 
 public class Main
 {
@@ -27,7 +29,10 @@ public class Main
 
         ServerCommunicator serverCommunicator = new ServerCommunicator(groupNumber);
         Environment environment = new Environment();
-        Agent agent = new Agent(environment, serverCommunicator);
+        AgentCallable agentCallable = new AgentCallable(environment, serverCommunicator);
+
+        ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
+        executorService.setRemoveOnCancelPolicy(true);
 
         /* *********************************
          *         Connect to server
@@ -39,19 +44,41 @@ public class Main
          *             Game itself
          */
         int msgType;
-        while((msgType=serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME){
+        Turn bestTurn = null;
+        boolean isDisqualified=false;
+        while((msgType=serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME && !isDisqualified){
+            bestTurn = null;
                 switch (msgType) {
                     case IMsgType.INITIAL_MAP:
                         environment.parseRawMap(serverCommunicator.getRawMap());
-                        break;
-                    case IMsgType.PLAYER_ICON:
-                        agent.setPlayer(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()));
                         break;
                     case IMsgType.ENEMY_TURN:
                         environment.updatePlayground(serverCommunicator.getEnemyTurn());
                         break;
                     case IMsgType.TURN_REQUEST:
-                        agent.play();
+                        agentCallable = new AgentCallable(environment, serverCommunicator);
+                        Future<?> futureTurn = executorService.submit(agentCallable);
+                        try {
+                            executorService.schedule(() -> {
+                                try {
+                                    if(futureTurn.get() == null) futureTurn.cancel(true);
+                                } catch (InterruptedException | ExecutionException e) {
+                                    futureTurn.cancel(true);
+                                }}, (long)(serverCommunicator.getTimeLimit()-25), TimeUnit.MILLISECONDS);
+                                bestTurn = (Turn) futureTurn.get((long)(serverCommunicator.getTimeLimit()-25), TimeUnit.MILLISECONDS);
+                        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+                            if (agentCallable != null && agentCallable.getAgent() != null && agentCallable.getAgent().getITurnChoiceAlgorithm() != null) {
+                                bestTurn = agentCallable.getAgent().getITurnChoiceAlgorithm().getBestTurn();
+                            }
+                            if(bestTurn != null) serverCommunicator.sendOwnTurn(bestTurn);
+                            futureTurn.cancel(true);
+                        }
+                        if(bestTurn == null) {
+                            bestTurn = new Turn(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()).getSymbol(), 0, 0, 0);
+                            serverCommunicator.sendOwnTurn(bestTurn);
+                            isDisqualified=true;
+                        }
+                        futureTurn.cancel(true);
                         break;
                     case IMsgType.DISQUALIFIED_PLAYER:
                         environment.disqualifyPlayer(serverCommunicator.getDisqualifiedPlayer());
@@ -68,7 +95,7 @@ public class Main
          *             END OF GAME
          */
 
-        if(!QUIET_MODE && environment.isPlayerDisqualified(agent.getPlayer().getSymbol())){
+        if(!QUIET_MODE && environment.isPlayerDisqualified(agentCallable.getAgent().getPlayer().getSymbol())){
             System.err.println("Agent got disqualified");
         }
         if(!QUIET_MODE) System.out.println("Game finished");

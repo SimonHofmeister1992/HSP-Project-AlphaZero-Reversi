@@ -12,35 +12,31 @@ public class Agent {
     private Environment environment;
     private ServerCommunicator serverCommunicator;
     private Player player;
+    private ITurnChoiceAlgorithm itca;
 
-    public Agent (Environment environment, ServerCommunicator serverCommunicator){
+    public Agent(Environment environment, ServerCommunicator serverCommunicator){
         this.environment = environment;
         this.serverCommunicator = serverCommunicator;
-        
-        
     }
 
-    // choose best turn and send turn to server
-    // all actions the agent does on the map are 1 indexed. 
-    // so the field in the upper left corner is (row:1,col:1)!
-    public void play(){
+    public Turn play() {
     	Turn turn;
-    	ITurnChoiceAlgorithm itca = new RandomTurnChoiceAlgorithm(environment, player);
-
+        itca = new RandomTurnChoiceAlgorithm(environment, player);
     	switch (environment.getPhase()) {
-    	case IPhase.TURN_PHASE: turn = itca.chooseTurnPhase1(); break;
-    	case IPhase.BOMB_PHASE: turn = itca.chooseTurnPhase2(); break;
-    	default: turn = new Turn(player.getSymbol(), 0, 0, 0);
+    	case IPhase.TURN_PHASE: itca.chooseTurnPhase1(); break;
+    	case IPhase.BOMB_PHASE: itca.chooseTurnPhase2(); break;
+    	default: break;
     	}
-        turn.setRow(turn.getRow());
-        turn.setColumn(turn.getColumn());
+    	turn =  itca.getBestTurn();
+
+        if(turn != null) serverCommunicator.sendOwnTurn(turn);
         
-        serverCommunicator.sendOwnTurn(turn);
-        
-        if(!Main.QUIET_MODE) {
+        if(!Main.QUIET_MODE && turn!=null) {
         	System.out.println("agent set stone to: row: " + turn.getRow() + ", col: " + turn.getColumn() + ", remaining overrides" + environment.getPlayerByPlayerIcon(turn.getPlayerIcon()).getRemainingOverrideStones());
         	environment.getPlayground().printPlayground();
         }
+
+        return turn;
     }
 
     public Player getPlayer() {
@@ -50,4 +46,8 @@ public class Agent {
     public void setPlayer(Player player) {
 		this.player = player;
 	}
+
+    public ITurnChoiceAlgorithm getITurnChoiceAlgorithm() {
+        return itca;
+    }
 }
