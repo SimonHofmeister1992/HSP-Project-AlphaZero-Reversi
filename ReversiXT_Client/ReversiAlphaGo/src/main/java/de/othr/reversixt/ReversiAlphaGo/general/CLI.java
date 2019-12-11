@@ -2,12 +2,12 @@ package de.othr.reversixt.ReversiAlphaGo.general;
 
 import org.apache.commons.cli.*;
 
-public class CLI {
+class CLI {
 
     private Options options;
     private CommandLine cmd;
 
-    public CLI (String[] args) {
+    CLI(String[] args) {
         defineOptions();
         parseCommandLine(args);
     }
@@ -31,10 +31,10 @@ public class CLI {
         }
     }
 
-    public boolean hasOption(String option){
+    boolean hasOption(String option){
         return cmd.hasOption(option);
     }
-    public String getOptionValue(String option){
+    String getOptionValue(String option){
         return cmd.getOptionValue(option);
     }
 

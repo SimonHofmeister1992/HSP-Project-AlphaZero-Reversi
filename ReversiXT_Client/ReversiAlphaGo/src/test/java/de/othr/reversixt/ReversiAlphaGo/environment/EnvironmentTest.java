@@ -7,6 +7,7 @@ import junit.framework.TestSuite;
 /**
  * Unit test for simple App.
  */
+@SuppressWarnings("ALL")
 public class EnvironmentTest
         extends TestCase
 
@@ -55,15 +56,12 @@ public class EnvironmentTest
     {
         String METHOD_NAME = "testParseRawMap: ";
         // prepare map to test
-        StringBuffer sb = new StringBuffer();
-        sb.append(NUM_OF_PLAYERS + System.lineSeparator()
-                + NUM_OF_OVERRIDES + System.lineSeparator()
-                + NUM_OF_BOMBS + " " + STRENGTH_OF_BOMBS + System.lineSeparator()
-                + PLAYGROUND_HEIGHT + " " + PLAYGROUND_WIDTH + System.lineSeparator()
-        );
+        StringBuffer sb;
+        sb = new StringBuffer();
+        sb.append(NUM_OF_PLAYERS).append(System.lineSeparator()).append(NUM_OF_OVERRIDES).append(System.lineSeparator()).append(NUM_OF_BOMBS).append(" ").append(STRENGTH_OF_BOMBS).append(System.lineSeparator()).append(PLAYGROUND_HEIGHT).append(" ").append(PLAYGROUND_WIDTH).append(System.lineSeparator());
         for(char[] line : PLAYGROUND){
             for (char c : line){
-                sb.append(c + " ");
+                sb.append(c).append(" ");
             }
             sb.append(System.lineSeparator());
         }
@@ -73,32 +71,32 @@ public class EnvironmentTest
         environment.parseRawMap(sb.toString());
 
         // test resulting content
-        assertTrue(CLASS_NAME+  METHOD_NAME + " number of players incorrect. got:  " + environment.getNumOfPlayers() + ", expected: " + NUM_OF_PLAYERS,environment.getNumOfPlayers()==NUM_OF_PLAYERS);
-        assertTrue(CLASS_NAME+  METHOD_NAME + " number of overrides incorrect. got:  " + environment.getNumOfOverrideStones() + ", expected: " + NUM_OF_OVERRIDES,environment.getNumOfOverrideStones()==NUM_OF_OVERRIDES);
-        assertTrue(CLASS_NAME+  METHOD_NAME + " number of bombs incorrect. got:  " + environment.getNumOfBombs() + ", expected: " + NUM_OF_BOMBS,environment.getNumOfBombs()==NUM_OF_BOMBS);
-        assertTrue(CLASS_NAME+  METHOD_NAME + " strength of bombs incorrect. got:  " + environment.getStrengthOfBombs() + ", expected: " + STRENGTH_OF_BOMBS,environment.getStrengthOfBombs()==STRENGTH_OF_BOMBS);
-        assertTrue(CLASS_NAME+  METHOD_NAME + " playground height incorrect. got:  " + environment.getPlayground().getPlaygroundHeight() + ", expected: " + PLAYGROUND_HEIGHT,environment.getPlayground().getPlaygroundHeight()==PLAYGROUND_HEIGHT);
-        assertTrue(CLASS_NAME+  METHOD_NAME + " playground width incorrect. got:  " + environment.getPlayground().getPlaygroundWidth() + ", expected: " + PLAYGROUND_WIDTH,environment.getPlayground().getPlaygroundWidth()==PLAYGROUND_WIDTH);
-        assertTrue(CLASS_NAME+  METHOD_NAME + " number of transitions incorrect. got:  " + environment.getPlayground().getTransitions().size() + ", expected: " + 2,environment.getPlayground().getTransitions().size()==2);
-        assertTrue(CLASS_NAME+  METHOD_NAME + " transition 1 for 3 0 0 incorrect. got:  " + environment.getPlayground().getTransitions().get(new TransitionPart(3,0,0)) + ", expected: " + "3 6 4",environment.getPlayground().getTransitions().get(new TransitionPart(3,0,0)).equals(new TransitionPart(3,6,4)));
-        assertTrue(CLASS_NAME+  METHOD_NAME + " transition 1 for 3 6 4 incorrect. got:  " + environment.getPlayground().getTransitions().get(new TransitionPart(3,6,4)) + ", expected: " + "3 0 0",environment.getPlayground().getTransitions().get(new TransitionPart(3,6,4)).equals(new TransitionPart(3,0,0)));
+        assertEquals(CLASS_NAME + METHOD_NAME + " number of players incorrect. got:  " + environment.getNumOfPlayers() + ", expected: " + NUM_OF_PLAYERS, environment.getNumOfPlayers(), NUM_OF_PLAYERS);
+        assertEquals(CLASS_NAME + METHOD_NAME + " number of overrides incorrect. got:  " + environment.getNumOfOverrideStones() + ", expected: " + NUM_OF_OVERRIDES, environment.getNumOfOverrideStones(), NUM_OF_OVERRIDES);
+        assertEquals(CLASS_NAME + METHOD_NAME + " number of bombs incorrect. got:  " + environment.getNumOfBombs() + ", expected: " + NUM_OF_BOMBS, environment.getNumOfBombs(), NUM_OF_BOMBS);
+        assertEquals(CLASS_NAME + METHOD_NAME + " strength of bombs incorrect. got:  " + environment.getStrengthOfBombs() + ", expected: " + STRENGTH_OF_BOMBS, environment.getStrengthOfBombs(), STRENGTH_OF_BOMBS);
+        assertEquals(CLASS_NAME + METHOD_NAME + " playground height incorrect. got:  " + environment.getPlayground().getPlaygroundHeight() + ", expected: " + PLAYGROUND_HEIGHT, environment.getPlayground().getPlaygroundHeight(), PLAYGROUND_HEIGHT);
+        assertEquals(CLASS_NAME + METHOD_NAME + " playground width incorrect. got:  " + environment.getPlayground().getPlaygroundWidth() + ", expected: " + PLAYGROUND_WIDTH, environment.getPlayground().getPlaygroundWidth(), PLAYGROUND_WIDTH);
+        assertEquals(CLASS_NAME + METHOD_NAME + " number of transitions incorrect. got:  " + environment.getPlayground().getTransitions().size() + ", expected: " + 2, 2, environment.getPlayground().getTransitions().size());
+        assertEquals(CLASS_NAME + METHOD_NAME + " transition 1 for 3 0 0 incorrect. got:  " + environment.getPlayground().getTransitions().get(new TransitionPart(3, 0, 0)) + ", expected: " + "3 6 4", environment.getPlayground().getTransitions().get(new TransitionPart(3, 0, 0)), new TransitionPart(3, 6, 4));
+        assertEquals(CLASS_NAME + METHOD_NAME + " transition 1 for 3 6 4 incorrect. got:  " + environment.getPlayground().getTransitions().get(new TransitionPart(3, 6, 4)) + ", expected: " + "3 0 0", environment.getPlayground().getTransitions().get(new TransitionPart(3, 6, 4)), new TransitionPart(3, 0, 0));
 
         for(int row = 0; row < PLAYGROUND_HEIGHT; row++){
             for(int col = 0; col < PLAYGROUND_WIDTH; col++){
-                assertTrue(CLASS_NAME+ METHOD_NAME + "map on position row " + row + " and col " + col + " is wrong. expected: " + PLAYGROUND[row][col] + ", got: " + environment.getPlayground().getPlayground()[row][col], PLAYGROUND[row][col]==environment.getPlayground().getPlayground()[row][col]);
+                assertEquals(CLASS_NAME + METHOD_NAME + "map on position row " + row + " and col " + col + " is wrong. expected: " + PLAYGROUND[row][col] + ", got: " + environment.getPlayground().getPlayground()[row][col], PLAYGROUND[row][col], environment.getPlayground().getPlayground()[row][col]);
             }
         }
 
         Player p1 = environment.getPlayers()[0];
         Player p2 = environment.getPlayers()[1];
 
-        assertTrue("the symbol of player 1 is incorrect, expected: '1', got: " + p1.getSymbol(),p1.getSymbol()=='1');
-        assertTrue("the number of bombs of player 1 is incorrect, expected: " + NUM_OF_BOMBS + ", got: " + p1.getRemainingBombs(),p1.getRemainingBombs()==NUM_OF_BOMBS);
-        assertTrue("the number of overrides of player 1 is incorrect, expected: " + NUM_OF_OVERRIDES + ", got: " + p1.getRemainingOverrideStones(),p1.getRemainingOverrideStones()==NUM_OF_OVERRIDES);
+        assertEquals("the symbol of player 1 is incorrect, expected: '1', got: " + p1.getSymbol(), '1', p1.getSymbol());
+        assertEquals("the number of bombs of player 1 is incorrect, expected: " + NUM_OF_BOMBS + ", got: " + p1.getRemainingBombs(), p1.getRemainingBombs(), NUM_OF_BOMBS);
+        assertEquals("the number of overrides of player 1 is incorrect, expected: " + NUM_OF_OVERRIDES + ", got: " + p1.getRemainingOverrideStones(), p1.getRemainingOverrideStones(), NUM_OF_OVERRIDES);
 
-        assertTrue("the symbol of player 2 is incorrect, expected: '2', got: " + p2.getSymbol(),p2.getSymbol()=='2');
-        assertTrue("the number of bombs of player 2 is incorrect, expected: " + NUM_OF_BOMBS + ", got: " + p2.getRemainingBombs(),p2.getRemainingBombs()==NUM_OF_BOMBS);
-        assertTrue("the number of overrides of player 2 is incorrect, expected: " + NUM_OF_OVERRIDES + ", got: " + p2.getRemainingOverrideStones(),p2.getRemainingOverrideStones()==NUM_OF_OVERRIDES);
+        assertEquals("the symbol of player 2 is incorrect, expected: '2', got: " + p2.getSymbol(), '2', p2.getSymbol());
+        assertEquals("the number of bombs of player 2 is incorrect, expected: " + NUM_OF_BOMBS + ", got: " + p2.getRemainingBombs(), p2.getRemainingBombs(), NUM_OF_BOMBS);
+        assertEquals("the number of overrides of player 2 is incorrect, expected: " + NUM_OF_OVERRIDES + ", got: " + p2.getRemainingOverrideStones(), p2.getRemainingOverrideStones(), NUM_OF_OVERRIDES);
 
     }
 
@@ -139,7 +137,7 @@ public class EnvironmentTest
         };
         environment.updatePlayground(turn);
         assertTrue(CLASS_NAME + METHOD_NAME+ "'x' turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
-        assertTrue(CLASS_NAME + METHOD_NAME+ "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('1').getRemainingOverrideStones()==NUM_OF_OVERRIDES-1);
+        assertEquals(CLASS_NAME + METHOD_NAME + "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('1').getRemainingOverrideStones(), NUM_OF_OVERRIDES - 1);
 
         // test 'b' turn: wish Bombs
 
@@ -157,7 +155,7 @@ public class EnvironmentTest
         };
         environment.updatePlayground(turn);
         assertTrue(CLASS_NAME + METHOD_NAME+ "b turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
-        assertTrue(CLASS_NAME + METHOD_NAME+ "number of bombs not increased",environment.getPlayerByPlayerIcon('2').getRemainingBombs()==NUM_OF_BOMBS+1);
+        assertEquals(CLASS_NAME + METHOD_NAME + "number of bombs not increased", environment.getPlayerByPlayerIcon('2').getRemainingBombs(), NUM_OF_BOMBS + 1);
 
         // test 'b' turn: wish Overrides
 
@@ -174,8 +172,8 @@ public class EnvironmentTest
                 {'b', '0', '0', '1', '0', '0'}
         };
         environment.updatePlayground(turn);
-        assertTrue(CLASS_NAME + METHOD_NAME+ "b turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
-        assertTrue(CLASS_NAME + METHOD_NAME+ "number of overrides not increased",environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones()==NUM_OF_OVERRIDES+1);
+        assertTrue(CLASS_NAME + METHOD_NAME + "b turns don't work", arePlaygroundsIdentical(expectedResultingPlayground, environment.getPlayground().getPlayground()));
+        assertEquals(CLASS_NAME + METHOD_NAME + "number of overrides not increased", environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones(), NUM_OF_OVERRIDES + 1);
 
         // test 'c' turn
 
@@ -227,7 +225,7 @@ public class EnvironmentTest
         };
         environment.updatePlayground(turn);
         assertTrue(CLASS_NAME + METHOD_NAME+ "transition turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
-        assertTrue(CLASS_NAME + METHOD_NAME+ "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones()==NUM_OF_OVERRIDES);
+        assertEquals(CLASS_NAME + METHOD_NAME + "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones(), NUM_OF_OVERRIDES);
     
         environment.setPlayground(savedPlayground);
     }

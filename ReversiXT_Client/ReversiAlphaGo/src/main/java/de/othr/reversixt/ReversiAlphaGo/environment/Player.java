@@ -4,13 +4,12 @@ public class Player {
     private char symbol;
     private int remainingOverrideStones;
     private int remainingBombs;
-    private boolean isDisqualified;
+    private boolean isDisqualified = Boolean.FALSE;
 
-    public Player(char symbol, int remainingOverrideStones, int remainingBombs){
+    Player(char symbol, int remainingOverrideStones, int remainingBombs){
         this.symbol=symbol;
         this.remainingOverrideStones=remainingOverrideStones;
         this.remainingBombs=remainingBombs;
-        this.isDisqualified = Boolean.FALSE;
     }
 
     public char getSymbol() {
@@ -39,7 +38,7 @@ public class Player {
         return this.isDisqualified;
     }
 
-    public void setDisqualified(boolean disqualified) {
-        this.isDisqualified = disqualified;
+    public void disqualify() {
+        this.isDisqualified = Boolean.TRUE;
     }
 }
