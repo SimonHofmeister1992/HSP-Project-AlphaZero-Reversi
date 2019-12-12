@@ -44,51 +44,55 @@ public class Main
          *             Game itself
          */
         int msgType;
-        Turn bestTurn = null;
+        Turn bestTurn;
         boolean isDisqualified=false;
+        long timeToWaitInMilis;
         while((msgType=serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME && !isDisqualified){
+            timeToWaitInMilis = serverCommunicator.getTimeLimit()-25;
             bestTurn = null;
-                switch (msgType) {
-                    case IMsgType.INITIAL_MAP:
-                        environment.parseRawMap(serverCommunicator.getRawMap());
-                        break;
-                    case IMsgType.ENEMY_TURN:
-                        environment.updatePlayground(serverCommunicator.getEnemyTurn());
-                        break;
-                    case IMsgType.TURN_REQUEST:
-                        agentCallable = new AgentCallable(environment, serverCommunicator);
-                        Future<?> futureTurn = executorService.submit(agentCallable);
-                        try {
-                            executorService.schedule(() -> {
-                                try {
-                                    if(futureTurn.get() == null) futureTurn.cancel(true);
-                                } catch (InterruptedException | ExecutionException e) {
-                                    futureTurn.cancel(true);
-                                }}, (long)(serverCommunicator.getTimeLimit()-25), TimeUnit.MILLISECONDS);
-                                bestTurn = (Turn) futureTurn.get((long)(serverCommunicator.getTimeLimit()-25), TimeUnit.MILLISECONDS);
-                        } catch (InterruptedException | TimeoutException | ExecutionException e) {
-                            if (agentCallable != null && agentCallable.getAgent() != null && agentCallable.getAgent().getITurnChoiceAlgorithm() != null) {
-                                bestTurn = agentCallable.getAgent().getITurnChoiceAlgorithm().getBestTurn();
-                            }
-                            if(bestTurn != null) serverCommunicator.sendOwnTurn(bestTurn);
+            switch (msgType) {
+                case IMsgType.INITIAL_MAP:
+                    environment.parseRawMap(serverCommunicator.getRawMap());
+                    break;
+                case IMsgType.ENEMY_TURN:
+                    environment.updatePlayground(serverCommunicator.getEnemyTurn());
+                    break;
+                case IMsgType.TURN_REQUEST:
+                    agentCallable = new AgentCallable(environment, serverCommunicator);
+                    Future<?> futureTurn = executorService.submit(agentCallable);
+                    try {
+                        executorService.schedule(() -> {
+                            try {
+                                if(futureTurn.get() == null) futureTurn.cancel(true);
+                            } catch (InterruptedException | ExecutionException e) {
+                                futureTurn.cancel(true);
+                                executorService.purge();
+                            }}, timeToWaitInMilis, TimeUnit.MILLISECONDS);
+                        bestTurn = (Turn) futureTurn.get(timeToWaitInMilis, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException | TimeoutException | ExecutionException e) {
+                        if (agentCallable.getAgent() != null && agentCallable.getAgent().getITurnChoiceAlgorithm() != null) {
+                            bestTurn = agentCallable.getAgent().getITurnChoiceAlgorithm().getBestTurn();
                             futureTurn.cancel(true);
-                        }
-                        if(bestTurn == null) {
-                            bestTurn = new Turn(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()).getSymbol(), 0, 0, 0);
-                            serverCommunicator.sendOwnTurn(bestTurn);
-                            isDisqualified=true;
+                            executorService.purge();
                         }
                         futureTurn.cancel(true);
-                        break;
-                    case IMsgType.DISQUALIFIED_PLAYER:
-                        environment.disqualifyPlayer(serverCommunicator.getDisqualifiedPlayer());
-                        break;
-                    case IMsgType.END_OF_FIRST_PHASE:
-                        environment.nextPhase();
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    if(bestTurn == null) {
+                        bestTurn = new Turn(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()).getSymbol(), 0, 0, 0);
+                        isDisqualified=true;
+                    }
+                    futureTurn.cancel(true);
+                    serverCommunicator.sendOwnTurn(bestTurn);
+                    break;
+                case IMsgType.DISQUALIFIED_PLAYER:
+                    environment.disqualifyPlayer(serverCommunicator.getDisqualifiedPlayer());
+                    break;
+                case IMsgType.END_OF_FIRST_PHASE:
+                    environment.nextPhase();
+                    break;
+                default:
+                    break;
+            }
         }
 
         /* ********************************
@@ -99,7 +103,7 @@ public class Main
             System.err.println("Agent got disqualified");
         }
         if(!QUIET_MODE) System.out.println("Game finished");
-
+        executorService.shutdownNow();
     }
 
     private static void setValuesFromCLI(CLI cli){

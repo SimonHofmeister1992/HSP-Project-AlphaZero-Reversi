@@ -57,7 +57,7 @@ public class Playground {
         return this.playground[row][col];
     }
 
-    /** 
+    /**
      * Input: A valid Turn (playerIcon, row, column, specialfieldInfo: 1-8 for choice stones, 20 on bonus stone to get bomb, 21 on bonus stone to get override)
      * 		  The actual player identified by the playericon
      * 		  The number of players on the map, known by the environment
@@ -99,7 +99,7 @@ public class Playground {
             actualColumn=startColumn;
             newPosition = new int[3];
 
-            // gather fields which shall be recolored by direction 
+            // gather fields which shall be recolored by direction
             // (see: Documentations\CheatSheets\kurzSpezifikation.pdf)
             while(true){
                 newPosition = getNewPosition(newPosition, actualRow, actualColumn, actualDirection); // row, col, direction
@@ -108,11 +108,11 @@ public class Playground {
                     actualRow=newPosition[0];
                     actualColumn=newPosition[1];
                     actualDirection=newPosition[2];
-                    
+
                     // validate pointer position on map
                     if(actualRow < 0 || actualColumn < 0 || actualRow >= playgroundHeight || actualColumn >=playgroundWidth) break;
                     actualSymbolOnPlayground = getSymbolOnPlaygroundPosition(actualRow,actualColumn);
-                    
+
                     // handle own player symbol
                     if(actualSymbolOnPlayground==playerIcon) {
                         fieldsToColour.addAll(possibleFieldsToColour);
@@ -137,14 +137,14 @@ public class Playground {
                 }
             }
         }
-        
+
         // recolor the playground
         for (int[] field : fieldsToColour){
             setSymbolOnPlaygroundPosition(field[0], field[1], playerIcon);
         }
 
      // choice-stone
-        if(specialFieldInfo>=1 && specialFieldInfo <=8){ 
+        if(specialFieldInfo>=1 && specialFieldInfo <=8){
             for(int row=0; row < getPlaygroundHeight(); row++){
                 for(int col=0; col < getPlaygroundWidth(); col++){
                     if(getSymbolOnPlaygroundPosition(row, col) == (char)(specialFieldInfo+48)){
@@ -176,9 +176,9 @@ public class Playground {
         int startColumn = turn.getColumn();
         player.decreaseNumberOfBombs();
         List<Turn> l = setBomb(startRow, startColumn, strengthOfBombs);
-        
+
         // color map
-        
+
         for(Turn t : l) {
         	setSymbolOnPlaygroundPosition(t.getRow(), t.getColumn(), '-');
         }
@@ -203,9 +203,9 @@ public class Playground {
     			// validate new position
     			if(r < 0 || r >= getPlaygroundHeight() || c < 0 || c >= getPlaygroundWidth()
     					|| getSymbolOnPlaygroundPosition(r, c) == '-') continue;
-    			
+
     			// recursive call to get every position
-    			l.addAll(setBomb(r, c, strengthOfBombs-1)); 			
+    			l.addAll(setBomb(r, c, strengthOfBombs-1));
     		}
     	}
     	return l;
@@ -254,7 +254,7 @@ public class Playground {
         }
         return p;
     }
-    
+
     public void printPlayground() {
     	for(int row = 0; row < getPlaygroundHeight(); row++) {
     		for(int col = 0; col < getPlaygroundWidth(); col++) {

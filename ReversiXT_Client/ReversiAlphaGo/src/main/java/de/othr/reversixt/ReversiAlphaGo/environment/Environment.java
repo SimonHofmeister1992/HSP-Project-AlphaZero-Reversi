@@ -21,8 +21,7 @@ public class Environment {
     public void parseRawMap(String rawMap) {
         int line = 0;
         if(!rawMap.isEmpty()){
-            for(String rawMapLine : rawMap.split("\n")){
-
+            for(String rawMapLine : rawMap.split(System.lineSeparator())){
                 if(line==0) {
                     this.numOfPlayers=Integer.parseInt(rawMapLine.trim());
                     this.players = new Player[numOfPlayers];
@@ -41,9 +40,9 @@ public class Environment {
                 }
 
                 else if (line >3 && line <= playground.getPlaygroundHeight() + 3){
-                    String[] columns = rawMapLine.split(" ");
-                    for(int column = 0; column < columns.length-1; column++){
-                        playground.setSymbolOnPlaygroundPosition(line-4,column,columns[column].charAt(0));
+                    String[] columns = rawMapLine.trim().split(" ");
+                    for(int column = 0; column < columns.length; column++){
+                        playground.setSymbolOnPlaygroundPosition(line-4,column,columns[column].trim().charAt(0));
                     }
                 }
 
@@ -74,9 +73,9 @@ public class Environment {
             if(player != null) this.playground.updatePlaygroundPhase1(turn, player, numOfPlayers);
         }
         else if(getPhase()==IPhase.BOMB_PHASE) {
-        	Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
+            Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
             if(player != null) {
-            	getPlayground().updatePlaygroundPhase2(turn, player, getStrengthOfBombs());            	
+                getPlayground().updatePlaygroundPhase2(turn, player, getStrengthOfBombs());
             }
         }
         this.turn++;
@@ -158,52 +157,52 @@ public class Environment {
     }
 
     public boolean validateTurnPhase1(Turn turn) {
-    	int row=turn.getRow();
-    	int col=turn.getColumn();    	
-    	Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
-    	int numOfColoredFields;
-    	char actualSymbol;
-   	if(!(row >= 0 && row < getPlayground().getPlaygroundHeight() 
-    			&& col >= 0 && col < getPlayground().getPlaygroundWidth())) return false;
-    		
-    	char startSymbol = getPlayground().getSymbolOnPlaygroundPosition(row, col);
-    	if(startSymbol == '-') return false;
-    	else if(startSymbol == 'x' && player.getRemainingOverrideStones() > 0) return true;
-    	else if((startSymbol == 'x' || (startSymbol >= '1' && startSymbol <= '8'))
-    			&& player.getRemainingOverrideStones() <= 0) return false;
-    	else {
-    		int[] newPos = new int[3];
-    		for(int direction = 0; direction < 8; direction++) {
-    			numOfColoredFields=0;
-    			newPos[0] = row; 
-    			newPos[1] = col; 
-    			newPos[2] = direction; 
-    			while(true) {
-    				newPos = getPlayground().getNewPosition(newPos, newPos[0], newPos[1], newPos[2]);
-    				if(!(newPos[0] >= 0 && newPos[0] < getPlayground().getPlaygroundHeight() 
-    						&& newPos[1] >= 0 && newPos[1] < getPlayground().getPlaygroundWidth())) break;
-    				actualSymbol = getPlayground().getSymbolOnPlaygroundPosition(newPos[0], newPos[1]);
-    				if(newPos[0]==row && newPos[1]==col) break;
-    				else if(actualSymbol == player.getSymbol() && numOfColoredFields > 0) {
-    					return true;
-    				}
-    				else if(actualSymbol == player.getSymbol() 
-    						|| actualSymbol=='c' 
-    						|| actualSymbol=='i' 
-    						|| actualSymbol=='b' 
-    						|| actualSymbol=='0' 
-    						|| actualSymbol=='-') break;
-    				else {
-     					numOfColoredFields++;
-    				}
-    			}
-    			
-    		}
-    	}
-    	return false;
+        int row=turn.getRow();
+        int col=turn.getColumn();
+        Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
+        int numOfColoredFields;
+        char actualSymbol;
+        if(!(row >= 0 && row < getPlayground().getPlaygroundHeight()
+                && col >= 0 && col < getPlayground().getPlaygroundWidth())) return false;
+
+        char startSymbol = getPlayground().getSymbolOnPlaygroundPosition(row, col);
+        if(startSymbol == '-') return false;
+        else if(startSymbol == 'x' && player.getRemainingOverrideStones() > 0) return true;
+        else if((startSymbol == 'x' || (startSymbol >= '1' && startSymbol <= '8'))
+                && player.getRemainingOverrideStones() <= 0) return false;
+        else {
+            int[] newPos = new int[3];
+            for(int direction = 0; direction < 8; direction++) {
+                numOfColoredFields=0;
+                newPos[0] = row;
+                newPos[1] = col;
+                newPos[2] = direction;
+                while(true) {
+                    newPos = getPlayground().getNewPosition(newPos, newPos[0], newPos[1], newPos[2]);
+                    if(!(newPos[0] >= 0 && newPos[0] < getPlayground().getPlaygroundHeight()
+                            && newPos[1] >= 0 && newPos[1] < getPlayground().getPlaygroundWidth())) break;
+                    actualSymbol = getPlayground().getSymbolOnPlaygroundPosition(newPos[0], newPos[1]);
+                    if(newPos[0]==row && newPos[1]==col) break;
+                    else if(actualSymbol == player.getSymbol() && numOfColoredFields > 0) {
+                        return true;
+                    }
+                    else if(actualSymbol == player.getSymbol()
+                            || actualSymbol=='c'
+                            || actualSymbol=='i'
+                            || actualSymbol=='b'
+                            || actualSymbol=='0'
+                            || actualSymbol=='-') break;
+                    else {
+                        numOfColoredFields++;
+                    }
+                }
+
+            }
+        }
+        return false;
     }
-    
+
     public boolean validateTurnPhase2(Turn turn) {
-    	return getPlayground().getSymbolOnPlaygroundPosition(turn.getRow(), turn.getColumn())!='-';
+        return getPlayground().getSymbolOnPlaygroundPosition(turn.getRow(), turn.getColumn())!='-';
     }
 }
