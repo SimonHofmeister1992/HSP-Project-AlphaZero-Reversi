@@ -13,12 +13,13 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 	private  Environment environment;
 	private Player player;
 	private Turn bestTurn;
-	
+	private Random random;
+
 	public RandomTurnChoiceAlgorithm(Environment environment, Player player) {
 		this.environment=environment;
 		this.player=player;
 	}
-	
+
 	@Override
 	public void chooseTurnPhase1() {
 		bestTurn = null;
@@ -39,12 +40,13 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 				}
 			}
 		}
-		
-		Random random = new Random();
+
+		random = new Random();
 		if(validTurns.size() > 0) {
 			int index = random.nextInt() % validTurns.size();
 			if(index < 0) index *= -1;
 			turn = validTurns.get(index);
+			setBestTurn(turn);
 		}
 		else { // no turn found, try to put stone on 0/0, normally disqualifies itself and should never happen
 			turn = new Turn();
@@ -54,9 +56,8 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			turn.setColumn(0);
 			setBestTurn(bestTurn);
 		}
-		setBestTurn(turn);
 	}
-	
+
 	@Override
 	public void chooseTurnPhase2() {
 		ArrayList<Turn> validTurns = new ArrayList<>();
@@ -69,7 +70,7 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 				}
 			}
 		}
-		Random random = new Random();
+		random = new Random();
 		if(validTurns.size() > 0) {
 			int index = random.nextInt() % validTurns.size();
 			if(index < 0) index *= -1;

@@ -11,7 +11,7 @@ public class AgentCallable implements Callable<Turn> {
     private Agent agent;
 
     public AgentCallable(Environment environment, ServerCommunicator serverCommunicator){
-        agent = new Agent(environment, serverCommunicator);
+        agent = new Agent(environment);
         if(environment != null && environment.getPlayers() != null) agent.setPlayer(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()));
     }
 
