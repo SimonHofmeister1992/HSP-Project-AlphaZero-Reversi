@@ -94,7 +94,7 @@ public class ServerCommunicator {
     // * Public Functions *
     // ************************************************************************************
 
-    public void connect(String adress, int port) throws IOException
+    public void connect(String address, int port) throws IOException
     {
         //network
         //establishing connection
@@ -103,7 +103,7 @@ public class ServerCommunicator {
         {
             try
             {
-                this.socket = new Socket(adress, port);
+                this.socket = new Socket(address, port);
                 if (!Main.QUIET_MODE) System.out.println("Server found");
                 outStream = new DataOutputStream(socket.getOutputStream());
                 outStream.flush();
@@ -132,7 +132,7 @@ public class ServerCommunicator {
 
     public void sendOwnTurn(Turn turn) //sends own turn to server
     {
-    	sendTurn(turn.getRow(), turn.getColumn(), turn.getSpecialFieldInfo());
+        sendTurn(turn.getRow(), turn.getColumn(), turn.getSpecialFieldInfo());
     }
 
     public void cleanup()
@@ -200,9 +200,9 @@ public class ServerCommunicator {
             {
                 this.phase=2;
             }
-            else if (msgType == IMsgType.END_OF_GAME) //end of game
+            else if (msgType == IMsgType.END_OF_GAME)
             {
-               if(!Main.QUIET_MODE)System.out.println("Game is over");
+                //end of game
             }
 
         }
