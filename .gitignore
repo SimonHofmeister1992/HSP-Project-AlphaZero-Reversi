@@ -1,8 +1,8 @@
 *.jar
-*.class
-*.exe
-*.log
-ReversiXT_Client/ReversiAlphaGo/target/*
-*.gitignore
-*.settings
-*.gitkeep
+         *.class
+         *.exe
+         *.log
+         ReversiXT_Client/ReversiAlphaGo/target/*
+         *.gitignore
+         *.settings
+         *.gitkeep
