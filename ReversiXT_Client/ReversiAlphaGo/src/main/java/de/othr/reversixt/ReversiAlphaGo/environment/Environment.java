@@ -1,6 +1,8 @@
 package de.othr.reversixt.ReversiAlphaGo.environment;
 
-public class Environment {
+import javax.management.relation.RelationNotFoundException;
+
+public class Environment implements Cloneable{
 
     private int phase;
     private int turn;
@@ -10,7 +12,6 @@ public class Environment {
     private int strengthOfBombs;
     private Playground playground;
     private Player[] players;
-
 
     public Environment(){
         setPhase(IPhase.TURN_PHASE);
@@ -204,5 +205,10 @@ public class Environment {
 
     public boolean validateTurnPhase2(Turn turn) {
         return getPlayground().getSymbolOnPlaygroundPosition(turn.getRow(), turn.getColumn())!='-';
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return (Environment) super.clone();
     }
 }

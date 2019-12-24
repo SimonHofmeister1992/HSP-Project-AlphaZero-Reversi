@@ -1,12 +1,16 @@
 package de.othr.reversixt.ReversiAlphaGo.mcts;
 
+import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
+import de.othr.reversixt.ReversiAlphaGo.environment.Player;
+
 import java.lang.Math;
+import java.util.ArrayList;
 
 public class Node {
 
     // TODO prior probability for a move (calculated by a nn) has to be added instead of the constant, for now an arbitrary constant is used (which will later be superfluous)
     // parameter for controlling the trade-off between exploration and exploitation in the mcts
-    private static final int UCB_CONSTANT = 1.2;
+    private static final double UCB_CONSTANT = 1.2;
 
     private int numVisited;
     private double simulationReward;
@@ -18,6 +22,8 @@ public class Node {
     /**
      * public constructor for the root node
      * init: a new node is not yet visited, the inital win/loss and has no children
+     * @param environment for the node
+     * @param player specifying whose turn it is (for the root node it is the current user not the opponent)
      */
     public Node(Environment environment, Player player) {
         this.numVisited = 0;
@@ -30,8 +36,10 @@ public class Node {
 
     /**
      * public constructor
-     * init: a new node is not yet visited, the inital win/loss and has no children
-     * @param parent
+     * init: a new node is not yet visited, the initial win/loss and has no children
+     * @param environment for the node
+     * @param parent of the node
+     * @param player specifying whose turn it is
      */
     public Node(Environment environment, Node parent, Player player) {
         this.numVisited = 0;
@@ -44,7 +52,6 @@ public class Node {
 
     /**
      * getter and setter
-     * @return
      */
     public int getNumVisited() {
         return numVisited;
@@ -74,6 +81,23 @@ public class Node {
         return children;
     }
 
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+
+    public Player getNextPlayer() {
+        return nextPlayer;
+    }
+
+    public void setNextPlayer(Player nextPlayer) {
+        this.nextPlayer = nextPlayer;
+    }
+
+
     //TODO updateSimulationReward and numVisited?
 
     /**
@@ -84,13 +108,12 @@ public class Node {
         return simulationReward / numVisited;
     }
 
-    //TODO parent.getNumVisited() correct?
     /**
      * calculates the exploration component for the uct
      * @return double exploration value
      */
     private double calculateExploration() {
-        return Math.sqrt( parent.getNumVisited() (1 + numVisited));
+        return Math.sqrt( ((double) parent.getNumVisited()) / (1 + numVisited));
     }
 
     /**
@@ -98,7 +121,7 @@ public class Node {
      * calculates the upper confidence bound applied to trees for the given node
      * @return double uct value
      */
-    protected double calculateUCT() {
+    public double calculateUCT() {
         return calculateExploitation() + UCB_CONSTANT * calculateExploration();
     }
 }
