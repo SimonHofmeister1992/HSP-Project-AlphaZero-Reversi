@@ -17,6 +17,7 @@ public class MCTS {
     public MCTS(Environment environment, Player player) {
         this.root = new Node(environment, player);
         this.leafNodes = new ArrayList<Node>();
+        leafNodes.add(root);
         this.myPlayer = player;
     }
 
@@ -55,8 +56,13 @@ public class MCTS {
      * @param currentPlayer implies whose turn it was now
      * @return player: specifies which player is next
      */
-    private Player getNextPlayer(Player currentPlayer) {
+    private Player getNextPlayer(Environment nodeEnvironment, Player currentPlayer) {
         //TODO find next player
+        for(int idx = 0; idx < nodeEnvironment.getNumOfPlayers(); idx++) {
+            //find next player
+            //if getPossibleTurns(nodeEnvironment, nextPlayer) empty --> continue
+            //if not empty --> return nextPlayer
+        }
         return currentPlayer;
     }
 
@@ -65,7 +71,6 @@ public class MCTS {
      * and simulates random playouts starting in each child node (which are eventually backpropagated)
      */
     public void searchBestTurn() {
-        leafNodes.add(root);
         Node chosenNode = root;
         while(!leafNodes.isEmpty()) {
             expand(chosenNode);
@@ -128,16 +133,15 @@ public class MCTS {
      * @return the reward of the simulated game
      */
     private double simulate(Environment nodeEnv,  Player currPlayer) {
-        Player nextPlayer = currPlayer;
-        ArrayList<Turn> possTurns = getPossibleTurns(nodeEnv, nextPlayer);
+        ArrayList<Turn> possTurns = getPossibleTurns(nodeEnv, currPlayer);
         // exit condition of recursion
         while(!possTurns.isEmpty()) {
             // determine next random turn
             int index = new Random().nextInt() % possTurns.size();
             nodeEnv.updatePlayground(possTurns.get(index));
             // create new child for the chosen turn
-            nextPlayer = getNextPlayer(nextPlayer);
-            possTurns = getPossibleTurns(nodeEnv, nextPlayer);
+            currPlayer = getNextPlayer(nodeEnv, currPlayer);
+            possTurns = getPossibleTurns(nodeEnv, currPlayer);
         }
         return (double) rewardGameState(nodeEnv);
     }
@@ -151,8 +155,6 @@ public class MCTS {
     private void expand(Node expandNode) {
         //get all possibleTurns for expandNode
         ArrayList<Turn> possibleTurns = getPossibleTurns(expandNode.getEnvironment(), expandNode.getNextPlayer());
-        //get the player after one Turn (not the player who makes the "possibleTurn")
-        Player nextPlayer = getNextPlayer(expandNode.getNextPlayer());
         //for each Turn, clone the environment and add the node as children to expandNode
         for (Turn turn : possibleTurns) {
             Environment nodeEnvironment;
@@ -163,7 +165,7 @@ public class MCTS {
                 return;
             }
             nodeEnvironment.updatePlayground(turn);
-            Node child = new Node(nodeEnvironment, expandNode, nextPlayer);
+            Node child = new Node(nodeEnvironment, expandNode, getNextPlayer(nodeEnvironment, expandNode.getNextPlayer()));
             expandNode.getChildren().add(child);
             leafNodes.add(child);
         }
