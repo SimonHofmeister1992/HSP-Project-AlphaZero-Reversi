@@ -50,30 +50,6 @@ public class MCTS {
     }
 
     /**
-     * calculates the reward as counting the stones one the playground from the corresponding player
-     *
-     * @param environment represents the current game state and holds the current playground
-     * @return the calculated reward (int)
-     */
-    private int rewardGameState(Environment environment) {
-        //reward = count all our stones
-        int reward = 0;
-        for (int x = 0; x < environment.getPlayground().getPlaygroundHeight(); x++) {
-            for (int y = 0; y < environment.getPlayground().getPlaygroundWidth(); y++) {
-                //print gameboard
-                //System.out.print(game[x][y]);
-                if (environment.getPlayground().getSymbolOnPlaygroundPosition(y, x) == myPlayer.getSymbol()) {
-                    reward++;
-                }
-            }
-            //print gameboard
-            //System.out.println('|');
-        }
-        System.out.println("The reward is " + reward);
-        return reward;
-    }
-
-    /**
      * determines whose turn is next
      *
      * @param currentPlayer implies whose turn it was now
@@ -89,8 +65,13 @@ public class MCTS {
      * and simulates random playouts starting in each child node (which are eventually backpropagated)
      */
     public void searchBestTurn() {
-        expand();
-        traverse();
+        leafNodes.add(root);
+        Node chosenNode = root;
+        while(!leafNodes.isEmpty()) {
+            expand(chosenNode);
+            traverse(chosenNode);
+            //call uct over leafs to get a new chosenNode
+        }
     }
 
     /**
@@ -98,59 +79,66 @@ public class MCTS {
      * when there are no more possible moves the end state is reached and the reward for this outcome is calculated
      * eventually the simulation results are backpropagated to the root node (number how often the node was visited and the the simulation reward are updated)
      */
-    private void traverse() {
-        for (Node child : root.getChildren()) {
+    //ToDo parameter root
+    private void traverse(Node traverseNode) {
+        for (Node child : traverseNode.getChildren()) {
             Environment nodeEnvironment;
             try {
-                nodeEnvironment = (Environment) root.getEnvironment().clone();
+                nodeEnvironment = (Environment) traverseNode.getEnvironment().clone();
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
                 return;
             }
-            Player nextPlayer = child.getNextPlayer();
-            root.setSimulationReward(root.getSimulationReward()
-                    + simulate(child, getPossibleTurns(nodeEnvironment, nextPlayer), nodeEnvironment, nextPlayer));
-            root.setNumVisited(root.getNumVisited() + 1);
+            //Simulate one path to get a reward
+            double reward = simulate(nodeEnvironment, child.getNextPlayer());
+            //Backpropagate the reward anv visitedNum to all Parents (except root)
+            Node nodeBP = child;
+            while(nodeBP != root) {
+                nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
+                nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
+                nodeBP = child.getParent();
+            }
         }
     }
 
     /**
-     * recursive function to simulate game by playing random moves
-     * @param currNode represents the current node
-     * @param possTurns represents all possible turns in the current game state
+     * calculates the reward as counting the stones one the playground from the corresponding player
+     *
+     * @param environment represents the current game state and holds the current playground
+     * @return the calculated reward (int)
+     */
+    private int rewardGameState(Environment environment) {
+        //reward = count all our stones
+        int reward = 0;
+        for (int x = 0; x < environment.getPlayground().getPlaygroundHeight(); x++) {
+            for (int y = 0; y < environment.getPlayground().getPlaygroundWidth(); y++) {
+                if (environment.getPlayground().getSymbolOnPlaygroundPosition(y, x) == myPlayer.getSymbol()) {
+                    reward++;
+                }
+            }
+        }
+        System.out.println("The reward is " + reward);
+        return reward;
+    }
+
+    /**
+     * function to simulate the full game by playing random moves till the end
      * @param nodeEnv represents the environment for the node
      * @param currPlayer represents the current player
      * @return the reward of the simulated game
      */
-    private double simulate(
-            Node currNode,
-            ArrayList<Turn> possTurns,
-            Environment nodeEnv,
-            Player currPlayer) {
+    private double simulate(Environment nodeEnv,  Player currPlayer) {
+        Player nextPlayer = currPlayer;
+        ArrayList<Turn> possTurns = getPossibleTurns(nodeEnv, nextPlayer);
         // exit condition of recursion
-        if (possTurns.isEmpty()) {
-            currNode.setNumVisited(currNode.getNumVisited() + 1);
-            currNode.setSimulationReward(currNode.getSimulationReward() + rewardGameState(nodeEnv));
-            return (double) rewardGameState(nodeEnv);
+        while(!possTurns.isEmpty()) {
+            // determine next random turn
+            int index = new Random().nextInt() % possTurns.size();
+            nodeEnv.updatePlayground(possTurns.get(index));
+            // create new child for the chosen turn
+            nextPlayer = getNextPlayer(nextPlayer);
+            possTurns = getPossibleTurns(nodeEnv, nextPlayer);
         }
-        // determine next random turn
-        int index = new Random().nextInt() % possTurns.size();
-        nodeEnv.updatePlayground(possTurns.get(index));
-        // create new child for the chosen turn
-        Player nextPlayer = getNextPlayer(currPlayer);
-        Node simulationNode = new Node(nodeEnv, currNode, nextPlayer);
-        // update the values of the current node
-        currNode.setNumVisited(currNode.getNumVisited() + 1);
-        currNode.setSimulationReward(
-                simulationNode.getSimulationReward() +
-                        // get here into next level and get the reward returned
-                        simulate(
-                                simulationNode,
-                                getPossibleTurns(nodeEnv, nextPlayer),
-                                nodeEnv,
-                                nextPlayer)
-        );
-        // backpropagate the reward to nodes on the higher level
         return (double) rewardGameState(nodeEnv);
     }
 
@@ -160,22 +148,27 @@ public class MCTS {
      * the map is updated according to the possible move
      * also the unvisited child nodes are added to the list of leaf nodes
      */
-    private void expand() {
-        ArrayList<Turn> possibleTurns = getPossibleTurns(root.getEnvironment(), myPlayer);
+    private void expand(Node expandNode) {
+        //get all possibleTurns for expandNode
+        ArrayList<Turn> possibleTurns = getPossibleTurns(expandNode.getEnvironment(), expandNode.getNextPlayer());
+        //get the player after one Turn (not the player who makes the "possibleTurn")
+        Player nextPlayer = getNextPlayer(expandNode.getNextPlayer());
+        //for each Turn, clone the environment and add the node as children to expandNode
         for (Turn turn : possibleTurns) {
             Environment nodeEnvironment;
             try {
-                nodeEnvironment = (Environment) root.getEnvironment().clone();
+                nodeEnvironment = (Environment) expandNode.getEnvironment().clone();
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
                 return;
             }
             nodeEnvironment.updatePlayground(turn);
-            Player nextPlayer = getNextPlayer(root.getNextPlayer());
-            Node child = new Node(nodeEnvironment, root, nextPlayer);
-            root.getChildren().add(child);
+            Node child = new Node(nodeEnvironment, expandNode, nextPlayer);
+            expandNode.getChildren().add(child);
             leafNodes.add(child);
         }
+        //this arraylist saves all nodes for uct
+        leafNodes.remove(expandNode);
     }
 
 }
