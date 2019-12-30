@@ -1,0 +1,24 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{BPW{\etalchar{+}}12}
+
+\bibitem[BPW{\etalchar{+}}12]{Browne2012}
+C.~B. Browne, E.~Powley, D.~Whitehouse, S.~M. Lucas, P.~I. Cowling,
+  P.~Rohlfshagen, S.~Tavener, D.~Perez, Samthrakis S., and S.~Colton.
+\newblock A survey of monte carlo tree search methods.
+\newblock In {\em IEEE Transactions on Computational Intelligence and AI in
+  games}, volume 4(1), pages 1--43, März 2012.
+
+\bibitem[CBSS08]{Chaslot2008}
+G.~Chaslot, S.~Bakkes, I.~Szita, and P.~Spronck.
+\newblock Monte-carlo tree search: A new framework for game ai.
+\newblock In {\em Proceedings of the Fourth Artificial Intelligence and
+  Interactive Digital Entertainment Conference}, Oktober 2008.
+
+\bibitem[SSS{\etalchar{+}}17]{Silver2017}
+D.~Silver, J.~Schrittwieser, K.~Simonyan, I.~Antonoglou, A.~Huang, A.~Guez,
+  T.~Hubert, L.~Baker, M.~Lai, A.~Bolton, Y.~Chen, T.~Lillicrap, F.~Hui,
+  L.~Sifre, G.~van~den Driessche, T.~Graepel, and D.~Hassabis.
+\newblock Mastering the game of go without human knowledge.
+\newblock In {\em nature}, volume 550(7676), pages 354--359, März 2017.
+
+\end{thebibliography}
