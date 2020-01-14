@@ -72,10 +72,19 @@ public class MCTS {
      */
     public void searchBestTurn() {
         Node chosenNode = root;
+        double chosenNodeUCT = double.min_value;
+        double nodeUCT;
         while(!leafNodes.isEmpty()) {
             expand(chosenNode);
             traverse(chosenNode);
-            //call uct over leafs to get a new chosenNode
+            //chose the next node which should be explored
+            for (Node node : leafNodes) {
+                nodeUCT = node.calculateUCT;
+                if(nodeUCT > chosenNodeUCT) {
+                    chosenNodeUCT = nodeUCT;
+                    chosenNode = node;
+                }
+            }
         }
     }
 
