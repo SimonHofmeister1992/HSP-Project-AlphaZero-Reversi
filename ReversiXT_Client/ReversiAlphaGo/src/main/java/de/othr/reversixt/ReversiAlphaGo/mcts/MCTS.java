@@ -13,6 +13,7 @@ public class MCTS {
     private Node root;
     private ArrayList<Node> leafNodes;
     private Player myPlayer;
+    private Node bestTurn;
 
     public MCTS(Environment environment, Player player) {
         this.root = new Node(environment, player);
@@ -21,7 +22,10 @@ public class MCTS {
         this.myPlayer = player;
     }
 
-    //TODO copied from RandomTurnChoiceAlgorithm
+    /**
+     * getter
+     */
+    public Node getBestTurn() { return bestTurn; }
 
     /**
      * @param environment represents the current game state and holds the current playground
@@ -67,6 +71,22 @@ public class MCTS {
     }
 
     /**
+     * choses the best turn of the all our possible turns
+     * based on all simulations
+     */
+    private void setBestTurn() {
+        double maxReward = double.min_value;
+        double nodeReward;
+        for (Node node : root.children) {
+            nodeReward = node.getSimulationReward;
+            if(nodeReward > maxReward) {
+                bestTurn = node;
+                maxReward = nodeReward;
+            }
+        }
+    }
+
+    /**
      * expands the tree with the corresponding child nodes (as possible next moves)
      * and simulates random playouts starting in each child node (which are eventually backpropagated)
      */
@@ -77,6 +97,7 @@ public class MCTS {
         while(!leafNodes.isEmpty()) {
             expand(chosenNode);
             traverse(chosenNode);
+            setBestTurn();
             //chose the next node which should be explored
             for (Node node : leafNodes) {
                 nodeUCT = node.calculateUCT;
@@ -181,5 +202,6 @@ public class MCTS {
         //this arraylist saves all nodes for uct
         leafNodes.remove(expandNode);
     }
+
 
 }
