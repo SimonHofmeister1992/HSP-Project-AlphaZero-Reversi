@@ -75,13 +75,13 @@ public class MCTS {
      * based on all simulations
      */
     private void setBestTurn() {
-        double maxReward = double.min_value;
-        double nodeReward;
-        for (Node node : root.children) {
-            nodeReward = node.getSimulationReward;
-            if(nodeReward > maxReward) {
+        int maxVisited = Integer.MIN_VALUE;
+        int nodeVisited;
+        for (Node node : root.getChildren()) {
+            nodeVisited = node.getNumVisited();
+            if(nodeVisited > maxVisited) {
                 bestTurn = node;
-                maxReward = nodeReward;
+                maxVisited = nodeVisited;
             }
         }
     }
@@ -92,7 +92,7 @@ public class MCTS {
      */
     public void searchBestTurn() {
         Node chosenNode = root;
-        double chosenNodeUCT = double.min_value;
+        double chosenNodeUCT = Double.MIN_VALUE;
         double nodeUCT;
         while(!leafNodes.isEmpty()) {
             expand(chosenNode);
@@ -100,7 +100,7 @@ public class MCTS {
             setBestTurn();
             //chose the next node which should be explored
             for (Node node : leafNodes) {
-                nodeUCT = node.calculateUCT;
+                nodeUCT = node.calculateUCT();
                 if(nodeUCT > chosenNodeUCT) {
                     chosenNodeUCT = nodeUCT;
                     chosenNode = node;
@@ -169,7 +169,6 @@ public class MCTS {
             // determine next random turn
             int index = new Random().nextInt() % possTurns.size();
             nodeEnv.updatePlayground(possTurns.get(index));
-            // create new child for the chosen turn
             currPlayer = getNextPlayer(nodeEnv, currPlayer);
             possTurns = getPossibleTurns(nodeEnv, currPlayer);
         }
