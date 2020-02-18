@@ -87,7 +87,7 @@ public class ServerCommunicator {
 
     // remaining time for turn in ms
     public int getTimeLimit(){
-        return this.timeLimit;
+        return timeLimit;
     }
 
     // ************************************************************************************
@@ -181,6 +181,7 @@ public class ServerCommunicator {
             else if (msgType == IMsgType.TURN_REQUEST) //turnrequest
             {
                 this.timeLimit = this.inStream.readInt();
+                if(this.timeLimit <= 0) this.timeLimit = Integer.MAX_VALUE;
                 this.maxDepth = this.inStream.read();
             }
             else if (msgType == IMsgType.ENEMY_TURN) //enemyTurn
