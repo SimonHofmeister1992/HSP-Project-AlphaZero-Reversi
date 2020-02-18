@@ -1,19 +1,23 @@
 package de.othr.reversixt.ReversiAlphaGo.mcts;
 
+import de.othr.reversixt.ReversiAlphaGo.agent.ITurnChoiceAlgorithm;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 
 
-public class MCTS {
+public class MCTS implements ITurnChoiceAlgorithm {
 
     private Node root;
     private ArrayList<Node> leafNodes;
     private Player myPlayer;
-    private Node bestTurn;
+    private Node bestNode;
 
     public MCTS(Environment environment, Player player) {
         this.root = new Node(environment, player);
@@ -25,7 +29,23 @@ public class MCTS {
     /**
      * getter
      */
-    public Node getBestTurn() { return bestTurn; }
+    @Override
+    public Turn getBestTurn() {
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
+        Date date = new Date(System.currentTimeMillis());
+        System.out.println("Ende: " + formatter.format(date));
+        return bestNode.getCurTurn();
+    }
+
+    @Override
+    public void chooseTurnPhase1() {
+        searchBestTurn();
+    }
+
+    @Override
+    public void chooseTurnPhase2() {
+
+    }
 
     /**
      * @param environment represents the current game state and holds the current playground
@@ -43,6 +63,7 @@ public class MCTS {
                 turnToCheck.setColumn(col);
 
                 if (environment.validateTurnPhase1(turnToCheck)) {
+                    //System.out.println("Valid Turn: row " + row + " col " + col);
                     turn = new Turn(player.getSymbol(), row, col, 0);
                     //if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='b') turn.setSpecialFieldInfo(21);
                     //if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='c') turn.setSpecialFieldInfo(player.getSymbol()-'0');
@@ -61,13 +82,16 @@ public class MCTS {
      * @return player: specifies which player is next
      */
     private Player getNextPlayer(Environment nodeEnvironment, Player currentPlayer) {
-        //TODO find next player
-        for(int idx = 0; idx < nodeEnvironment.getNumOfPlayers(); idx++) {
-            //find next player
-            //if getPossibleTurns(nodeEnvironment, nextPlayer) empty --> continue
-            //if not empty --> return nextPlayer
+        int curSymbol = currentPlayer.getSymbol();
+        int nextSymbol = ((curSymbol - 49 + 1) % nodeEnvironment.getNumOfPlayers() ) + 49;
+        char nextSymbolChar = (char) nextSymbol;
+        for(Player player : nodeEnvironment.getPlayers()) {
+            if(player.getSymbol() == nextSymbolChar) {
+                //System.out.println("Nex Player Symbol: " + nextSymbolChar);
+                return player;
+            }
         }
-        return currentPlayer;
+        return currentPlayer; //should not occur
     }
 
     /**
@@ -79,8 +103,8 @@ public class MCTS {
         int nodeVisited;
         for (Node node : root.getChildren()) {
             nodeVisited = node.getNumVisited();
-            if(nodeVisited > maxVisited) {
-                bestTurn = node;
+            if (nodeVisited > maxVisited) {
+                bestNode = node;
                 maxVisited = nodeVisited;
             }
         }
@@ -91,21 +115,30 @@ public class MCTS {
      * and simulates random playouts starting in each child node (which are eventually backpropagated)
      */
     public void searchBestTurn() {
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
+        Date date = new Date(System.currentTimeMillis());
+        System.out.println("Start: " + formatter.format(date));
         Node chosenNode = root;
-        double chosenNodeUCT = Double.MIN_VALUE;
+        double chosenNodeUCT;
         double nodeUCT;
-        while(!leafNodes.isEmpty()) {
+        while (!leafNodes.isEmpty()) {
+            System.out.println("LeafNodeSize before expand: " + leafNodes.size());
+            chosenNodeUCT = Double.MIN_VALUE;
             expand(chosenNode);
+            System.out.println("LeafNodeSize after expand: " + leafNodes.size());
             traverse(chosenNode);
+            System.out.println("LeafNodeSize after traverse: " + leafNodes.size());
             setBestTurn();
+            System.out.println("SetBestTurn finished!");
             //chose the next node which should be explored
             for (Node node : leafNodes) {
                 nodeUCT = node.calculateUCT();
-                if(nodeUCT > chosenNodeUCT) {
+                if (nodeUCT > chosenNodeUCT) {
                     chosenNodeUCT = nodeUCT;
                     chosenNode = node;
                 }
             }
+            //break;
         }
     }
 
@@ -116,23 +149,33 @@ public class MCTS {
      */
     //ToDo parameter root
     private void traverse(Node traverseNode) {
+        System.out.println("Start Traverse");
+        System.out.println("Node children size: " + traverseNode.getChildren().size());
         for (Node child : traverseNode.getChildren()) {
             Environment nodeEnvironment;
             try {
-                nodeEnvironment = (Environment) traverseNode.getEnvironment().clone();
+                nodeEnvironment = (Environment) child.getEnvironment().clone();
+                nodeEnvironment.setPlayground(child.getEnvironment().getPlayground().getCloneOfPlayground());
+                System.out.println("Map cloned");
+                //nodeEnvironment.getPlayground().printPlayground();
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
+                System.out.println("Clone Exception");
                 return;
             }
             //Simulate one path to get a reward
+            System.out.println("Simulate started");
             double reward = simulate(nodeEnvironment, child.getNextPlayer());
+            System.out.println("Simulate finished");
             //Backpropagate the reward anv visitedNum to all Parents (except root)
+            System.out.println("Backpropagation started");
             Node nodeBP = child;
-            while(nodeBP != root) {
+            while (nodeBP != root) {
                 nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
                 nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
-                nodeBP = child.getParent();
+                nodeBP = nodeBP.getParent();
             }
+            System.out.println("Backpropagation finished");
         }
     }
 
@@ -158,16 +201,17 @@ public class MCTS {
 
     /**
      * function to simulate the full game by playing random moves till the end
-     * @param nodeEnv represents the environment for the node
+     *
+     * @param nodeEnv    represents the environment for the node
      * @param currPlayer represents the current player
      * @return the reward of the simulated game
      */
-    private double simulate(Environment nodeEnv,  Player currPlayer) {
+    private double simulate(Environment nodeEnv, Player currPlayer) {
         ArrayList<Turn> possTurns = getPossibleTurns(nodeEnv, currPlayer);
         // exit condition of recursion
-        while(!possTurns.isEmpty()) {
+        while (!possTurns.isEmpty()) {
             // determine next random turn
-            int index = new Random().nextInt() % possTurns.size();
+            int index = new Random().nextInt(possTurns.size());
             nodeEnv.updatePlayground(possTurns.get(index));
             currPlayer = getNextPlayer(nodeEnv, currPlayer);
             possTurns = getPossibleTurns(nodeEnv, currPlayer);
@@ -182,24 +226,30 @@ public class MCTS {
      * also the unvisited child nodes are added to the list of leaf nodes
      */
     private void expand(Node expandNode) {
+        System.out.println("Start Expand");
         //get all possibleTurns for expandNode
         ArrayList<Turn> possibleTurns = getPossibleTurns(expandNode.getEnvironment(), expandNode.getNextPlayer());
         //for each Turn, clone the environment and add the node as children to expandNode
         for (Turn turn : possibleTurns) {
+            System.out.println("-- new Node --");
             Environment nodeEnvironment;
             try {
                 nodeEnvironment = (Environment) expandNode.getEnvironment().clone();
+                nodeEnvironment.setPlayground(expandNode.getEnvironment().getPlayground().getCloneOfPlayground());
+                System.out.println("Map cloned");
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
+                System.out.println("Clone Exception");
                 return;
             }
             nodeEnvironment.updatePlayground(turn);
-            Node child = new Node(nodeEnvironment, expandNode, getNextPlayer(nodeEnvironment, expandNode.getNextPlayer()));
+            Node child = new Node(nodeEnvironment, expandNode, getNextPlayer(nodeEnvironment, expandNode.getNextPlayer()), turn);
             expandNode.getChildren().add(child);
             leafNodes.add(child);
         }
         //this arraylist saves all nodes for uct
         leafNodes.remove(expandNode);
+        System.out.println("Removed Node form leaf Nodes");
     }
 
 
