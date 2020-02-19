@@ -7,66 +7,70 @@ import java.util.List;
 public class Playground {
     private int playgroundHeight;
     private int playgroundWidth;
+    private int numOfPlayer;
     private char[][] playground;
-    private HashMap<TransitionPart,TransitionPart> transitions;
+    private HashMap<TransitionPart, TransitionPart> transitions;
 
-    Playground(){
-        transitions=new HashMap<>();
+    /**
+     * init function
+     */
+    Playground() {
+        transitions = new HashMap<>();
     }
 
-    public HashMap<TransitionPart,TransitionPart> getTransitions() {
+    public HashMap<TransitionPart, TransitionPart> getTransitions() {
         return transitions;
     }
-    public TransitionPart getTransitionedPosition (TransitionPart origin){
+
+    /**
+     * Getter Setter
+     *
+     */
+    public TransitionPart getTransitionedPosition(TransitionPart origin) {
         return transitions.get(origin);
     }
 
-    public void addTransition(TransitionPart firstTransitionPart, TransitionPart secondTransitionPart){
-        this.transitions.put(firstTransitionPart,secondTransitionPart);
-        this.transitions.put(secondTransitionPart,firstTransitionPart);
+    public void addTransition(TransitionPart firstTransitionPart, TransitionPart secondTransitionPart) {
+        this.transitions.put(firstTransitionPart, secondTransitionPart);
+        this.transitions.put(secondTransitionPart, firstTransitionPart);
     }
 
     public int getPlaygroundHeight() {
         return playgroundHeight;
     }
 
-    void setPlaygroundHeight(int playgroundHeight) {
-        this.playgroundHeight = playgroundHeight;
-    }
-
     public int getPlaygroundWidth() {
         return playgroundWidth;
-    }
-
-    void setPlaygroundWidth(int playgroundWidth) {
-        this.playgroundWidth = playgroundWidth;
     }
 
     char[][] getPlayground() {
         return playground;
     }
-    void initPlayground(int playgroundHeight, int playgroundWidth){
+
+    void initPlayground(int playgroundHeight, int playgroundWidth, int numOfPlayer) {
+        this.playgroundHeight = playgroundHeight;
+        this.playgroundWidth = playgroundWidth;
+        this.numOfPlayer = numOfPlayer;
         this.playground = new char[playgroundHeight][playgroundWidth];
     }
 
-    void setSymbolOnPlaygroundPosition(int row, int col, char symbol){
-        this.playground[row][col]=symbol;
+    void setSymbolOnPlaygroundPosition(int row, int col, char symbol) {
+        this.playground[row][col] = symbol;
     }
 
-    public char getSymbolOnPlaygroundPosition(int row, int col){
+    public char getSymbolOnPlaygroundPosition(int row, int col) {
         return this.playground[row][col];
     }
 
     /**
      * Input: A valid Turn (playerIcon, row, column, specialfieldInfo: 1-8 for choice stones, 20 on bonus stone to get bomb, 21 on bonus stone to get override)
-     * 		  The actual player identified by the playericon
-     * 		  The number of players on the map, known by the environment
+     * The actual player identified by the playericon
+     * The number of players on the map, known by the environment
      * Returns: Nothing, the playground of type char[][] of this class is recolored.
      * Hints: Updates the playground by recoloring using valid turns; can handle all rules of ReversiXT.
-     * 		  Updates the overrides and bombs gained by 'b' fields.
-    */
+     * Updates the overrides and bombs gained by 'b' fields.
+     */
     void updatePlaygroundPhase1(Turn turn, Player player, int numOfPlayers) {
-
         ArrayList<int[]> fieldsToColour = new ArrayList<>(); // row, column: overall fields to colour in turn
         ArrayList<int[]> possibleFieldsToColour = new ArrayList<>(); // row, column: fields to colour in actual direction
 
@@ -81,96 +85,141 @@ public class Playground {
 
 
         int[] fieldToAdd;
-        // check stones to colour in all directions
+
         char startSymbol = getSymbolOnPlaygroundPosition(startRow, startColumn);
 
-        if(turn.getSpecialFieldInfo()==20 && startSymbol == 'b') player.increaseNumberOfBombs();
-        else if(turn.getSpecialFieldInfo()==21 && startSymbol == 'b') player.increaseNumberOfOverrideStones();
-        if(startSymbol=='x' || (startSymbol>='1' && startSymbol<='8')){
-            player.decreaseNumberOfOverrideStones();
-        }
 
-        fieldsToColour.add(new int[]{startRow,startColumn});
+        fieldsToColour.add(new int[]{startRow, startColumn});
 
-        for(int direction=0; direction < 8; direction++){
+        for (int direction = 0; direction < 8; direction++) {
             possibleFieldsToColour.clear();
-            actualDirection=direction;
-            actualRow=startRow;
-            actualColumn=startColumn;
+            actualDirection = direction;
+            actualRow = startRow;
+            actualColumn = startColumn;
             newPosition = new int[3];
 
             // gather fields which shall be recolored by direction
             // (see: Documentations\CheatSheets\kurzSpezifikation.pdf)
-            while(true){
-                newPosition = getNewPosition(newPosition, actualRow, actualColumn, actualDirection); // row, col, direction
-                if(newPosition==null || (newPosition[0]==startRow && newPosition[1]==startColumn)) break;
-                else{
-                    actualRow=newPosition[0];
-                    actualColumn=newPosition[1];
-                    actualDirection=newPosition[2];
+            while (true) {
+                // parameter newPosition to avoid new int[3] in every loop
+                newPosition = getNewPosition(newPosition, actualRow, actualColumn, actualDirection);
+                actualRow = newPosition[0];
+                actualColumn = newPosition[1];
+                actualDirection = newPosition[2];
 
-                    // validate pointer position on map
-                    if(actualRow < 0 || actualColumn < 0 || actualRow >= playgroundHeight || actualColumn >=playgroundWidth) break;
-                    actualSymbolOnPlayground = getSymbolOnPlaygroundPosition(actualRow,actualColumn);
-
-                    // handle own player symbol
-                    if(actualSymbolOnPlayground==playerIcon) {
-                        fieldsToColour.addAll(possibleFieldsToColour);
-                        break;
-                    }
-                    // handle special fields which must not be recolored as the whole direction
-                    else if(actualSymbolOnPlayground=='0'
-                    		|| actualSymbolOnPlayground=='-'
-                            || actualSymbolOnPlayground=='i'
-                            || actualSymbolOnPlayground=='b'
-                            || actualSymbolOnPlayground=='c'){
-                        break;
-                    }
-                    // handle fields which may be recolored
-                    else {
-                        fieldToAdd = new int[2];
-                        fieldToAdd[0] = actualRow;
-                        fieldToAdd[1] = actualColumn;
-                        possibleFieldsToColour.add(fieldToAdd);
-                    }
-
+                // loop through a transition -> break
+                if (actualRow == startRow && actualColumn == startColumn) {
+                    break;
                 }
+                // validate pointer position on map
+                if (actualRow < 0 || actualColumn < 0 || actualRow >= playgroundHeight || actualColumn >= playgroundWidth) {
+                    break;
+                }
+
+                actualSymbolOnPlayground = getSymbolOnPlaygroundPosition(actualRow, actualColumn);
+
+                // handle own player symbol
+                if (actualSymbolOnPlayground == playerIcon) {
+                    fieldsToColour.addAll(possibleFieldsToColour);
+                    break;
+                }
+                // handle special fields which must not be recolored as the whole direction
+                else if (actualSymbolOnPlayground == '0'
+                        || actualSymbolOnPlayground == '-'
+                        || actualSymbolOnPlayground == 'i'
+                        || actualSymbolOnPlayground == 'b'
+                        || actualSymbolOnPlayground == 'c') {
+                    break;
+                }
+                // handle fields which may be recolored
+                else {
+                    fieldToAdd = new int[2];
+                    fieldToAdd[0] = actualRow;
+                    fieldToAdd[1] = actualColumn;
+                    possibleFieldsToColour.add(fieldToAdd);
+                }
+
             }
         }
 
         // recolor the playground
-        for (int[] field : fieldsToColour){
+        for (int[] field : fieldsToColour) {
             setSymbolOnPlaygroundPosition(field[0], field[1], playerIcon);
         }
 
-     // choice-stone
-        if(specialFieldInfo>=1 && specialFieldInfo <=8){
-            for(int row=0; row < getPlaygroundHeight(); row++){
-                for(int col=0; col < getPlaygroundWidth(); col++){
-                    if(getSymbolOnPlaygroundPosition(row, col) == (char)(specialFieldInfo+48)){
-                        setSymbolOnPlaygroundPosition(row, col, playerIcon);
-                    }
-                    else  if(getSymbolOnPlaygroundPosition(row, col)==playerIcon){
-                        setSymbolOnPlaygroundPosition(row, col, (char)(specialFieldInfo+48));
-                    }
+        // Make all special Move Checks
+        switch(startSymbol){
+            // bonus stone on playground
+            case 'b':
+                // Bomb stone was chosen
+                if (turn.getSpecialFieldInfo() == 20) {
+                    player.increaseNumberOfBombs();
                 }
-            }
-        }
-     // inversion-stone
-        if(startSymbol=='i'){
-            for(int row=0; row < getPlaygroundHeight(); row++){
-                for(int col=0; col < getPlaygroundWidth(); col++){
-                    char symbol = getSymbolOnPlaygroundPosition(row, col);
-                    if(symbol>='1' && symbol <='8'){
-                        setSymbolOnPlaygroundPosition(row, col, (char)((((symbol-49)+1)%numOfPlayers)+49));
-                    }
+                // Override stone was chosen
+                else if (turn.getSpecialFieldInfo() == 21) {
+                    player.increaseNumberOfOverrideStones();
                 }
-            }
+                break;
+            // override stone was used
+            case 'x':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+                player.decreaseNumberOfOverrideStones();
+                break;
+            case 'i':
+                invertStones();
+                break;
         }
 
+        // choice-stone
+        if (specialFieldInfo >= 1 && specialFieldInfo <= 8) {
+            choiceStone(playerIcon, specialFieldInfo);
+        }
 
     }
 
+    /**
+     * Inversion Stone was used
+     * Color all stones one player "up"
+     * Example: 0 1 2 3 0 --> 0 2 3 1 0
+     */
+    private void invertStones() {
+        for (int row = 0; row < playgroundHeight; row++) {
+            for (int col = 0; col < playgroundWidth; col++) {
+                char symbol = getSymbolOnPlaygroundPosition(row, col);
+                if (symbol >= '1' && symbol <= '8') {
+                    setSymbolOnPlaygroundPosition(row, col, (char) ((((symbol - 49) + 1) % numOfPlayer) + 49));
+                }
+            }
+        }
+    }
+
+    /**
+     * Choice Stone was used
+     * A Player was chosen, which will transform the stones of this player with "our" stones and vice versa
+     * Example: 0 1 2 3 0 --> 0 3 2 1 0 (Input: 1, 3)
+     */
+    private void choiceStone(char playerIcon, int specialFieldInfo) {
+        char choicePlayer = (char) (specialFieldInfo + 48);
+
+        for (int row = 0; row < getPlaygroundHeight(); row++) {
+            for (int col = 0; col < getPlaygroundWidth(); col++) {
+                if (getSymbolOnPlaygroundPosition(row, col) == choicePlayer) {
+                    setSymbolOnPlaygroundPosition(row, col, playerIcon);
+                } else if (getSymbolOnPlaygroundPosition(row, col) == playerIcon) {
+                    setSymbolOnPlaygroundPosition(row, col, choicePlayer);
+                }
+            }
+        }
+    }
+
+    /* Bomb Phase
     public void updatePlaygroundPhase2(Turn turn, Player player, int strengthOfBombs) {
         int startRow = turn.getRow();
         int startColumn = turn.getColumn();
@@ -179,90 +228,114 @@ public class Playground {
 
         // color map
 
-        for(Turn t : l) {
-        	setSymbolOnPlaygroundPosition(t.getRow(), t.getColumn(), '-');
+        for (Turn t : l) {
+            setSymbolOnPlaygroundPosition(t.getRow(), t.getColumn(), '-');
         }
     }
 
     public List<Turn> setBomb(int row, int col, int strengthOfBombs) {
-    	List<Turn> l = new ArrayList<>();
-    	if(strengthOfBombs <= 0) {
-    		Turn t = new Turn();
-    		t.setRow(row);
-    		t.setColumn(col);
-    		l.add(t);
-    		return l;
-    	}
-    	else {
-    		for(int direction = 0; direction < 8; direction++) {
-    			int r, c;
-    			int[] newPos = new int[3];
-    			// calculate new position
-    			int[] actualPos = getNewPosition(newPos, row, col, direction);
-    			r = actualPos[0]; c = actualPos[1];
-    			// validate new position
-    			if(r < 0 || r >= getPlaygroundHeight() || c < 0 || c >= getPlaygroundWidth()
-    					|| getSymbolOnPlaygroundPosition(r, c) == '-') continue;
+        List<Turn> l = new ArrayList<>();
+        if (strengthOfBombs <= 0) {
+            Turn t = new Turn();
+            t.setRow(row);
+            t.setColumn(col);
+            l.add(t);
+            return l;
+        } else {
+            for (int direction = 0; direction < 8; direction++) {
+                int r, c;
+                int[] newPos = new int[3];
+                // calculate new position
+                int[] actualPos = getNewPosition(newPos, row, col, direction);
+                r = actualPos[0];
+                c = actualPos[1];
+                // validate new position
+                if (r < 0 || r >= getPlaygroundHeight() || c < 0 || c >= getPlaygroundWidth()
+                        || getSymbolOnPlaygroundPosition(r, c) == '-') continue;
 
-    			// recursive call to get every position
-    			l.addAll(setBomb(r, c, strengthOfBombs-1));
-    		}
-    	}
-    	return l;
+                // recursive call to get every position
+                l.addAll(setBomb(r, c, strengthOfBombs - 1));
+            }
+        }
+        return l;
     }
+    */
 
+    /**
+     * Get next position on the playground in one direction
+     */
     public int[] getNewPosition(int[] newPosition, int row, int col, int direction) {
         TransitionPart tp = getTransitionedPosition(new TransitionPart(col, row, direction));
         if (tp != null) {
             newPosition[0] = tp.getRow();
             newPosition[1] = tp.getColumn();
-            newPosition[2] = (tp.getDirection()+4)%8;
+            newPosition[2] = (tp.getDirection() + 4) % 8;
             return newPosition;
         } else {
             switch (direction) {
-                case 0: row--; break;
-                case 1: row--; col++; break;
-                case 2: col++; break;
-                case 3: row++; col++; break;
-                case 4: row++; break;
-                case 5: row++; col--; break;
-                case 6: col--; break;
-                case 7: row--; col--; break;
-                default: newPosition=new int[3];
+                case 0:
+                    row--;
+                    break;
+                case 1:
+                    row--;
+                    col++;
+                    break;
+                case 2:
+                    col++;
+                    break;
+                case 3:
+                    row++;
+                    col++;
+                    break;
+                case 4:
+                    row++;
+                    break;
+                case 5:
+                    row++;
+                    col--;
+                    break;
+                case 6:
+                    col--;
+                    break;
+                case 7:
+                    row--;
+                    col--;
+                    break;
             }
-            newPosition[0]=row;
-            newPosition[1]=col;
-            newPosition[2]=direction;
+            newPosition[0] = row;
+            newPosition[1] = col;
+            newPosition[2] = direction;
             return newPosition;
         }
     }
 
-    public Playground getCloneOfPlayground(){
+    public Playground getCloneOfPlayground() {
         Playground p = new Playground();
-        p.setPlaygroundHeight(this.getPlaygroundHeight());
-        p.setPlaygroundWidth(this.getPlaygroundWidth());
+        p.initPlayground(this.getPlaygroundHeight(),this.getPlaygroundWidth(), this.numOfPlayer);
 
-        for(TransitionPart tp : getTransitions().keySet()){
+        for (TransitionPart tp : getTransitions().keySet()) {
             p.addTransition(tp, getTransitions().get(tp));
         }
 
-        p.initPlayground(getPlaygroundHeight(), getPlaygroundWidth());
-        for(int row = 0; row < getPlaygroundHeight(); row++){
-            for(int col = 0; col < getPlaygroundWidth(); col++){
+        for (int row = 0; row < getPlaygroundHeight(); row++) {
+            for (int col = 0; col < getPlaygroundWidth(); col++) {
                 p.setSymbolOnPlaygroundPosition(row, col, this.getSymbolOnPlaygroundPosition(row, col));
             }
         }
         return p;
     }
 
+    /**
+     * Print Playground in terminal
+     */
     public void printPlayground() {
-    	for(int row = 0; row < getPlaygroundHeight(); row++) {
-    		for(int col = 0; col < getPlaygroundWidth(); col++) {
-    			System.out.print(playground[row][col] + " ");
-    		}
-    		System.out.println();
-    	}
-		System.out.println();
-		System.out.println();
+        for (int row = 0; row < getPlaygroundHeight(); row++) {
+            for (int col = 0; col < getPlaygroundWidth(); col++) {
+                System.out.print(playground[row][col] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+        System.out.println();
     }
 }

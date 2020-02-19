@@ -15,7 +15,7 @@ public class Environment {
     public Environment(){
         setPhase(IPhase.TURN_PHASE);
         turn = 1;
-        this.playground=new Playground();
+        this.playground = new Playground();
     }
 
     public void parseRawMap(String rawMap) {
@@ -32,20 +32,20 @@ public class Environment {
                     this.setNumOfBombs(Integer.parseInt(columns[0].trim()));
                     this.setStrengthOfBombs(Integer.parseInt(columns[1].trim()));
                 }
+                //init Playground height and width
                 else if(line==3) {
                     String[] columns = rawMapLine.split(" ");
-                    this.playground.setPlaygroundHeight(Integer.parseInt(columns[0].trim()));
-                    this.playground.setPlaygroundWidth(Integer.parseInt(columns[1].trim()));
-                    this.playground.initPlayground(playground.getPlaygroundHeight(), playground.getPlaygroundWidth());
+                    //create new map and init a blank map
+                    playground.initPlayground(Integer.parseInt(columns[0].trim()),Integer.parseInt(columns[1].trim()), numOfPlayers);
                 }
-
+                //init Playground
                 else if (line >3 && line <= playground.getPlaygroundHeight() + 3){
                     String[] columns = rawMapLine.trim().split(" ");
                     for(int column = 0; column < columns.length; column++){
                         playground.setSymbolOnPlaygroundPosition(line-4,column,columns[column].trim().charAt(0));
                     }
                 }
-
+                //init Transition
                 else if (line > playground.getPlaygroundHeight() + 3){
                     String[] transitionParts = rawMapLine.split("->");
                     String[] fromTransition = transitionParts[0].split(" ");
@@ -58,7 +58,6 @@ public class Environment {
                             Integer.parseInt(toTransition[3].trim()));
                     playground.addTransition(first,second);
                 }
-
                 line++;
             }
             for(int i = 0; i < numOfPlayers; i++){
@@ -67,33 +66,27 @@ public class Environment {
         }
     }
 
-    public void updatePlayground(Turn turn){
+    public void updatePlayground(Turn turn,  Playground playground){
         if(getPhase()==IPhase.TURN_PHASE){
             Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
-            if(player != null) this.playground.updatePlaygroundPhase1(turn, player, numOfPlayers);
+            if(player != null) playground.updatePlaygroundPhase1(turn, player, numOfPlayers);
         }
+        /* Bomb Phase
         else if(getPhase()==IPhase.BOMB_PHASE) {
             Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
             if(player != null) {
                 getPlayground().updatePlaygroundPhase2(turn, player, getStrengthOfBombs());
             }
-        }
+        }*/
         this.turn++;
     }
 
     public void disqualifyPlayer(char playerIcon){
-        for(Player p : players){
-            if(p.getSymbol()==playerIcon) p.disqualify();
-        }
+        getPlayerByPlayerIcon(playerIcon).setDisqualify();
     }
 
     public boolean isPlayerDisqualified(char playerIcon){
-        for(Player p : players){
-            if(p.getSymbol()==playerIcon) {
-                return p.isDisqualified();
-            }
-        }
-        return Boolean.FALSE;
+        return getPlayerByPlayerIcon(playerIcon).isDisqualified();
     }
 
     public void nextPhase() {
@@ -146,30 +139,38 @@ public class Environment {
     }
 
     public Player getPlayerByPlayerIcon(char icon){
-        Player player = null;
         for(Player p : players){
             if(p.getSymbol()==icon) {
-                player=p;
-                break;
+                return p;
             }
         }
-        return player;
+        return null;
     }
 
-    public boolean validateTurnPhase1(Turn turn) {
+    public boolean validateTurnPhase1(Turn turn, Playground playground) {
         int row=turn.getRow();
         int col=turn.getColumn();
         Player player = getPlayerByPlayerIcon(turn.getPlayerIcon());
         int numOfColoredFields;
         char actualSymbol;
-        if(!(row >= 0 && row < getPlayground().getPlaygroundHeight()
-                && col >= 0 && col < getPlayground().getPlaygroundWidth())) return false;
 
-        char startSymbol = getPlayground().getSymbolOnPlaygroundPosition(row, col);
-        if(startSymbol == '-') return false;
-        else if(startSymbol == 'x' && player.getRemainingOverrideStones() > 0) return true;
+        if(!(row >= 0 && row < playground.getPlaygroundHeight()
+                && col >= 0 && col < playground.getPlaygroundWidth())) {
+            return false;
+        }
+
+        char startSymbol = playground.getSymbolOnPlaygroundPosition(row, col);
+
+        if(startSymbol == '-') {
+            return false;
+        }
+        else if(startSymbol == 'x' && player.getRemainingOverrideStones() > 0) {
+            return true;
+        }
         else if((startSymbol == 'x' || (startSymbol >= '1' && startSymbol <= '8'))
-                && player.getRemainingOverrideStones() <= 0) return false;
+                && player.getRemainingOverrideStones() <= 0) {
+            return false;
+        }
         else {
             int[] newPos = new int[3];
             for(int direction = 0; direction < 8; direction++) {
@@ -178,11 +179,16 @@ public class Environment {
                 newPos[1] = col;
                 newPos[2] = direction;
                 while(true) {
-                    newPos = getPlayground().getNewPosition(newPos, newPos[0], newPos[1], newPos[2]);
-                    if(!(newPos[0] >= 0 && newPos[0] < getPlayground().getPlaygroundHeight()
-                            && newPos[1] >= 0 && newPos[1] < getPlayground().getPlaygroundWidth())) break;
-                    actualSymbol = getPlayground().getSymbolOnPlaygroundPosition(newPos[0], newPos[1]);
-                    if(newPos[0]==row && newPos[1]==col) break;
+                    newPos = playground.getNewPosition(newPos, newPos[0], newPos[1], newPos[2]);
+
+                    if(!(newPos[0] >= 0 && newPos[0] < playground.getPlaygroundHeight()
+                            && newPos[1] >= 0 && newPos[1] < playground.getPlaygroundWidth())) {
+                        break;
+                    }
+                    actualSymbol = playground.getSymbolOnPlaygroundPosition(newPos[0], newPos[1]);
+                    if(newPos[0]==row && newPos[1]==col) {
+                        break;
+                    }
                     else if(actualSymbol == player.getSymbol() && numOfColoredFields > 0) {
                         return true;
                     }
@@ -191,7 +197,9 @@ public class Environment {
                             || actualSymbol=='i'
                             || actualSymbol=='b'
                             || actualSymbol=='0'
-                            || actualSymbol=='-') break;
+                            || actualSymbol=='-') {
+                        break;
+                    }
                     else {
                         numOfColoredFields++;
                     }

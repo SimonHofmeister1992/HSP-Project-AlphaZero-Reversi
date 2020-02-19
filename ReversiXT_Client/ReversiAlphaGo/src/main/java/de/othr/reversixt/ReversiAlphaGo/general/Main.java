@@ -55,7 +55,7 @@ public class Main
                     environment.parseRawMap(serverCommunicator.getRawMap());
                     break;
                 case IMsgType.ENEMY_TURN:
-                    environment.updatePlayground(serverCommunicator.getEnemyTurn());
+                    environment.updatePlayground(serverCommunicator.getEnemyTurn(), environment.getPlayground());
                     break;
                 case IMsgType.TURN_REQUEST:
                     agentCallable = new AgentCallable(environment, serverCommunicator);

@@ -24,17 +24,24 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 	public void chooseTurnPhase1() {
 		bestTurn = null;
 		Turn turn;
-		Turn turnToCheck = new Turn(player.getSymbol(), 0, 0, 0);
+		Turn turnToCheck;
 		List<Turn> validTurns = new ArrayList<>();
 		for(int row=0; row < environment.getPlayground().getPlaygroundHeight(); row++) {
 			for(int col=0; col < environment.getPlayground().getPlaygroundWidth(); col++) {
-				turnToCheck.setRow(row);
-				turnToCheck.setColumn(col);
 
-				if(environment.validateTurnPhase1(turnToCheck)) {
-					turn = new Turn(player.getSymbol(), row, col, 0);
-					if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='b') turn.setSpecialFieldInfo(21);
-					if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='c') turn.setSpecialFieldInfo(player.getSymbol()-'0');
+				turnToCheck = new Turn(player.getSymbol(), row, col, 0);
+
+				if(environment.validateTurnPhase1(turnToCheck,environment.getPlayground())) {
+					if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='b') {
+						turn = new Turn(player.getSymbol(), row, col, 21);
+					}
+					else if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='c') {
+						turn = new Turn(player.getSymbol(), row, col, player.getSymbol()-'0');
+					}
+					else
+					{
+						turn = new Turn(player.getSymbol(), row, col, 0);
+					}
 					validTurns.add(turn);
 					setBestTurn(turn);
 				}
@@ -49,11 +56,7 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			setBestTurn(turn);
 		}
 		else { // no turn found, try to put stone on 0/0, normally disqualifies itself and should never happen
-			turn = new Turn();
-			turn.setPlayerIcon(player.getSymbol());
-			turn.setSpecialFieldInfo(0);
-			turn.setRow(0);
-			turn.setColumn(0);
+			turn = new Turn(player.getSymbol(),0,0,0);
 			setBestTurn(bestTurn);
 		}
 	}
@@ -78,11 +81,7 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			setBestTurn(turn);
 		}
 		else {
-			turn = new Turn();
-			turn.setPlayerIcon(player.getSymbol());
-			turn.setSpecialFieldInfo(0);
-			turn.setRow(0);
-			turn.setColumn(0);
+			turn = new Turn(player.getSymbol(),0,0,0);
 			setBestTurn(turn);
 		}
 		setBestTurn(turn);

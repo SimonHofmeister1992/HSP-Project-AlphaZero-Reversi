@@ -32,7 +32,7 @@ public class ServerCommunicator {
     private int phase;
     private int maxDepth;
     private int timeLimit;
-    private Turn enemyTurn = new Turn();
+    private Turn enemyTurn;
     private char disqPlayer;
 
 
@@ -186,10 +186,13 @@ public class ServerCommunicator {
             }
             else if (msgType == IMsgType.ENEMY_TURN) //enemyTurn
             {
-                this.enemyTurn.setColumn(this.inStream.readUnsignedShort());
-                this.enemyTurn.setRow(this.inStream.readUnsignedShort());
-                this.enemyTurn.setSpecialFieldInfo(this.inStream.read());
-                this.enemyTurn.setPlayerIcon((char)(this.inStream.read()+48));
+
+                int col = this.inStream.readUnsignedShort();
+                int row = this.inStream.readUnsignedShort();
+                int specialInfo = this.inStream.read();
+                char playerIcon = (char)(this.inStream.read()+48);
+
+                this.enemyTurn = new Turn(playerIcon,row,col,specialInfo);
 
             }
             else if (msgType == IMsgType.DISQUALIFIED_PLAYER) //disqualified

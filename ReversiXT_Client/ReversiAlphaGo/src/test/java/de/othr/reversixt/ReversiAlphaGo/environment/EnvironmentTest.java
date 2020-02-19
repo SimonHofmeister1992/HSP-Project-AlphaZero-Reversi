@@ -118,7 +118,7 @@ public class EnvironmentTest
                 {'0', '0', 'i', '1', '0', '0'},
                 {'b', '0', '0', '1', '0', '0'}
         };
-        environment.updatePlayground(turn);
+        environment.updatePlayground(turn, environment.getPlayground());
         assertTrue(CLASS_NAME + METHOD_NAME+ "normal turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
 
         // test 'x' turn
@@ -135,7 +135,7 @@ public class EnvironmentTest
                 {'0', '0', 'i', '1', '0', '0'},
                 {'b', '0', '0', '1', '0', '0'}
         };
-        environment.updatePlayground(turn);
+        environment.updatePlayground(turn, environment.getPlayground());
         assertTrue(CLASS_NAME + METHOD_NAME+ "'x' turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
         assertEquals(CLASS_NAME + METHOD_NAME + "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('1').getRemainingOverrideStones(), NUM_OF_OVERRIDES - 1);
 
@@ -153,7 +153,7 @@ public class EnvironmentTest
                 {'0', '0', 'i', '1', '0', '0'},
                 {'b', '0', '0', '1', '0', '0'}
         };
-        environment.updatePlayground(turn);
+        environment.updatePlayground(turn, environment.getPlayground());
         assertTrue(CLASS_NAME + METHOD_NAME+ "b turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
         assertEquals(CLASS_NAME + METHOD_NAME + "number of bombs not increased", environment.getPlayerByPlayerIcon('2').getRemainingBombs(), NUM_OF_BOMBS + 1);
 
@@ -171,7 +171,7 @@ public class EnvironmentTest
                 {'0', '0', 'i', '1', '0', '0'},
                 {'b', '0', '0', '1', '0', '0'}
         };
-        environment.updatePlayground(turn);
+        environment.updatePlayground(turn, environment.getPlayground());
         assertTrue(CLASS_NAME + METHOD_NAME + "b turns don't work", arePlaygroundsIdentical(expectedResultingPlayground, environment.getPlayground().getPlayground()));
         assertEquals(CLASS_NAME + METHOD_NAME + "number of overrides not increased", environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones(), NUM_OF_OVERRIDES + 1);
 
@@ -189,7 +189,7 @@ public class EnvironmentTest
                 {'0', '0', 'i', '2', '0', '0'},
                 {'b', '0', '0', '2', '0', '0'}
         };
-        environment.updatePlayground(turn);
+        environment.updatePlayground(turn, environment.getPlayground());
         assertTrue(CLASS_NAME + METHOD_NAME+ "c turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
 
         // test 'i' turn
@@ -206,7 +206,7 @@ public class EnvironmentTest
                 {'0', '0', '2', '2', '0', '0'},
                 {'b', '0', '0', '2', '0', '0'}
         };
-        environment.updatePlayground(turn);
+        environment.updatePlayground(turn, environment.getPlayground());
         assertTrue(CLASS_NAME + METHOD_NAME+ "i turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
 
         // test 'transition' turn: use override
@@ -223,7 +223,7 @@ public class EnvironmentTest
                 {'0', '0', 'i', '2', '0', '0'},
                 {'b', '0', '0', '2', '0', '0'}
         };
-        environment.updatePlayground(turn);
+        environment.updatePlayground(turn, environment.getPlayground());
         assertTrue(CLASS_NAME + METHOD_NAME+ "transition turns don't work", arePlaygroundsIdentical(expectedResultingPlayground,environment.getPlayground().getPlayground()));
         assertEquals(CLASS_NAME + METHOD_NAME + "transitions: overrides not decreased", environment.getPlayerByPlayerIcon('2').getRemainingOverrideStones(), NUM_OF_OVERRIDES);
     
@@ -274,10 +274,10 @@ public class EnvironmentTest
     		for(int col = 0; col < PLAYGROUND_WIDTH; col++) {
 //    			turnP1.setRow(row+1); turnP1.setColumn(col+1);
 //    			turnP2.setRow(row+1); turnP2.setColumn(col+1);
-    			turnP1.setRow(row); turnP1.setColumn(col);
-    			turnP2.setRow(row); turnP2.setColumn(col);
-    			isTurnOfPlayer1Valid = environment.validateTurnPhase1(turnP1);
-    			isTurnOfPlayer2Valid = environment.validateTurnPhase1(turnP2);
+                turnP1 = new Turn(turnP1.getPlayerIcon(), row, col, turnP1.getSpecialFieldInfo());
+                turnP2 = new Turn(turnP2.getPlayerIcon(), row, col, turnP2.getSpecialFieldInfo());
+    			isTurnOfPlayer1Valid = environment.validateTurnPhase1(turnP1, environment.getPlayground());
+    			isTurnOfPlayer2Valid = environment.validateTurnPhase1(turnP2, environment.getPlayground());
     			if(isTurnOfPlayer1Valid) mapPlayer1[row][col] = '1';
     			else mapPlayer1[row][col] = '0';
     		
@@ -298,10 +298,10 @@ public class EnvironmentTest
     		for(int col = 0; col < PLAYGROUND_WIDTH; col++) {
 //    			turnP1.setRow(row+1); turnP1.setColumn(col+1);
 //    			turnP2.setRow(row+1); turnP2.setColumn(col+1);
-    			turnP1.setRow(row); turnP1.setColumn(col);
-    			turnP2.setRow(row); turnP2.setColumn(col);
-    			isTurnOfPlayer1Valid = environment.validateTurnPhase1(turnP1);
-    			isTurnOfPlayer2Valid = environment.validateTurnPhase1(turnP2);
+                turnP1 = new Turn(turnP1.getPlayerIcon(), row, col, turnP1.getSpecialFieldInfo());
+                turnP2 = new Turn(turnP2.getPlayerIcon(), row, col, turnP2.getSpecialFieldInfo());
+    			isTurnOfPlayer1Valid = environment.validateTurnPhase1(turnP1, environment.getPlayground());
+    			isTurnOfPlayer2Valid = environment.validateTurnPhase1(turnP2, environment.getPlayground());
     			if(isTurnOfPlayer1Valid) mapPlayer1[row][col] = '1';
     			else mapPlayer1[row][col] = '0';
     		
@@ -338,13 +338,10 @@ public class EnvironmentTest
     	+ "0 0 0 2 2 " + System.lineSeparator()
     	+ "4 0 2 <-> 4 4 2";
     	environment.parseRawMap(rawMap);
+    	/*
     	environment.setPhase(IPhase.BOMB_PHASE);
-    	Turn turn = new Turn();
-    	turn.setRow(0);
-    	turn.setColumn(2);
-    	turn.setPlayerIcon('1');
-    	turn.setSpecialFieldInfo(0);
-    	environment.updatePlayground(turn);
+    	Turn turn = new Turn('1',0,2,0);
+    	environment.updatePlayground(turn, environment.getPlayground());
     	
     	char[][] expectedMap = new char[][] {
     		{'1', '-', '-', '-', '-'},
@@ -355,7 +352,7 @@ public class EnvironmentTest
     	};
     	environment.getPlayground().printPlayground();
     	assertTrue(CLASS_NAME + METHOD_NAME + "bombphase coloring does not work", arePlaygroundsIdentical(expectedMap, environment.getPlayground().getPlayground()));
-    	
+    	*/
     }
     
     
