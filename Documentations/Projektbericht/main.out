@@ -1,0 +1,18 @@
+\BOOKMARK [1][-]{section.1}{Einleitung}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Reversi}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{ ReversiXT}{section.1}% 3
+\BOOKMARK [2][-]{subsection.1.3}{AlphaGo}{section.1}% 4
+\BOOKMARK [2][-]{subsection.1.4}{AlphaZero}{section.1}% 5
+\BOOKMARK [1][-]{section.2}{Related Work}{}% 6
+\BOOKMARK [2][-]{subsection.2.1}{Monte Carlo Tree Search}{section.2}% 7
+\BOOKMARK [1][-]{section.3}{Implementierung}{}% 8
+\BOOKMARK [2][-]{subsection.3.1}{Monte Carlo Tree Search}{section.3}% 9
+\BOOKMARK [1][-]{section.4}{Organisation}{}% 10
+\BOOKMARK [2][-]{subsection.4.1}{Team und Aufgabenverteilung}{section.4}% 11
+\BOOKMARK [2][-]{subsection.4.2}{Kommunikation}{section.4}% 12
+\BOOKMARK [2][-]{subsection.4.3}{Versionskontrolle}{section.4}% 13
+\BOOKMARK [2][-]{subsection.4.4}{OS, IDE und Programmiersprache}{section.4}% 14
+\BOOKMARK [2][-]{subsection.4.5}{Testumgebungen}{section.4}% 15
+\BOOKMARK [2][-]{subsection.4.6}{Projekt-Dokumentation}{section.4}% 16
+\BOOKMARK [1][-]{section.5}{Fazit}{}% 17
+\BOOKMARK [1][-]{section.5}{Anhang}{}% 18

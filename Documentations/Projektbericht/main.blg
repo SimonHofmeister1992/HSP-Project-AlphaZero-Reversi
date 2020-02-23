@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: main.aux
+The style file: alpha.bst
+Database file #1: literatur.bib
+Warning--I didn't find a database entry for "Silver_2019"
+You've used 16 entries,
+            2543 wiz_defined-function locations,
+            652 strings with 7579 characters,
+and the built_in function-call counts, 7304 in all, are:
+= -- 635
+> -- 526
+< -- 14
++ -- 196
+- -- 193
+* -- 584
+:= -- 1238
+add.period$ -- 48
+call.type$ -- 16
+change.case$ -- 151
+chr.to.int$ -- 16
+cite$ -- 16
+duplicate$ -- 216
+empty$ -- 447
+format.name$ -- 214
+if$ -- 1424
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 6
+newline$ -- 84
+num.names$ -- 48
+pop$ -- 201
+preamble$ -- 1
+purify$ -- 167
+quote$ -- 0
+skip$ -- 192
+stack$ -- 0
+substring$ -- 214
+swap$ -- 35
+text.length$ -- 14
+text.prefix$ -- 10
+top$ -- 0
+type$ -- 128
+warning$ -- 0
+while$ -- 46
+width$ -- 22
+write$ -- 201
+(There was 1 warning)

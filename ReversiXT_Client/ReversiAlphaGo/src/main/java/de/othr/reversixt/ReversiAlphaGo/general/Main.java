@@ -14,7 +14,8 @@ public class Main {
     private static int port = 7777;
     private static int groupNumber = 3;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
+
         /* ********************************
          *         Commandline options
          */
@@ -27,7 +28,7 @@ public class Main {
 
         ServerCommunicator serverCommunicator = new ServerCommunicator(groupNumber);
         Environment environment = new Environment();
-        AgentCallable agentCallable = new AgentCallable(environment, serverCommunicator);
+        AgentCallable agentCallable;
 
         ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
         executorService.setRemoveOnCancelPolicy(true);
@@ -46,28 +47,31 @@ public class Main {
         boolean isDisqualified = false;
         long timeToWaitInMilis;
         while ((msgType = serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME && !isDisqualified) {
+
             timeToWaitInMilis = serverCommunicator.getTimeLimit() - 500;
+
             bestTurn = null;
             switch (msgType) {
-                case IMsgType.INITIAL_MAP:
-                    environment.parseRawMap(serverCommunicator.getRawMap());
+                case IMsgType.PLAYER_ICON:
+                    System.out.println("Set ourPlayer in environment");
+                    environment.setOurPlayer(serverCommunicator.getPlayerIcon());
                     break;
                 case IMsgType.ENEMY_TURN:
-                    environment.updatePlayground(serverCommunicator.getEnemyTurn());
+                    environment.updatePlayground(serverCommunicator.getEnemyTurn(), environment.getPlayground());
                     break;
                 case IMsgType.TURN_REQUEST:
                     System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
-                    agentCallable = new AgentCallable(environment, serverCommunicator);
+                    agentCallable = new AgentCallable(environment);
                     Future<?> futureTurn = executorService.submit(agentCallable);
                     try {
                         executorService.schedule(() -> {
                             try {
-                                if(futureTurn.get() == null) futureTurn.cancel(true);
+                                if (futureTurn.get() == null) futureTurn.cancel(true);
                             } catch (InterruptedException | ExecutionException e) {
                                 futureTurn.cancel(true);
                                 executorService.purge();
-                            }}, timeToWaitInMilis, TimeUnit.MILLISECONDS);
-
+                            }
+                        }, timeToWaitInMilis, TimeUnit.MILLISECONDS);
                         bestTurn = (Turn) futureTurn.get(timeToWaitInMilis, TimeUnit.MILLISECONDS);
 
                     } catch (InterruptedException | TimeoutException | ExecutionException e) {
@@ -80,9 +84,9 @@ public class Main {
                         futureTurn.cancel(true);
                     }
 
-                    if(bestTurn == null) {
+                    if (bestTurn == null) {
                         bestTurn = new Turn(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()).getSymbol(), 0, 0, 0);
-                        isDisqualified=true;
+                        isDisqualified = true;
                     }
                     futureTurn.cancel(true);
                     serverCommunicator.sendOwnTurn(bestTurn);
@@ -101,8 +105,8 @@ public class Main {
         /* ********************************
          *             END OF GAME
          */
-
-        if (!QUIET_MODE && environment.isPlayerDisqualified(agentCallable.getAgent().getPlayer().getSymbol())) {
+		 
+        if (!QUIET_MODE && environment.isPlayerDisqualified(serverCommunicator.getPlayerIcon())) {
             System.err.println("Agent got disqualified");
         }
         if (!QUIET_MODE) System.out.println("Game finished");
@@ -127,8 +131,10 @@ public class Main {
         int msgType = serverComm.waitOnServer();
         if (msgType == IMsgType.INITIAL_MAP) //got map from server
         {
-            if (!Main.QUIET_MODE) System.out.println("Got Map from Server");
-            if (!Main.QUIET_MODE) System.out.println("everything seems good, starting game...");
+            if (!Main.QUIET_MODE) {
+                System.out.println("Got Map from Server");
+                System.out.println("everything seems good, starting game...");
+            }
             environment.parseRawMap(serverComm.getRawMap());
         } else //something went wrong!!
         {

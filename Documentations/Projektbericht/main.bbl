@@ -1,0 +1,103 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{BPW{\etalchar{+}}12}
+
+\bibitem[BPW{\etalchar{+}}12]{Browne2012}
+C.~B. Browne, E.~Powley, D.~Whitehouse, S.~M. Lucas, P.~I. Cowling,
+  P.~Rohlfshagen, S.~Tavener, D.~Perez, Samthrakis S., and S.~Colton.
+\newblock A survey of monte carlo tree search methods.
+\newblock In {\em IEEE Transactions on Computational Intelligence and AI in
+  games}, volume 4(1), pages 1--43, März 2012.
+
+\bibitem[CBSS08]{Chaslot2008}
+G.~Chaslot, S.~Bakkes, I.~Szita, and P.~Spronck.
+\newblock Monte-carlo tree search: A new framework for game ai.
+\newblock In {\em Proceedings of the Fourth Artificial Intelligence and
+  Interactive Digital Entertainment Conference}, Oktober 2008.
+
+\bibitem[Cho16]{Chouard2016}
+Tanguy Chouard.
+\newblock The go files: Ai computer clinches victory against go champion, 03
+  2016.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[Dee]{DeepMind}
+DeepMind.
+\newblock Deepmind.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[Dee16]{AlphaGoMatch}
+DeepMind.
+\newblock Match 1 - google deepmind challenge match: Lee sedol vs alphago, 03
+  2016.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[Gib16]{Gibney2016}
+Elizabeth Gibney.
+\newblock Google ai algorithm masters ancient game of go, 12 2016.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[Gre17]{Greenemeier2017}
+Larry Greenemeier.
+\newblock Ai versus ai: Self-taught alphago zero vanquishes its predecessor, 10
+  2017.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[Koh17]{AlphaGoFilm}
+Greg Kohs.
+\newblock Alphago, 2017.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[New16]{BBC_NewsGo}
+BBC News.
+\newblock Artificial intelligence: Google's alphago beats go master lee se-dol,
+  03 2016.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[Rib16]{Ribeiro2016}
+John Ribeiro.
+\newblock Alphago’s unusual moves prove its ai prowess, experts say, 03 2016.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[SHM{\etalchar{+}}16]{Silver_2016}
+David Silver, Aja Huang, Chris~J. Maddison, Arthur Guez, Laurent Sifre, George
+  van~den Driessche, Julian Schrittwieser, Ioannis Antonoglou, Veda
+  Panneershelvam, Marc Lanctot, Sander Dieleman, Dominik Grewe, John Nham, Nal
+  Kalchbrenner, Ilya Sutskever, Timothy Lillicrap, Madeleine Leach, Koray
+  Kavukcuoglu, Thore Graepel, and Demis Hassabis.
+\newblock Mastering the game of {Go} with deep neural networks and tree search.
+\newblock {\em Nature}, 529(7587):484--489, January 2016.
+
+\bibitem[SHS{\etalchar{+}}17]{SilverHubert2017}
+David Silver, Thomas Hubert, Julian Schrittwieser, Ioannis Antonoglou, Matthew
+  Lai, Arthur Guez, Marc Lanctot, Laurent Sifre, Dharshan Kumaran, Thore
+  Graepel, Timothy~P. Lillicrap, Karen Simonyan, and Demis Hassabis.
+\newblock Mastering chess and shogi by self-play with a general reinforcement
+  learning algorithm.
+\newblock {\em CoRR}, abs/1712.01815, 2017.
+
+\bibitem[SHS{\etalchar{+}}18]{Silver2018}
+David Silver, Thomas Hubert, Julian Schrittwieser, Ioannis Antonoglou, Matthew
+  Lai, Arthur Guez, Marc Lanctot, Laurent Sifre, Dharshan Kumaran, Thore
+  Graepel, Timothy Lillicrap, Karen Simonyan, and Demis Hassabis.
+\newblock A general reinforcement learning algorithm that masters chess, shogi,
+  and go through self-play.
+\newblock {\em Science}, 362(6419):1140--1144, 2018.
+
+\bibitem[SSS{\etalchar{+}}17]{Silver2017}
+D.~Silver, J.~Schrittwieser, K.~Simonyan, I.~Antonoglou, A.~Huang, A.~Guez,
+  T.~Hubert, L.~Baker, M.~Lai, A.~Bolton, Y.~Chen, T.~Lillicrap, F.~Hui,
+  L.~Sifre, G.~van~den Driessche, T.~Graepel, and D.~Hassabis.
+\newblock Mastering the game of go without human knowledge.
+\newblock In {\em nature}, volume 550(7676), pages 354--359, März 2017.
+
+\bibitem[Sta16]{Science2016}
+Science~News Staff.
+\newblock From ai to protein folding: Our breakthrough runners-up, 12 2016.
+\newblock Retrieved: 25.12.2019.
+
+\bibitem[Str16]{AlphaGoDan}
+The Straitstimes.
+\newblock Google's alphago gets 'divine' go ranking, 03 2016.
+\newblock Retrieved: 25.12.2019.
+
+\end{thebibliography}

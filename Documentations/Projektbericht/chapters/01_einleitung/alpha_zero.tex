@@ -1,0 +1,26 @@
+\subsection{AlphaZero}
+AlphaZero ist ein Computerprogramm, das von der Forschungsfirma \textit{DeepMind} für künstliche Intelligenz entwickelt wurde, um die Spiele Schach, Shogi und Go zu meistern. Der Algorithmus verwendet einen ähnlichen Ansatz wie AlphaGo Zero \cite{SilverHubert2017}. 
+
+
+Das neuronale Netz von AlphaGo Zero weiß nichts über das Spiel jenseits der Regeln. Im Gegensatz zu früheren Versionen von AlphaGo nahm AlphaGo Zero nur die Steine des Bretts wahr, anstatt einige seltene, vom Menschen programmierte Randfälle zu haben, die helfen, ungewöhnliche Go-Brettstellungen zu erkennen. Die KI beschäftigte sich mit dem Reinforcement Learning und spielte gegen sich selbst, bis sie ihre eigenen Züge und deren Auswirkungen auf den Ausgang des Spiels vorhersehen konnte \cite{Greenemeier2017}.
+
+
+AlphaZero ersetzt das handgemachte Wissen und die domänenspezifischen Erweiterungen, die in traditionellen Spielprogrammen verwendet werden, durch tiefe neuronale Netze, einen universellen Reinforcement Learning-Algorithmus und einen universellen Baumsuch-Algorithmus \cite{Silver2018}. 
+Statt einer handgemachten Auswertungsfunktion und Heuristik für die Zugreihenfolge verwendet AlphaZero ein tiefes neuronales Netzwerk. Die Parameter des tiefen neuronalen Netzes in AlphaZero werden durch Reinforcement Learning trainiert, indem AlphaZero mit sich selber spielt und Parameter zufällig initialisiert. Statt einer Alpha-Beta-Suche mit domänenspezifischen Erweiterungen verwendet AlphaZero einen universellen Monte-Carlo-Baumsuch-Algorithmus \cite{Silver2018}. AlphaZero ist eine verallgemeinerte Variante des AlphaGo Zero Algorithmus und kann neben Go auch Shogi und Schach spielen. Die Unterschiede zwischen AlphaZero und AlphaGo Zero sind: \cite{Silver2018}
+\begin{enumerate}
+	\item AZ hat fest programmierte Regeln für die Einstellung von Such-Hyperparametern.
+	\item Das neuronale Netz wird nun ständig aktualisiert.
+	\item Go ist (im Gegensatz zu Schach) unter bestimmten Reflexionen und Rotationen symmetrisch; AlphaGo Zero wurde programmiert, um diese Symmetrien auszunutzen. AlphaZero ist es nicht.
+	\item Schach kann im Gegensatz zu Go mit einem Unentschieden enden; daher kann AlphaZero die Möglichkeit einer unentschiedenen Partie in Betracht ziehen.
+\end{enumerate}
+Im Jahr 2019 veröffentlichte DeepMind einen neuen Artikel über MuZero, einen neuen Algorithmus, der in der Lage ist, auf AlphaZero Arbeit zu verallgemeinern, indem er sowohl Atari als auch Brettspiele ohne Kenntnis der Regeln oder Darstellungen des Spiels spielt \cite{Silver_2019}. 
+
+
+
+
+
+%In den ersten drei Tagen spielte AlphaGo Zero 4,9 Millionen Spiele gegen sich selbst in schneller Folge \cite{Kennedy2017}. Es schien die Fähigkeiten zu entwickeln, die erforderlich waren, um Spitzenleute innerhalb weniger Tage zu schlagen, während das frühere AlphaGo Monate des Trainings benötigte, um das gleiche Niveau zu erreichen \cite{Klein2017}.
+
+
+%Am 5. Dezember 2017 veröffentlichte das DeepMind-Team einen Vorabdruck, der AlphaZero vorstellte, das innerhalb von 24 Stunden ein übermenschliches Spielniveau in diesen drei Partien erreichte, indem es die Weltmeisterprogramme Stockfish, elmo und die 3-Tage-Version von AlphaGo Zero besiegte. In jedem dieser Spiele wurden spezielle Tensor Processing Units (TPUs) verwendet, für deren Verwendung die Google-Programme optimiert wurden \cite{SilverHubert2017}.  DeepMind's Arbeit über AlphaZero wurde am 7. Dezember 2018 in der Zeitschrift Science veröffentlicht.
+

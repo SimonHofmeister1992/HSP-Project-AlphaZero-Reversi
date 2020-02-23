@@ -1,0 +1,12 @@
+Wenn die compile.sh nicht funktioniert, läuft noch eine Instanz des ReversiClients.
+Dann muss dieser entweder in cygwin manuell abgeschossen werden:
+
+
+1) ps -ef | grep Reversi
+
+ergibt hierbei möglicherweise mehrere Einträge mit dem Aufbau: Owner PID 1? Path
+
+2) kill -9 *PID* (wobei *PID* mit der PID von oben ersetzt werden muss)
+
+
+Alternativ, oder falls obiges Vorgehen versagt, muss sich der Nutzer ab- und wieder anmelden.

@@ -1,0 +1,1 @@
+Löscht die log-Dateien logs/*.out, sowie die log_game*.txt
