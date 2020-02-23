@@ -160,8 +160,7 @@ public class ServerCommunicator {
                 if (!Main.QUIET_MODE) System.out.println(this.rawMap);
             } else if (msgType == IMsgType.PLAYER_ICON) //playericon
             {
-                int icon = this.inStream.read();
-                this.playerIcon = Character.forDigit(icon, 10);
+                this.playerIcon = (char) (this.inStream.read() + 48);
             } else if (msgType == IMsgType.TURN_REQUEST) //turnrequest
             {
                 this.timeLimit = this.inStream.readInt();

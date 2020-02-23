@@ -6,7 +6,7 @@ public class Player {
     private int remainingBombs;
     private boolean isDisqualified = Boolean.FALSE;
 
-    Player(char symbol, int remainingOverrideStones, int remainingBombs) {
+    public Player(char symbol, int remainingOverrideStones, int remainingBombs) {
         this.symbol = symbol;
         this.remainingOverrideStones = remainingOverrideStones;
         this.remainingBombs = remainingBombs;

@@ -1,9 +1,8 @@
 package de.othr.reversixt.ReversiAlphaGo.environment;
 
-import javax.management.relation.RelationNotFoundException;
 import java.util.HashMap;
 
-public class Environment implements Cloneable{
+public class Environment {
 	
 	
     private int phase;
@@ -153,16 +152,31 @@ public class Environment implements Cloneable{
     }
 
     public void setOurPlayer(char ourIcon) {
-        this.ourPlayer = getPlayerByPlayerIcon(ourIcon);
+        ourPlayer = getPlayerByPlayerIcon(ourIcon);
+    }
+
+    /**
+     * determines whose turn is next
+     *
+     * @param playerSymbol implies whose turn it was now
+     * @return player: specifies which player is next
+     */
+    public Player getNextPlayer(char playerSymbol) {
+        int nextSymbol = ((playerSymbol - 49 + 1) % this.numOfPlayers) + 49;
+        char nextSymbolChar = (char) nextSymbol;
+        for (Player player : this.players) {
+            if (player.getSymbol() == nextSymbolChar) {
+                //System.out.println("Nex Player Symbol: " + nextSymbolChar);
+                return player;
+            }
+        }
+        // should not occur
+        // if it occur -> invalid player
+        return new Player((char) (this.numOfPlayers + 49), 0, 0);
     }
 
     public HashMap<TransitionPart, TransitionPart> getTransitions() {
         return transitions;
-    }
-
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return (Environment) super.clone();
     }
 
     public void addTransition(TransitionPart firstTransitionPart, TransitionPart secondTransitionPart) {

@@ -2,6 +2,7 @@ package de.othr.reversixt.ReversiAlphaGo.mcts;
 
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Player;
+import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 
 
@@ -18,7 +19,7 @@ public class Node {
     private double simulationReward;
     private Node parent;
     private ArrayList<Node> children;
-    private Environment environment;
+    private Playground playground;
     private Player nextPlayer;
     private Turn curTurn;
 
@@ -26,15 +27,15 @@ public class Node {
      * public constructor for the root node
      * init: a new node is not yet visited, the inital win/loss and has no children
      *
-     * @param environment for the node
+     * @param playground for the node
      * @param player      specifying whose turn it is (for the root node it is the current user not the opponent)
      */
-    public Node(Environment environment, Player player) {
+    public Node(Playground playground, Player player) {
         this.numVisited = 0;
         this.simulationReward = 0.0;
         this.parent = null;
         this.children = new ArrayList<Node>();
-        this.environment = environment;
+        this.playground = playground;
         this.nextPlayer = player;
     }
 
@@ -42,17 +43,17 @@ public class Node {
      * public constructor
      * init: a new node is not yet visited, the initial win/loss and has no children
      *
-     * @param environment for the node
+     * @param playground for the node
      * @param parent      of the node
-     * @param player      specifying whose turn it is
+     * @param nextPlayer      specifying whose turn it is
      */
-    public Node(Environment environment, Node parent, Player player, Turn turn) {
+    public Node(Playground playground, Node parent, Player nextPlayer, Turn turn) {
         this.numVisited = 0;
         this.simulationReward = 0.0;
         this.parent = parent;
         this.children = new ArrayList<Node>();
-        this.environment = environment;
-        this.nextPlayer = player;
+        this.playground = playground;
+        this.nextPlayer = nextPlayer;
         this.curTurn = turn;
     }
 
@@ -96,12 +97,12 @@ public class Node {
         return children;
     }
 
-    public Environment getEnvironment() {
-        return environment;
+    public Playground getPlayground() {
+        return playground;
     }
 
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
+    public void setPlayground(Playground playground) {
+        this.playground = playground;
     }
 
     public Player getNextPlayer() {
@@ -112,8 +113,6 @@ public class Node {
         this.nextPlayer = nextPlayer;
     }
 
-
-    //TODO updateSimulationReward and numVisited?
 
     /**
      * calculates the exploitation component for the uct

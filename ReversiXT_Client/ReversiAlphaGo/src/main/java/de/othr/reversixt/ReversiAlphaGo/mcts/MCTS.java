@@ -3,6 +3,7 @@ package de.othr.reversixt.ReversiAlphaGo.mcts;
 import de.othr.reversixt.ReversiAlphaGo.agent.ITurnChoiceAlgorithm;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Player;
+import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 
 
@@ -11,19 +12,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
+import static de.othr.reversixt.ReversiAlphaGo.general.Main.QUIET_MODE;
+
 
 public class MCTS implements ITurnChoiceAlgorithm {
 
+    private Environment environment;
+    private char ourPlayerSymbol;
     private Node root;
     private ArrayList<Node> leafNodes;
-    private Player myPlayer;
     private Node bestNode;
 
-    public MCTS(Environment environment, Player player) {
-        this.root = new Node(environment, player);
+    public MCTS(Environment environment) {
+        this.environment = environment;
+        this.root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
         this.leafNodes = new ArrayList<Node>();
+        this.ourPlayerSymbol = environment.getOurPlayer().getSymbol();
         leafNodes.add(root);
-        this.myPlayer = player;
     }
 
     /**
@@ -31,9 +36,11 @@ public class MCTS implements ITurnChoiceAlgorithm {
      */
     @Override
     public Turn getBestTurn() {
-        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
-        Date date = new Date(System.currentTimeMillis());
-        System.out.println("Ende: " + formatter.format(date));
+        if (!QUIET_MODE) {
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
+            Date date = new Date(System.currentTimeMillis());
+            System.out.println("Ende: " + formatter.format(date));
+        }
         return bestNode.getCurTurn();
     }
 
@@ -48,23 +55,22 @@ public class MCTS implements ITurnChoiceAlgorithm {
     }
 
     /**
-     * @param environment represents the current game state and holds the current playground
-     * @param player      specifies whose turn it is
+     * @param playground represents the current game state and holds the current playground
+     * @param player     specifies whose turn it is
      * @return an ArrayList of Turns that holds all possible/valid moves that can be played from this game state by this player,
      * if there are no possible moves an empty ArrayList is returned
      */
-    private ArrayList<Turn> getPossibleTurns(Environment environment, Player player) {
+    private ArrayList<Turn> getPossibleTurns(Playground playground, Player player) {
         Turn turn;
-        Turn turnToCheck = new Turn(player.getSymbol(), 0, 0, 0);
+        char playerIcon = player.getSymbol();
         ArrayList<Turn> validTurns = new ArrayList<>();
-        for (int row = 0; row < environment.getPlayground().getPlaygroundHeight(); row++) {
-            for (int col = 0; col < environment.getPlayground().getPlaygroundWidth(); col++) {
-                turnToCheck.setRow(row);
-                turnToCheck.setColumn(col);
+        for (int row = 0; row < playground.getPlaygroundHeight(); row++) {
+            for (int col = 0; col < playground.getPlaygroundWidth(); col++) {
 
-                if (environment.validateTurnPhase1(turnToCheck)) {
+                turn = new Turn(playerIcon, row, col, 0);
+
+                if (playground.validateTurnPhase1(turn, player)) {
                     //System.out.println("Valid Turn: row " + row + " col " + col);
-                    turn = new Turn(player.getSymbol(), row, col, 0);
                     //if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='b') turn.setSpecialFieldInfo(21);
                     //if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='c') turn.setSpecialFieldInfo(player.getSymbol()-'0');
                     validTurns.add(turn);
@@ -73,25 +79,6 @@ public class MCTS implements ITurnChoiceAlgorithm {
             }
         }
         return validTurns;
-    }
-
-    /**
-     * determines whose turn is next
-     *
-     * @param currentPlayer implies whose turn it was now
-     * @return player: specifies which player is next
-     */
-    private Player getNextPlayer(Environment nodeEnvironment, Player currentPlayer) {
-        int curSymbol = currentPlayer.getSymbol();
-        int nextSymbol = ((curSymbol - 49 + 1) % nodeEnvironment.getNumOfPlayers() ) + 49;
-        char nextSymbolChar = (char) nextSymbol;
-        for(Player player : nodeEnvironment.getPlayers()) {
-            if(player.getSymbol() == nextSymbolChar) {
-                //System.out.println("Nex Player Symbol: " + nextSymbolChar);
-                return player;
-            }
-        }
-        return currentPlayer; //should not occur
     }
 
     /**
@@ -122,8 +109,9 @@ public class MCTS implements ITurnChoiceAlgorithm {
         double chosenNodeUCT;
         double nodeUCT;
         while (!leafNodes.isEmpty()) {
-            System.out.println("LeafNodeSize before expand: " + leafNodes.size());
+            //search best UCT in every loop of while
             chosenNodeUCT = Double.MIN_VALUE;
+            System.out.println("LeafNodeSize before expand: " + leafNodes.size());
             expand(chosenNode);
             System.out.println("LeafNodeSize after expand: " + leafNodes.size());
             traverse(chosenNode);
@@ -147,26 +135,19 @@ public class MCTS implements ITurnChoiceAlgorithm {
      * when there are no more possible moves the end state is reached and the reward for this outcome is calculated
      * eventually the simulation results are backpropagated to the root node (number how often the node was visited and the the simulation reward are updated)
      */
-    //ToDo parameter root
     private void traverse(Node traverseNode) {
         System.out.println("Start Traverse");
         System.out.println("Node children size: " + traverseNode.getChildren().size());
         for (Node child : traverseNode.getChildren()) {
-            Environment nodeEnvironment;
-            try {
-                nodeEnvironment = (Environment) child.getEnvironment().clone();
-                nodeEnvironment.setPlayground(child.getEnvironment().getPlayground().getCloneOfPlayground());
-                System.out.println("Map cloned");
-                //nodeEnvironment.getPlayground().printPlayground();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-                System.out.println("Clone Exception");
-                return;
-            }
+            //
+            //clone map to "complete" the map
+            Playground playground = child.getPlayground().getCloneOfPlayground();
+            //
             //Simulate one path to get a reward
             System.out.println("Simulate started");
-            double reward = simulate(nodeEnvironment, child.getNextPlayer());
+            double reward = simulate(playground, child.getNextPlayer());
             System.out.println("Simulate finished");
+            //
             //Backpropagate the reward anv visitedNum to all Parents (except root)
             System.out.println("Backpropagation started");
             Node nodeBP = child;
@@ -182,15 +163,15 @@ public class MCTS implements ITurnChoiceAlgorithm {
     /**
      * calculates the reward as counting the stones one the playground from the corresponding player
      *
-     * @param environment represents the current game state and holds the current playground
+     * @param playground represents the current game state and holds the current playground
      * @return the calculated reward (int)
      */
-    private int rewardGameState(Environment environment) {
+    private int rewardGameState(Playground playground) {
         //reward = count all our stones
         int reward = 0;
-        for (int x = 0; x < environment.getPlayground().getPlaygroundHeight(); x++) {
-            for (int y = 0; y < environment.getPlayground().getPlaygroundWidth(); y++) {
-                if (environment.getPlayground().getSymbolOnPlaygroundPosition(y, x) == myPlayer.getSymbol()) {
+        for (int x = 0; x < playground.getPlaygroundHeight(); x++) {
+            for (int y = 0; y < playground.getPlaygroundWidth(); y++) {
+                if (playground.getSymbolOnPlaygroundPosition(y, x) == this.ourPlayerSymbol) {
                     reward++;
                 }
             }
@@ -202,21 +183,21 @@ public class MCTS implements ITurnChoiceAlgorithm {
     /**
      * function to simulate the full game by playing random moves till the end
      *
-     * @param nodeEnv    represents the environment for the node
+     * @param playground represents a cloned map which will calculated till end
      * @param currPlayer represents the current player
      * @return the reward of the simulated game
      */
-    private double simulate(Environment nodeEnv, Player currPlayer) {
-        ArrayList<Turn> possTurns = getPossibleTurns(nodeEnv, currPlayer);
-        // exit condition of recursion
+    private double simulate(Playground playground, Player currPlayer) {
+        ArrayList<Turn> possTurns = getPossibleTurns(playground, currPlayer);
+        //
         while (!possTurns.isEmpty()) {
-            // determine next random turn
+            // determine next random turn and update playground
             int index = new Random().nextInt(possTurns.size());
-            nodeEnv.updatePlayground(possTurns.get(index));
-            currPlayer = getNextPlayer(nodeEnv, currPlayer);
-            possTurns = getPossibleTurns(nodeEnv, currPlayer);
+            environment.updatePlayground(possTurns.get(index), playground);
+            currPlayer = environment.getNextPlayer(currPlayer.getSymbol());
+            possTurns = getPossibleTurns(playground, currPlayer);
         }
-        return (double) rewardGameState(nodeEnv);
+        return (double) rewardGameState(playground);
     }
 
     /**
@@ -227,27 +208,21 @@ public class MCTS implements ITurnChoiceAlgorithm {
      */
     private void expand(Node expandNode) {
         System.out.println("Start Expand");
-        //get all possibleTurns for expandNode
-        ArrayList<Turn> possibleTurns = getPossibleTurns(expandNode.getEnvironment(), expandNode.getNextPlayer());
-        //for each Turn, clone the environment and add the node as children to expandNode
+        ArrayList<Turn> possibleTurns = getPossibleTurns(expandNode.getPlayground(), expandNode.getNextPlayer());
+        System.out.println("Possbile Turn Size: " + possibleTurns.size());
+        //for each Turn:
+        // clone the playground and make a single turn -> create newNode with updated map
+        // insert newNode in children of expandNode and in leafNodes
         for (Turn turn : possibleTurns) {
-            System.out.println("-- new Node --");
-            Environment nodeEnvironment;
-            try {
-                nodeEnvironment = (Environment) expandNode.getEnvironment().clone();
-                nodeEnvironment.setPlayground(expandNode.getEnvironment().getPlayground().getCloneOfPlayground());
-                System.out.println("Map cloned");
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-                System.out.println("Clone Exception");
-                return;
-            }
-            nodeEnvironment.updatePlayground(turn);
-            Node child = new Node(nodeEnvironment, expandNode, getNextPlayer(nodeEnvironment, expandNode.getNextPlayer()), turn);
+            Playground playground = expandNode.getPlayground().getCloneOfPlayground();
+            environment.updatePlayground(turn, playground);
+            Node child = new Node(playground, expandNode, environment.getNextPlayer(turn.getPlayerIcon()), turn);
+            System.out.println("-- new Node created--");
             expandNode.getChildren().add(child);
             leafNodes.add(child);
         }
-        //this arraylist saves all nodes for uct
+        //expandNode is expanded and can be removed from Leaf Nodes
+        //expandNode is not included in UCT anymore
         leafNodes.remove(expandNode);
         System.out.println("Removed Node form leaf Nodes");
     }
