@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.Random;
 
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
-import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 
 public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 
 	private  Environment environment;
-	private Player player;
 	private Turn bestTurn;
 	private Random random;
+	private char playerSymbol;
 
-	public RandomTurnChoiceAlgorithm(Environment environment, Player player) {
+	public RandomTurnChoiceAlgorithm(Environment environment) {
 		this.environment=environment;
-		this.player=player;
+		playerSymbol = environment.getOurPlayer().getSymbol();
+
 	}
 
 	@Override
@@ -29,18 +29,18 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 		for(int row=0; row < environment.getPlayground().getPlaygroundHeight(); row++) {
 			for(int col=0; col < environment.getPlayground().getPlaygroundWidth(); col++) {
 
-				turnToCheck = new Turn(player.getSymbol(), row, col, 0);
+				turnToCheck = new Turn(playerSymbol, row, col, 0);
 
-				if(environment.validateTurnPhase1(turnToCheck,environment.getPlayground())) {
+				if(environment.getPlayground().validateTurnPhase1(turnToCheck,environment.getOurPlayer())) {
 					if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='b') {
-						turn = new Turn(player.getSymbol(), row, col, 21);
+						turn = new Turn(playerSymbol, row, col, 21);
 					}
 					else if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='c') {
-						turn = new Turn(player.getSymbol(), row, col, player.getSymbol()-'0');
+						turn = new Turn(playerSymbol, row, col, playerSymbol -'0');
 					}
 					else
 					{
-						turn = new Turn(player.getSymbol(), row, col, 0);
+						turn = new Turn(playerSymbol, row, col, 0);
 					}
 					validTurns.add(turn);
 					setBestTurn(turn);
@@ -56,7 +56,7 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			setBestTurn(turn);
 		}
 		else { // no turn found, try to put stone on 0/0, normally disqualifies itself and should never happen
-			turn = new Turn(player.getSymbol(),0,0,0);
+			turn = new Turn(playerSymbol,0,0,0);
 			setBestTurn(bestTurn);
 		}
 	}
@@ -68,7 +68,7 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 		for(int row = 0; row < environment.getPlayground().getPlaygroundHeight(); row++) {
 			for(int col = 0; col < environment.getPlayground().getPlaygroundWidth(); col++) {
 				if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col) != '-') {
-					turn = new Turn(player.getSymbol(), row, col, 0);
+					turn = new Turn(playerSymbol, row, col, 0);
 					validTurns.add(turn);
 				}
 			}
@@ -81,7 +81,7 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 			setBestTurn(turn);
 		}
 		else {
-			turn = new Turn(player.getSymbol(),0,0,0);
+			turn = new Turn(playerSymbol,0,0,0);
 			setBestTurn(turn);
 		}
 		setBestTurn(turn);

@@ -7,11 +7,11 @@ import java.util.concurrent.TimeoutException;
 
 public class Turn implements Future<Turn> {
     private char playerIcon;
-    private int column=-1;
-    private int row=-1;
+    private int column = -1;
+    private int row = -1;
     private int specialFieldInfo; //0:normal turn, 1-8 and choice: player to switch, 20 and bonus: get bomb, 21 and bonus: get override
 
-    public Turn (char playerIcon, int row, int col, int specialFieldInfo){
+    public Turn(char playerIcon, int row, int col, int specialFieldInfo) {
         this.playerIcon = playerIcon;
         this.row = row;
         this.column = col;
@@ -51,7 +51,7 @@ public class Turn implements Future<Turn> {
 
     @Override
     public boolean isDone() {
-        if(this.getRow() != -1) return true;
+        if (this.getRow() != -1) return true;
         else return false;
     }
 

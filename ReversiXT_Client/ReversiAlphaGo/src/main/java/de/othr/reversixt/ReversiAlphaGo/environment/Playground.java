@@ -2,7 +2,6 @@ package de.othr.reversixt.ReversiAlphaGo.environment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class Playground {
     private int playgroundHeight;
@@ -12,29 +11,26 @@ public class Playground {
     private HashMap<TransitionPart, TransitionPart> transitions;
 
     /**
-     * init function
+     * the init functions without transition is for parseRawMap (the transitions will set after initialisation)
      */
-    Playground() {
-        transitions = new HashMap<>();
+    public Playground(int playgroundHeight, int playgroundWidth, int numOfPlayer, HashMap<TransitionPart, TransitionPart> transitions) {
+        this.playgroundHeight = playgroundHeight;
+        this.playgroundWidth = playgroundWidth;
+        this.numOfPlayer = numOfPlayer;
+        this.playground = new char[playgroundHeight][playgroundWidth];
+        this.transitions = transitions;
     }
 
-    public HashMap<TransitionPart, TransitionPart> getTransitions() {
-        return transitions;
+    public Playground(int playgroundHeight, int playgroundWidth, int numOfPlayer) {
+        this.playgroundHeight = playgroundHeight;
+        this.playgroundWidth = playgroundWidth;
+        this.numOfPlayer = numOfPlayer;
+        this.playground = new char[playgroundHeight][playgroundWidth];
     }
 
     /**
      * Getter Setter
-     *
      */
-    public TransitionPart getTransitionedPosition(TransitionPart origin) {
-        return transitions.get(origin);
-    }
-
-    public void addTransition(TransitionPart firstTransitionPart, TransitionPart secondTransitionPart) {
-        this.transitions.put(firstTransitionPart, secondTransitionPart);
-        this.transitions.put(secondTransitionPart, firstTransitionPart);
-    }
-
     public int getPlaygroundHeight() {
         return playgroundHeight;
     }
@@ -47,22 +43,22 @@ public class Playground {
         return playground;
     }
 
-    void initPlayground(int playgroundHeight, int playgroundWidth, int numOfPlayer) {
-        this.playgroundHeight = playgroundHeight;
-        this.playgroundWidth = playgroundWidth;
-        this.numOfPlayer = numOfPlayer;
-        this.playground = new char[playgroundHeight][playgroundWidth];
+    public char getSymbolOnPlaygroundPosition(int row, int col) {
+        return this.playground[row][col];
     }
 
     void setSymbolOnPlaygroundPosition(int row, int col, char symbol) {
         this.playground[row][col] = symbol;
     }
 
-    public char getSymbolOnPlaygroundPosition(int row, int col) {
-        return this.playground[row][col];
+    public void setTransitions(HashMap<TransitionPart, TransitionPart> transitions) {
+        this.transitions = transitions;
     }
 
     /**
+     * Game Rule
+     * Update Playground - Makes a full move
+     *
      * Input: A valid Turn (playerIcon, row, column, specialfieldInfo: 1-8 for choice stones, 20 on bonus stone to get bomb, 21 on bonus stone to get override)
      * The actual player identified by the playericon
      * The number of players on the map, known by the environment
@@ -70,7 +66,7 @@ public class Playground {
      * Hints: Updates the playground by recoloring using valid turns; can handle all rules of ReversiXT.
      * Updates the overrides and bombs gained by 'b' fields.
      */
-    void updatePlaygroundPhase1(Turn turn, Player player, int numOfPlayers) {
+    void updatePlaygroundPhase1(Turn turn, Player player) {
         ArrayList<int[]> fieldsToColour = new ArrayList<>(); // row, column: overall fields to colour in turn
         ArrayList<int[]> possibleFieldsToColour = new ArrayList<>(); // row, column: fields to colour in actual direction
 
@@ -83,11 +79,9 @@ public class Playground {
         int actualRow, actualColumn, actualDirection;
         char actualSymbolOnPlayground;
 
-
         int[] fieldToAdd;
 
         char startSymbol = getSymbolOnPlaygroundPosition(startRow, startColumn);
-
 
         fieldsToColour.add(new int[]{startRow, startColumn});
 
@@ -138,7 +132,6 @@ public class Playground {
                     fieldToAdd[1] = actualColumn;
                     possibleFieldsToColour.add(fieldToAdd);
                 }
-
             }
         }
 
@@ -148,33 +141,18 @@ public class Playground {
         }
 
         // Make all special Move Checks
-        switch(startSymbol){
-            // bonus stone on playground
-            case 'b':
-                // Bomb stone was chosen
-                if (turn.getSpecialFieldInfo() == 20) {
-                    player.increaseNumberOfBombs();
-                }
-                // Override stone was chosen
-                else if (turn.getSpecialFieldInfo() == 21) {
-                    player.increaseNumberOfOverrideStones();
-                }
-                break;
-            // override stone was used
-            case 'x':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-                player.decreaseNumberOfOverrideStones();
-                break;
-            case 'i':
-                invertStones();
-                break;
+        if (startSymbol == 'b') {
+            if (turn.getSpecialFieldInfo() == 20) {
+                player.increaseNumberOfBombs();
+            }
+            // Override stone was chosen
+            else if (turn.getSpecialFieldInfo() == 21) {
+                player.increaseNumberOfOverrideStones();
+            }
+        } else if (startSymbol == 'x' || (startSymbol >= '1' && startSymbol <= '8')) {
+            player.decreaseNumberOfOverrideStones();
+        } else if (startSymbol == 'i') {
+            invertStones();
         }
 
         // choice-stone
@@ -185,7 +163,78 @@ public class Playground {
     }
 
     /**
+     * Game Rule
+     * Validate Turn (Phase 1) - Check if turn is possible
+     */
+    public boolean validateTurnPhase1(Turn turn, Player player) {
+        int row = turn.getRow();
+        int col = turn.getColumn();
+        int numOfColoredFields;
+        char actualSymbol;
+
+        if (!(row >= 0 && row < this.playgroundHeight
+                && col >= 0 && col < this.playgroundWidth)) {
+            return false;
+        }
+
+        char startSymbol = this.getSymbolOnPlaygroundPosition(row, col);
+
+        if (startSymbol == '-') {
+            return false;
+        } else if (startSymbol == 'x' && player.getRemainingOverrideStones() > 0) {
+            return true;
+        } else if ((startSymbol == 'x' || (startSymbol >= '1' && startSymbol <= '8'))
+                && player.getRemainingOverrideStones() <= 0) {
+            return false;
+        } else {
+            int[] newPos = new int[3];
+            for (int direction = 0; direction < 8; direction++) {
+                numOfColoredFields = 0;
+                newPos[0] = row;
+                newPos[1] = col;
+                newPos[2] = direction;
+                while (true) {
+                    newPos = getNewPosition(newPos, newPos[0], newPos[1], newPos[2]);
+
+                    if (!(newPos[0] >= 0 && newPos[0] < this.playgroundHeight
+                            && newPos[1] >= 0 && newPos[1] < this.playgroundWidth)) {
+                        break;
+                    }
+                    actualSymbol = this.getSymbolOnPlaygroundPosition(newPos[0], newPos[1]);
+                    if (newPos[0] == row && newPos[1] == col) {
+                        break;
+                    } else if (actualSymbol == player.getSymbol() && numOfColoredFields > 0) {
+                        return true;
+                    } else if (actualSymbol == player.getSymbol()
+                            || actualSymbol == 'c'
+                            || actualSymbol == 'i'
+                            || actualSymbol == 'b'
+                            || actualSymbol == '0'
+                            || actualSymbol == '-') {
+                        break;
+                    } else {
+                        numOfColoredFields++;
+                    }
+                }
+
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Game Rule
+     * Validate Turn (Phase 2) - Check if turn is possible
+     *
+     * This function is needed for bomb phase
+     */
+    public boolean validateTurnPhase2(Turn turn) {
+        return getSymbolOnPlaygroundPosition(turn.getRow(), turn.getColumn()) != '-';
+    }
+
+    /**
      * Inversion Stone was used
+     *
      * Color all stones one player "up"
      * Example: 0 1 2 3 0 --> 0 2 3 1 0
      */
@@ -202,6 +251,7 @@ public class Playground {
 
     /**
      * Choice Stone was used
+     *
      * A Player was chosen, which will transform the stones of this player with "our" stones and vice versa
      * Example: 0 1 2 3 0 --> 0 3 2 1 0 (Input: 1, 3)
      */
@@ -217,6 +267,72 @@ public class Playground {
                 }
             }
         }
+    }
+
+
+    /**
+     * Get next position on the playground in one direction
+     * Function also checks if there is a transition
+     */
+    private int[] getNewPosition(int[] newPosition, int row, int col, int direction) {
+        TransitionPart tp = transitions.get(new TransitionPart(col, row, direction));
+        if (tp != null) {
+            newPosition[0] = tp.getRow();
+            newPosition[1] = tp.getColumn();
+            newPosition[2] = (tp.getDirection() + 4) % 8;
+            return newPosition;
+        } else {
+            switch (direction) {
+                case 0:
+                    row--;
+                    break;
+                case 1:
+                    row--;
+                    col++;
+                    break;
+                case 2:
+                    col++;
+                    break;
+                case 3:
+                    row++;
+                    col++;
+                    break;
+                case 4:
+                    row++;
+                    break;
+                case 5:
+                    row++;
+                    col--;
+                    break;
+                case 6:
+                    col--;
+                    break;
+                case 7:
+                    row--;
+                    col--;
+                    break;
+            }
+            newPosition[0] = row;
+            newPosition[1] = col;
+            newPosition[2] = direction;
+            return newPosition;
+        }
+    }
+
+    /**
+     * Get a clone of the complete playground
+     * Map cloned complete
+     * Transition are the same - these will not be a new instance, because these always the same!
+     */
+    public Playground getCloneOfPlayground() {
+        Playground p = new Playground(this.getPlaygroundHeight(), this.getPlaygroundWidth(), this.numOfPlayer, this.transitions);
+
+        for (int row = 0; row < getPlaygroundHeight(); row++) {
+            for (int col = 0; col < getPlaygroundWidth(); col++) {
+                p.setSymbolOnPlaygroundPosition(row, col, this.getSymbolOnPlaygroundPosition(row, col));
+            }
+        }
+        return p;
     }
 
     /* Bomb Phase
@@ -262,70 +378,6 @@ public class Playground {
     */
 
     /**
-     * Get next position on the playground in one direction
-     */
-    public int[] getNewPosition(int[] newPosition, int row, int col, int direction) {
-        TransitionPart tp = getTransitionedPosition(new TransitionPart(col, row, direction));
-        if (tp != null) {
-            newPosition[0] = tp.getRow();
-            newPosition[1] = tp.getColumn();
-            newPosition[2] = (tp.getDirection() + 4) % 8;
-            return newPosition;
-        } else {
-            switch (direction) {
-                case 0:
-                    row--;
-                    break;
-                case 1:
-                    row--;
-                    col++;
-                    break;
-                case 2:
-                    col++;
-                    break;
-                case 3:
-                    row++;
-                    col++;
-                    break;
-                case 4:
-                    row++;
-                    break;
-                case 5:
-                    row++;
-                    col--;
-                    break;
-                case 6:
-                    col--;
-                    break;
-                case 7:
-                    row--;
-                    col--;
-                    break;
-            }
-            newPosition[0] = row;
-            newPosition[1] = col;
-            newPosition[2] = direction;
-            return newPosition;
-        }
-    }
-
-    public Playground getCloneOfPlayground() {
-        Playground p = new Playground();
-        p.initPlayground(this.getPlaygroundHeight(),this.getPlaygroundWidth(), this.numOfPlayer);
-
-        for (TransitionPart tp : getTransitions().keySet()) {
-            p.addTransition(tp, getTransitions().get(tp));
-        }
-
-        for (int row = 0; row < getPlaygroundHeight(); row++) {
-            for (int col = 0; col < getPlaygroundWidth(); col++) {
-                p.setSymbolOnPlaygroundPosition(row, col, this.getSymbolOnPlaygroundPosition(row, col));
-            }
-        }
-        return p;
-    }
-
-    /**
      * Print Playground in terminal
      */
     public void printPlayground() {
@@ -338,4 +390,5 @@ public class Playground {
         System.out.println();
         System.out.println();
     }
+
 }

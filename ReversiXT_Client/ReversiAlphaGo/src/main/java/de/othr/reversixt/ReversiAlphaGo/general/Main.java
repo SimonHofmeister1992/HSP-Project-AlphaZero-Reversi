@@ -8,15 +8,13 @@ import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import java.io.IOException;
 import java.util.concurrent.*;
 
-public class Main
-{
+public class Main {
     public static boolean QUIET_MODE = Boolean.FALSE;
     private static String ip = "127.0.0.1"; // localhost
     private static int port = 7777;
     private static int groupNumber = 3;
 
-    public static void main( String[] args )
-    {
+    public static void main(String[] args) {
         /* ********************************
          *         Commandline options
          */
@@ -29,7 +27,7 @@ public class Main
 
         ServerCommunicator serverCommunicator = new ServerCommunicator(groupNumber);
         Environment environment = new Environment();
-        AgentCallable agentCallable = new AgentCallable(environment, serverCommunicator);
+        AgentCallable agentCallable;
 
         ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
         executorService.setRemoveOnCancelPolicy(true);
@@ -45,29 +43,31 @@ public class Main
          */
         int msgType;
         Turn bestTurn;
-        boolean isDisqualified=false;
+        boolean isDisqualified = false;
         long timeToWaitInMilis;
-        while((msgType=serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME && !isDisqualified){
-            timeToWaitInMilis = serverCommunicator.getTimeLimit()-25;
+        while ((msgType = serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME && !isDisqualified) {
+            timeToWaitInMilis = serverCommunicator.getTimeLimit() - 25;
             bestTurn = null;
             switch (msgType) {
-                case IMsgType.INITIAL_MAP:
-                    environment.parseRawMap(serverCommunicator.getRawMap());
+                case IMsgType.PLAYER_ICON:
+                    System.out.println("Set ourPlayer in environment");
+                    environment.setOurPlayer(serverCommunicator.getPlayerIcon());
                     break;
                 case IMsgType.ENEMY_TURN:
                     environment.updatePlayground(serverCommunicator.getEnemyTurn(), environment.getPlayground());
                     break;
                 case IMsgType.TURN_REQUEST:
-                    agentCallable = new AgentCallable(environment, serverCommunicator);
+                    agentCallable = new AgentCallable(environment);
                     Future<?> futureTurn = executorService.submit(agentCallable);
                     try {
                         executorService.schedule(() -> {
                             try {
-                                if(futureTurn.get() == null) futureTurn.cancel(true);
+                                if (futureTurn.get() == null) futureTurn.cancel(true);
                             } catch (InterruptedException | ExecutionException e) {
                                 futureTurn.cancel(true);
                                 executorService.purge();
-                            }}, timeToWaitInMilis, TimeUnit.MILLISECONDS);
+                            }
+                        }, timeToWaitInMilis, TimeUnit.MILLISECONDS);
                         bestTurn = (Turn) futureTurn.get(timeToWaitInMilis, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException | TimeoutException | ExecutionException e) {
                         if (agentCallable.getAgent() != null && agentCallable.getAgent().getITurnChoiceAlgorithm() != null) {
@@ -77,9 +77,9 @@ public class Main
                         }
                         futureTurn.cancel(true);
                     }
-                    if(bestTurn == null) {
+                    if (bestTurn == null) {
                         bestTurn = new Turn(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()).getSymbol(), 0, 0, 0);
-                        isDisqualified=true;
+                        isDisqualified = true;
                     }
                     futureTurn.cancel(true);
                     serverCommunicator.sendOwnTurn(bestTurn);
@@ -99,36 +99,37 @@ public class Main
          *             END OF GAME
          */
 
-        if(!QUIET_MODE && environment.isPlayerDisqualified(agentCallable.getAgent().getPlayer().getSymbol())){
+        if (!QUIET_MODE && environment.isPlayerDisqualified(serverCommunicator.getPlayerIcon())) {
             System.err.println("Agent got disqualified");
         }
-        if(!QUIET_MODE) System.out.println("Game finished");
+        if (!QUIET_MODE) System.out.println("Game finished");
         executorService.shutdownNow();
     }
 
-    private static void setValuesFromCLI(CLI cli){
-        if(cli.hasOption(ICLIOptions.GROUP_NUMBER)) groupNumber =  Integer.parseInt(cli.getOptionValue(ICLIOptions.GROUP_NUMBER));
-        if(cli.hasOption(ICLIOptions.QUIET_MODE)) QUIET_MODE = Boolean.TRUE;
-        if(cli.hasOption(ICLIOptions.IP_ADDRESS)) ip = cli.getOptionValue(ICLIOptions.IP_ADDRESS);
-        if(cli.hasOption(ICLIOptions.PORT)) port = Integer.parseInt(cli.getOptionValue(ICLIOptions.PORT));
+    private static void setValuesFromCLI(CLI cli) {
+        if (cli.hasOption(ICLIOptions.GROUP_NUMBER))
+            groupNumber = Integer.parseInt(cli.getOptionValue(ICLIOptions.GROUP_NUMBER));
+        if (cli.hasOption(ICLIOptions.QUIET_MODE)) QUIET_MODE = Boolean.TRUE;
+        if (cli.hasOption(ICLIOptions.IP_ADDRESS)) ip = cli.getOptionValue(ICLIOptions.IP_ADDRESS);
+        if (cli.hasOption(ICLIOptions.PORT)) port = Integer.parseInt(cli.getOptionValue(ICLIOptions.PORT));
     }
 
-    private static void serverInit(String IP, int port, ServerCommunicator serverComm, Environment environment)
-    {
-        try {serverComm.connect(IP, port);}
-        catch(IOException ServerError)
-        {
-            if(!Main.QUIET_MODE)System.err.println("Server error. Aborting");
+    private static void serverInit(String IP, int port, ServerCommunicator serverComm, Environment environment) {
+        try {
+            serverComm.connect(IP, port);
+        } catch (IOException ServerError) {
+            if (!Main.QUIET_MODE) System.err.println("Server error. Aborting");
             serverComm.cleanup();
         }
         int msgType = serverComm.waitOnServer();
         if (msgType == IMsgType.INITIAL_MAP) //got map from server
         {
-            if(!Main.QUIET_MODE)System.out.println("Got Map from Server");
-            if(!Main.QUIET_MODE)System.out.println("everything seems good, starting game...");
+            if (!Main.QUIET_MODE) {
+                System.out.println("Got Map from Server");
+                System.out.println("everything seems good, starting game...");
+            }
             environment.parseRawMap(serverComm.getRawMap());
-        }
-        else //something went wrong!!
+        } else //something went wrong!!
         {
             System.err.println("First message was not MAP");
             System.err.println("Aborting!!");

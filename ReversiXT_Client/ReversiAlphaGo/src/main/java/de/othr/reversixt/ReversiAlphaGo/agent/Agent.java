@@ -2,14 +2,12 @@ package de.othr.reversixt.ReversiAlphaGo.agent;
 
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.IPhase;
-import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import de.othr.reversixt.ReversiAlphaGo.general.Main;
 
 public class Agent {
 
     private Environment environment;
-    private Player player;
     private ITurnChoiceAlgorithm itca;
 
     public Agent(Environment environment){
@@ -18,7 +16,7 @@ public class Agent {
 
     public Turn play() {
         Turn turn;
-        itca = new RandomTurnChoiceAlgorithm(environment, player);
+        itca = new RandomTurnChoiceAlgorithm(environment);
         switch (environment.getPhase()) {
             case IPhase.TURN_PHASE: itca.chooseTurnPhase1(); break;
             case IPhase.BOMB_PHASE: itca.chooseTurnPhase2(); break;
@@ -38,14 +36,6 @@ public class Agent {
         }
 
         return turn;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
     }
 
     public ITurnChoiceAlgorithm getITurnChoiceAlgorithm() {
