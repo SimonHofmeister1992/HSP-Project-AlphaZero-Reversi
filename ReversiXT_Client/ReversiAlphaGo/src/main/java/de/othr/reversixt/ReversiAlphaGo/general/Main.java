@@ -1,5 +1,6 @@
 package de.othr.reversixt.ReversiAlphaGo.general;
 
+import de.othr.reversixt.ReversiAlphaGo.agent.Agent;
 import de.othr.reversixt.ReversiAlphaGo.agent.AgentCallable;
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
@@ -14,7 +15,7 @@ public class Main {
     private static int port = 7777;
     private static int groupNumber = 3;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         /* ********************************
          *         Commandline options
@@ -30,9 +31,6 @@ public class Main {
         Environment environment = new Environment();
         AgentCallable agentCallable;
 
-        ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
-        executorService.setRemoveOnCancelPolicy(true);
-
         /* *********************************
          *         Connect to server
          */
@@ -44,16 +42,14 @@ public class Main {
          */
         int msgType;
         Turn bestTurn;
-        boolean isDisqualified = false;
         long timeToWaitInMilis;
-        while ((msgType = serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME && !isDisqualified) {
+        while ((msgType = serverCommunicator.waitOnServer()) != IMsgType.END_OF_GAME) {
 
             timeToWaitInMilis = serverCommunicator.getTimeLimit() - 500;
 
-            bestTurn = null;
             switch (msgType) {
                 case IMsgType.PLAYER_ICON:
-                    System.out.println("Set ourPlayer in environment");
+                    System.out.println("Set ourPlayer in environment: " + serverCommunicator.getPlayerIcon());
                     environment.setOurPlayer(serverCommunicator.getPlayerIcon());
                     break;
                 case IMsgType.ENEMY_TURN:
@@ -62,33 +58,19 @@ public class Main {
                 case IMsgType.TURN_REQUEST:
                     System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
                     agentCallable = new AgentCallable(environment);
-                    Future<?> futureTurn = executorService.submit(agentCallable);
+                    ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
+                    Future<Turn> futureTurn = executorService.submit(agentCallable);
+                    //
+                    //the get methods waits until one of two events occur
+                    // 1) the time runes out (timeToWaitInMilis) -> TimeoutException -> ShutdownNow() and getBestTurn()
+                    // 2) the thread is finished and the .get return a turn -> no ShutdownNow() is needed
                     try {
-                        executorService.schedule(() -> {
-                            try {
-                                if (futureTurn.get() == null) futureTurn.cancel(true);
-                            } catch (InterruptedException | ExecutionException e) {
-                                futureTurn.cancel(true);
-                                executorService.purge();
-                            }
-                        }, timeToWaitInMilis, TimeUnit.MILLISECONDS);
-                        bestTurn = (Turn) futureTurn.get(timeToWaitInMilis, TimeUnit.MILLISECONDS);
-
-                    } catch (InterruptedException | TimeoutException | ExecutionException e) {
-                        System.out.println("TurnRequest Exception: : " + e.toString());
-                        if (agentCallable.getAgent() != null && agentCallable.getAgent().getITurnChoiceAlgorithm() != null) {
-                            bestTurn = agentCallable.getAgent().getITurnChoiceAlgorithm().getBestTurn();
-                            futureTurn.cancel(true);
-                            executorService.purge();
-                        }
-                        futureTurn.cancel(true);
+                        bestTurn = futureTurn.get(timeToWaitInMilis, TimeUnit.MILLISECONDS);
+                    } catch (ExecutionException | TimeoutException e) {
+                        executorService.shutdownNow();
+                        bestTurn = agentCallable.getAgent().getITurnChoiceAlgorithm().getBestTurn();
                     }
-
-                    if (bestTurn == null) {
-                        bestTurn = new Turn(environment.getPlayerByPlayerIcon(serverCommunicator.getPlayerIcon()).getSymbol(), 0, 0, 0);
-                        isDisqualified = true;
-                    }
-                    futureTurn.cancel(true);
+                    //
                     serverCommunicator.sendOwnTurn(bestTurn);
                     break;
                 case IMsgType.DISQUALIFIED_PLAYER:
@@ -105,12 +87,14 @@ public class Main {
         /* ********************************
          *             END OF GAME
          */
-		 
+
         if (!QUIET_MODE && environment.isPlayerDisqualified(serverCommunicator.getPlayerIcon())) {
             System.err.println("Agent got disqualified");
         }
-        if (!QUIET_MODE) System.out.println("Game finished");
-        executorService.shutdownNow();
+        if (!QUIET_MODE) {
+            System.out.println("Game finished");
+        }
+        //executorService.shutdownNow();
     }
 
     private static void setValuesFromCLI(CLI cli) {

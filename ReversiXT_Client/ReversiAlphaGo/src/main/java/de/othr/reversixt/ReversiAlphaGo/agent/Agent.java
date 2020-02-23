@@ -21,14 +21,19 @@ public class Agent {
         itca = new MCTS(environment);
 
         switch (environment.getPhase()) {
-            case IPhase.TURN_PHASE: itca.chooseTurnPhase1(); break;
-            //case IPhase.BOMB_PHASE: itca.chooseTurnPhase2(); break;
-            default: break;
+            case IPhase.TURN_PHASE:
+                itca.chooseTurnPhase1();
+                break;
+            case IPhase.BOMB_PHASE:
+                itca.chooseTurnPhase2();
+                break;
+            default:
+                break;
         }
-        System.out.println("Agent.play.itca.getBestTurn()");
-        turn =  itca.getBestTurn();
 
-        if(!Main.QUIET_MODE && turn!=null) {
+        turn = itca.getBestTurn();
+
+        if(!Main.QUIET_MODE) {
             System.out.println("agent set stone to: row: " + turn.getRow() + ", col: " + turn.getColumn() + ", remaining overrides" + environment.getPlayerByPlayerIcon(turn.getPlayerIcon()).getRemainingOverrideStones());
             environment.getPlayground().printPlayground();
         }

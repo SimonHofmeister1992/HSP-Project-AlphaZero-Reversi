@@ -109,15 +109,19 @@ public class MCTS implements ITurnChoiceAlgorithm {
         double chosenNodeUCT;
         double nodeUCT;
         while (!leafNodes.isEmpty()) {
+            //Check if Thread was interrupted
+            if(Thread.currentThread().isInterrupted()) {
+                return;
+            }
             //search best UCT in every loop of while
             chosenNodeUCT = Double.MIN_VALUE;
-            System.out.println("LeafNodeSize before expand: " + leafNodes.size());
+            System.out.println("LeafNodeSize: " + leafNodes.size());
             expand(chosenNode);
-            System.out.println("LeafNodeSize after expand: " + leafNodes.size());
+            //System.out.println("LeafNodeSize after expand: " + leafNodes.size());
             traverse(chosenNode);
-            System.out.println("LeafNodeSize after traverse: " + leafNodes.size());
+            //System.out.println("LeafNodeSize after traverse: " + leafNodes.size());
             setBestTurn();
-            System.out.println("SetBestTurn finished!");
+            //System.out.println("SetBestTurn finished!");
             //chose the next node which should be explored
             for (Node node : leafNodes) {
                 nodeUCT = node.calculateUCT();
@@ -126,7 +130,6 @@ public class MCTS implements ITurnChoiceAlgorithm {
                     chosenNode = node;
                 }
             }
-            //break;
         }
     }
 
@@ -136,27 +139,18 @@ public class MCTS implements ITurnChoiceAlgorithm {
      * eventually the simulation results are backpropagated to the root node (number how often the node was visited and the the simulation reward are updated)
      */
     private void traverse(Node traverseNode) {
-        System.out.println("Start Traverse");
-        System.out.println("Node children size: " + traverseNode.getChildren().size());
         for (Node child : traverseNode.getChildren()) {
-            //
             //clone map to "complete" the map
             Playground playground = child.getPlayground().getCloneOfPlayground();
-            //
             //Simulate one path to get a reward
-            System.out.println("Simulate started");
             double reward = simulate(playground, child.getNextPlayer());
-            System.out.println("Simulate finished");
-            //
             //Backpropagate the reward anv visitedNum to all Parents (except root)
-            System.out.println("Backpropagation started");
             Node nodeBP = child;
             while (nodeBP != root) {
                 nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
                 nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
                 nodeBP = nodeBP.getParent();
             }
-            System.out.println("Backpropagation finished");
         }
     }
 
@@ -176,7 +170,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
                 }
             }
         }
-        System.out.println("The reward is " + reward);
+        //System.out.println("The reward is " + reward);
         return reward;
     }
 
@@ -207,9 +201,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
      * also the unvisited child nodes are added to the list of leaf nodes
      */
     private void expand(Node expandNode) {
-        System.out.println("Start Expand");
         ArrayList<Turn> possibleTurns = getPossibleTurns(expandNode.getPlayground(), expandNode.getNextPlayer());
-        System.out.println("Possbile Turn Size: " + possibleTurns.size());
         //for each Turn:
         // clone the playground and make a single turn -> create newNode with updated map
         // insert newNode in children of expandNode and in leafNodes
@@ -217,14 +209,12 @@ public class MCTS implements ITurnChoiceAlgorithm {
             Playground playground = expandNode.getPlayground().getCloneOfPlayground();
             environment.updatePlayground(turn, playground);
             Node child = new Node(playground, expandNode, environment.getNextPlayer(turn.getPlayerIcon()), turn);
-            System.out.println("-- new Node created--");
             expandNode.getChildren().add(child);
             leafNodes.add(child);
         }
         //expandNode is expanded and can be removed from Leaf Nodes
         //expandNode is not included in UCT anymore
         leafNodes.remove(expandNode);
-        System.out.println("Removed Node form leaf Nodes");
     }
 
 
