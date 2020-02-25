@@ -1,10 +1,10 @@
 package de.othr.reversixt.ReversiAlphaGo.general;
 
-import de.othr.reversixt.ReversiAlphaGo.agent.Agent;
 import de.othr.reversixt.ReversiAlphaGo.agent.AgentCallable;
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
+import org.nd4j.jita.conf.CudaEnvironment;
 
 import java.io.IOException;
 import java.util.concurrent.*;
@@ -16,6 +16,12 @@ public class Main {
     private static int groupNumber = 3;
 
     public static void main(String[] args) throws InterruptedException {
+
+        /* *******************************
+        *       Enable training on multi-gpu
+         */
+
+        CudaEnvironment.getInstance().getConfiguration().allowMultiGPU(true);
 
         /* ********************************
          *         Commandline options

@@ -31,6 +31,47 @@
 			<artifactId>commons-cli</artifactId>
 			<version>1.4</version>
 		</dependency>
+
+		<!-- enable deep learning computation on CPU -->
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>nd4j-native-platform</artifactId>
+			<version>1.0.0-beta6</version>
+		</dependency>
+
+		<!-- enable deep learning computation on GPU -->
+		<!--
+		The locally installed cuda & version must match the downloaded one.
+		At this time the following combinations are supported by Deeplearning4j:
+		CUDA Version 	cuDNN Version
+		9.2				7.2
+		10.0			7.4
+		10.1			7.6
+		10.2			7.6
+
+		The value can be adapted by inserting the correct version into nd4j-cuda-xx.x-platform
+
+		further reference: https://deeplearning4j.org/docs/latest/deeplearning4j-config-cudnn
+		-->
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>nd4j-cuda-9.2-platform</artifactId>
+			<version>1.0.0-beta6</version>
+		</dependency>
+
+		<!-- Core DL4J functionality -->
+
+		<dependency>
+			<groupId>org.deeplearning4j</groupId>
+			<artifactId>deeplearning4j-core</artifactId>
+			<version>1.0.0-beta6</version>
+		</dependency>
+		<!-- static logger needed by dl4j -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
