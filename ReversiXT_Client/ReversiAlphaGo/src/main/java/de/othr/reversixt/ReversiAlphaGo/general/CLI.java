@@ -18,6 +18,7 @@ class CLI {
         options.addOption("q", ICLIOptions.QUIET_MODE, false, "suppresses output of the application to a minimum");
         options.addOption("a", ICLIOptions.IP_ADDRESS, true, "ip address of server");
         options.addOption("p", ICLIOptions.PORT, true, "port of server");
+        options.addOption("l", ICLIOptions.LEARNER_MODE, false, "defines that the agent learns");
     }
 
     private void parseCommandLine(String[] args) {

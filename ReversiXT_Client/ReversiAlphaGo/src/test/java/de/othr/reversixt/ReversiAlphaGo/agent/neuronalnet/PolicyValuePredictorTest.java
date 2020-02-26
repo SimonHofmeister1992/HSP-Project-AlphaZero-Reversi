@@ -17,6 +17,9 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class PolicyValuePredictorTest extends TestCase {
     private static final Logger log = LoggerFactory.getLogger(PolicyValuePredictor.class);
@@ -54,9 +57,6 @@ public class PolicyValuePredictorTest extends TestCase {
 
             PolicyValuePredictor pvp = PolicyValuePredictor.getInstance();
 
-            System.out.println(pvp.getComputationGraph().getNumOutputArrays());
-
-
             int miniBatchSize = 1;
             int boardSize = 15;
             int numFeaturePlanes = 4;
@@ -69,7 +69,15 @@ public class PolicyValuePredictorTest extends TestCase {
             // ****************************************
 
             log.info("Create dummy data");
-            INDArray input = Nd4j.create(miniBatchSize,numFeaturePlanes, boardSize, boardSize);
+            INDArray input = Nd4j.create(miniBatchSize,3, boardSize, boardSize);
+
+            INDArray in = Nd4j.ones(miniBatchSize,1, boardSize, boardSize);
+
+            List<INDArray> indArrays = new ArrayList<>();
+
+            INDArray indArray = Nd4j.concat(1, input, in);
+
+
 
             // move prediction has one value for each point on the board (15*15) plus one for passing.
             INDArray policyOutput = Nd4j.ones(miniBatchSize, boardSize * boardSize + 1);
@@ -82,12 +90,12 @@ public class PolicyValuePredictorTest extends TestCase {
             // ****************************************
 
             log.info("Train AGZ model");
-            cg.fit(new INDArray[] {input}, new INDArray[] {policyOutput, valueOutput});
+            cg.fit(new INDArray[] {indArray}, new INDArray[] {policyOutput, valueOutput});
 
             // ****************************************
             // PREDICTION ON INPUTS
             // ****************************************
-            INDArray[] output = cg.output(false, input);
+            INDArray[] output = cg.output(false, indArray);
 
 
             // ****************************************

@@ -1,6 +1,7 @@
 package de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet;
 
 
+import de.othr.reversixt.ReversiAlphaGo.general.AlphaGoZeroConstants;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.InputPreProcessor;
@@ -14,8 +15,6 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
@@ -24,11 +23,11 @@ import java.util.HashMap;
 // use the getInstance() method.
 //
 class NeuronalNet {
-    private static final Logger log = LoggerFactory.getLogger(NeuronalNet.class);
+
     private static NeuronalNet NeuronalNet = null; // instance of the neural net
     private ComputationGraph computationGraph; // model of the neural net
 
-    private final int MAP_SIZE = 15;    // width and height of quadratic playground
+    private final int MAP_SIZE = AlphaGoZeroConstants.DIMENSION_PLAYGROUND;    // width and height of quadratic playground
 
     // getter
     ComputationGraph getComputationGraph(){
@@ -96,7 +95,7 @@ class NeuronalNet {
         ComputationGraphConfiguration.GraphBuilder graphBuilder = new NeuralNetConfiguration.Builder()
                 .weightInit(WeightInit.XAVIER)
                 .updater(new Sgd())
-                .graphBuilder().setInputTypes(InputType.convolutional(MAP_SIZE, MAP_SIZE, 4));
+                .graphBuilder().setInputTypes(InputType.convolutional(MAP_SIZE, MAP_SIZE, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET));
 
         return graphBuilder;
     }

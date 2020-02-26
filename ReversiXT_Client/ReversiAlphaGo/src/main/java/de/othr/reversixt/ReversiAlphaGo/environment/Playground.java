@@ -39,8 +39,11 @@ public class Playground {
         return playgroundWidth;
     }
 
-    char[][] getPlayground() {
+    public char[][] getPlayground() {
         return playground;
+    }
+    public void setPlayground(char[][] playground){
+        this.playground = playground;
     }
 
     public char getSymbolOnPlaygroundPosition(int row, int col) {

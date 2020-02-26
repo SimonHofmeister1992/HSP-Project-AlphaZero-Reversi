@@ -5,5 +5,6 @@ public interface ICLIOptions {
     String QUIET_MODE = "quietMode";
     String PORT = "port";
     String IP_ADDRESS = "ipaddress";
+    String LEARNER_MODE = "learnerMode";
 }
 
