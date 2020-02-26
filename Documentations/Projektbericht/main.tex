@@ -59,7 +59,7 @@
 % ----------------------------------------------------------------------------------
 % Kapitel: Related Work/Theorie
 % ----------------------------------------------------------------------------------
-\section{Related Work}
+\section{Theoretische Grundlagen}
 
 \subsection{Monte Carlo Tree Search}
 Der MCTS findet als Alternative zum Alpha-Beta-Search Anwendung. Da der Alpha-Beta-Ansatz einen geringen Verzweigungsgrad und eine angemessene Bewertungsfunktion fordert, ist dessen in Anwendung in Brettspielen, die diese Bedingungen nicht erfüllen, ungeeignet. Der MCTS hingegen bewies sich im Umgang mit solchen Situation \cite{Chaslot2008}.
@@ -90,13 +90,36 @@ Letztlich wird ein konkreter Spielzug ausgehend vom Wurzelknoten selektiert. Dab
 
 \newpage
 \subsection{Neuronales Netz}
+Ein Neuronales Netz (NN) wird durch eine Vielzahl einzelner miteinander verknüpfter Neuronen beschrieben. Dabei erhalten sie Signale von anderen Neuronen als Input, verarbeiten diese und geben sie als Output an andere weiter. Diese Eingangswerte werden als Vektor X = $\{x_{1}, x_{2}, ..., x_{n}\}$ repräsentiert. Um adäquate Ausgangswerte zu erhalten werden die einzelnen Input-Elemente durch die entsprechenden Komponenten im Vektor W = $\{w_{1}, w_{2}, ..., w_{n}\}$ gewichtet. Des Weiteren kann es zu jedem Neuron einen Bias b geben. Zur Verarbeitung der Eingangswerte wird eine Aktivierungsfunktion herangezogen, die Z = $\{w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b(W^{T}X + b)\}$ als Input erhält. Das sich hieraus ergebende Resultat entspricht \^{y}. Im weiteren Verlauf wird versucht die Diskrepanz zwischen dem tatsächlichen Wert y und dem geschätzten Wert \^{y} durch Anwendung einer Verlustfunktion zu minimieren. Dieser Vorgang wird als \glqq{}Backpropagation\grqq bezeichnet. Dabei werden Fehler von dem letzten bis hin zum ersten layer zurück geleitet, um alle beteiligten Gewichte in die entsprechende Richtung anzupassen. Dies wird dadurch erreicht, dass man das Minimum der Fehlerfunktion lokalisiert, das durch Annäherung an den Gradienten der Funktion ermittelt werden kann \cite[S. 75-79]{Sewak2019}. 
+
+Neuronale Netze bestehen aus verschiedenen Schichten. Dabei existieren stets der input layer, ein oder mehrere hidden layer und der output layer. Während der input layer über genau so viele Neuronen, wie es Eingangswerte gibt, verfügt, weist der output layer so viele Neuronen auf, wie Ausgangsmerkmale vorhanden sind. Die Neuronenanzahl in den versteckten Zwischenschichten kann variieren. Sobald mehr als ein hidden layer vorliegt, spricht man von einem tiefen neuronalen Netz \cite[S. 77]{Sewak2019}.
+
+Hinsichtlich der Fehlerfunktion spricht man von einem \glqq{}L1 loss\grqq{} beziehungsweise einem \glqq{}L2 loss\grqq{}, wenn der absolute respektive der quadratische Fehler berücksichtigt wird \cite[S. 82]{Sewak2019}.
+
+Wenn in einer Schicht alle Neuronen mit allen Elementen aus dem vorangegangen, sowie dem nachfolgenden layer verknüpft sind, wird diese als fully connected bezeichnet \cite[S. 79]{Sewak2019}.
+
+Convolutional Neuronal Networks (CNNs) beschreiben tiefe Netze, die für die Bildverarbeitung ausgelegt sind. Dabei wird die Grafik typischerweise dreidimensional dargestellt, mit der Bildhöhe und -breite, sowie den Farbkanälen in der Tiefe. Hierbei kann eine Schicht als convolutional layer eingebunden werden, die entsprechend eine Faltungsoperation anhand eines vorgegebenen Kerns auf das vorliegende Bild anwendet \cite[S. 85]{Sewak2019}.
+
 \subsection{Reinforcement Learning}
+Reinforcement Learning (RL), auch als bestärkendes Lernen bezeichnet, beschreibt die Interaktion eines Agenten mit einer konkreten Environment. Dabei stellt die Umgebung dem Agenten einen bestimmten Zustand bereit, anhand dessen er die bestmögliche Aktion auswählt, die im nächsten Schritt ausgeführt werden soll. Daraufhin wird der Zustand entsprechend modifiziert und eine Funktion berechnet, die dem Agenten eine Belohnung oder Bestrafung in Form eines positiven beziehungsweise negativen Rewards zurückliefert. Anhand iterativer Durchläufe von Lern- und Entscheidungsprozessen optimiert der Agent seine Aktionen. Dies ist in Abbildung \ref{fig:rl_agent_loop} einzusehen. Dabei wählt der Agent zunächst Aktion $a_{t}$ im Zustand $s_{t}$, was eine Änderung des Zustands der Umgebung zu $s_{t+1}$ zur Folge hat. Außerdem berechnet die Environment den Reward $r_{t}$ für die vom Agenten gewählte Aktion. Ziel in diesem Trainingsdurchlauf für den Agenten ist es, anhand der Belohnungsstrategie die Entscheidung bezüglich der besten nächsten Aktion zu stetig zu verbessern. Hierbei anzumerken ist, dass die Rewardfunktion sowohl den Zustand als auch die Aktion berücksichtigt, um einen Rückgabewert zu berechnen. Daraus folgt, dass die gleiche Aktion unterschiedlichen Ausgangszuständen in verschiedenen Belohnungswerten resultieren kann beziehungsweise sogar sollte \cite[S. 2]{Sewak2019}.
+
+Die Strategie zur Ermittlung der besten Aktion während des Lernprozesses wird als Policy $\pi$ bezeichnet. Diese ist während eines gesamten Trainingsdurchlaufs gültig. Bezüglich der Notation gibt $\pi_{(s)}$ entsprechend die vielversprechendste Aktion im Zustand s an \cite[S. 16]{Sewak2019}.
+
+\begin{figure}
+\centering
+\includegraphics{pics/rl_agent_loop.png}	\caption{iterative Interaktion zwischen Agent und Environment, Abbildung entnommen aus \cite[S. 2]{Sewak2019}}
+	\label{fig:rl_agent_loop}
+\end{figure}
+
+Ferner bringt das Aufstellen einer Rewardfunktion Schwierigkeiten mit sich, da sie versucht eine sinnvolle Vorhersage für die Bewertungen eines Zustandes zu ermitteln. Probleme können dabei beispielsweise darin liegen, dass Belohnungen womöglich erst im zukünftigen Verlauf zu Trage treten können oder dass sie zum gegenwärtigen Zeitpunkt schlichtweg noch ungewiss sind. Mögliche Lösungen hierfür sehen allerdings je nach Anwendungsdomäne verschieden aus \cite[S. 4-7]{Sewak2019}.
+
+Reinforcement Learning Modelle sind als \glqq Markov Devision Process\grqq{} (MDP) anzusehen. Das hat zur Folge, dass aufgrund der zugrundeliegenden \glqq Markov Property, sowie Markov Chain\grqq{} die Wahrscheinlichkeiten für die nächstmöglichen Aktionen lediglich vom derzeitigen Zustand und nicht von weiteren vorangegangen abhhängen. Der MDP wendet diese Regeln auf den Entscheidungsprozess an, der im Fall von RL die Policy darstellt. Des Weiteren liefert der MDP die Wahrscheinlichkeiten für Zustandsübergange in der Form $P_{a}(s, s')$ an, wobei a für die mögliche Aktion, s für den aktuellen und s' für den resultierenden Zustand steht. Die Notation des entsprechenden Rewards lautet $R_{a}(s, s')$ \cite[S. 19f.]{Sewak2019}.
+
+Weitere Begriffe, die im Kontext von RL von Bedeutung sind, sind \glqq{}Policy Evaluation\grqq{} und \glqq{}Policy Iteration\grqq{}. Erstere steht für die geschätzte Bewertung des Zustandes. Letztere beschreibt einen Iteration Prozess mit dem Ziel, dass die Policy konvergiert \cite[S. 27]{Sewak2019}.
 
 \subsection{Zusammenspiel von MCTS und NN}
 AlphaGoZero und AlphaZero basieren auf der Kombination des MCTS und des NN. Dabei gibt es zwei Schnittstellen zwischen diesen beiden Komponenten. 
 Erstere liegt in der bereits erwähnten Bewertung von Blattknoten. Der MCTS durchläuft keinen simulierten Spielablauf, sondern überlässt die Evaluation des Knotens dem NN und arbeitet mit den zurückgegeben Daten weiter. Dies spiegelt die policy evaluation wider \cite{Silver2017}.
-
-%TODO reinforcement learning def of policy evaluation and improvement
 
 Eine weitere Verzweigung von MCTS und NN tritt bei dem Update der Parameter des NN auf. Das NN ermittelt zu jedem Spielstand die möglichen Züge und gibt deren Gewinnwahrscheinlichkeit, sowie die Wahrscheinlichkeit für die Auswahl des Zuges an. Für die Aktualisierung der Parameter werden die genannten Werte dahingehend angepasst, dass sie den im MCTS ermittelten Werten entsprechend beziehungsweise sich diesen annähern. Eine Anpassung in diese Richtung ist sinnvoll, da die Daten im MCTS als deutlich genauer gelten. Dieser Vorgang entspricht der policy improvement \cite{Silver2017}.
 
@@ -130,12 +153,32 @@ Nach Abschluss der Simulation wird der Reward zurückgegeben. Daraufhin wird in 
 \subsection{Team und Aufgabenverteilung}
 % Beschreiben Sie in diesem Abschnitt Ihr Team. Welche Person hat welche Aufgaben wahrgenommen, wie wurden
 % Aufgaben aufgeteilt und wie wurde kommuniziert, etc.
+Als Vierer-Team bestand unsere Gruppe aus Simon Hofmeister, Nadiia Matsko, Monika Silber und Simon Wasserburger. Anzumerken ist, dass Simona Hofmeister und Simon Wasserburger bereits im Bachelorkurs Erfahrung mit dem Implementieren einer künstlichen Intelligenz für Reversi sammeln konnten. Aus diesen Gründen griffen wir für den Aufbau dieses Projektes auf das Grundgerüst des bereits im Bachelorkurs erstellen Programms von Simon Hofmeister zurück, der dieses entsprechend an die Anforderungen des vorliegenden Projektes anpasste.
+
+Die weiteren Komponenten verteilten wir wie folgt:
+Simon Hofmeister: Aufsetzen des Grundgerüsts, Implementierung des NN
+Nadiia Matsko: Implementierung des NN, Verfassen des Kapitels Einleitung in der Dokumentation
+Monika Silber: Implementierung des MCTS, Verfassen der Kapitel theoretischen Grundlagen des MCTS und Organisation in der Dokumentation
+Simon Wasserburger: Implementierung des MCTS, Erstellen der Grafiken für MCTS, Code-Refactoring (Grundgerüst)
+%TODO Ergänzungen
+
+Hinsichtlich des Aufwands für diese Aufgaben ergab sich für die einzelnen Teammitglieder folgende Verteilung:
+%TODO Aufdröselung in Recherche, Implementierung, Doku und Orga
 
 \subsection{Kommunikation}
+Die virtuelle Kommunikation fand hauptsächlich in unserer WhatsApp-Gruppe statt, wo wir einander auf Problemstellen aufmerksam machten, Lösungsansätze diskutierten, einander über Fortschritte informierten und Treffen ausmachten. Ebenfalls konnte durch Commits im Repository die Arbeit der Teamkollegen und entsprechend der Projektfortschritt verfolgt werden. Daneben verfügten wir über ein Trello-Board, in dem wir Aufgaben planten, dokumentierten und zuwiesen. In gemeinsamen Treffen besprachen und ergänzten wir dabei die offenen Punkte und kontrollierten den Projektablauf. 
+
+In den persönlichen Treffen, in denen meist alle Teammitglieder anwesend waren, konnten wir alle offenen Punkte konkretisieren und ausführlich diskutieren. Wir erarbeiteten gemeinsame Lösungsstrategien und halfen einander bei Verständnisproblemen. Abschließend trafen wir Absprachen zum weiteren Vorgehen, sowie zur Aufgabenverteilung.
 
 \subsection{Versionskontrolle}
+Als Versionskontrollsystem stand ein Gitlab-Repository der OTHR zur Verfügung. Zum Abrufen und Bearbeiten dessen wurde GitHub Desktop als GUI verwendet.
+%TODO welche GUI/CLI?
+
+Hinsichtlich Implementierung der Komponenten wurden eigene Branches angelegt, die vom master-Branch geklont und nach Fertigstellung entsprechend dort wieder gemergt wurden. Dabei ergaben sich eigene Branches für den MCTS, das NN, sowie für den Prozess des Refactoring des ursprünglichen Codes. Die finale und alle Bestandteile umfassende Version befindet sich folglich im master-Branch.
 
 \subsection{OS, IDE und Programmiersprache}
+%TODO OS
+Als Entwicklungsumgebung wurde IntelliJ IDEA\footnote{https://www.jetbrains.com/de-de/idea/} von JetBrains genutzt. Java wurde als Programmiersprache zur Impelementierung des Projektes verwendet. Zur Erstellung des Programms kam maven\footnote{https://maven.apache.org/} als Build-Management-Tool zum Einsatz.
 
 \subsection{Testumgebungen}
 
