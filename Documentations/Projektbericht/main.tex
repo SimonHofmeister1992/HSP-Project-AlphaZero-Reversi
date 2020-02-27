@@ -63,7 +63,32 @@
 
 \subsection{Monte Carlo Tree Search}
 Der MCTS findet als Alternative zum Alpha-Beta-Search Anwendung. Da der Alpha-Beta-Ansatz einen geringen Verzweigungsgrad und eine angemessene Bewertungsfunktion fordert, ist dessen in Anwendung in Brettspielen, die diese Bedingungen nicht erfüllen, ungeeignet. Der MCTS hingegen bewies sich im Umgang mit solchen Situation \cite{Chaslot2008}.
-Basierend auf einer Bestensuche und stochastischer Simulation  wählt der MCTS bei jedem Durchlauf den erfolgversprechendsten Knoten als nächsten Spielzug aus. Entsprechend wird ein Baum aufgebaut, in dem ein Knoten einen konkreten Spielzustand widerspiegelt\cite{Chaslot2008}. Dabei werden die drei Schritte Expansion, Simulation und Backpropagation durchgeführt \cite{Chaslot2008}. Falls der aktuelle Spielzustand noch nicht als Knoten existiert, wird der Baum zunächst expandiert. Um nun die beste Aktion zu ermitteln, werden Spiele ausgehend vom aktuellen Zustand bis hin zum Spielende simuliert. Dabei werden valide Spielzüge zufällig ausgewählt. Hierbei ist jedoch zu beachten, dass eine reine Zufallsauswahl, die impliziert, dass die Selektion aller Möglichkeiten gleich wahrscheinlich ist, in eher primitivem Spielverhalten resultiert. Mithilfe einer Heuristik können daher aussichtsreichere Spielzüge favorisiert werden. Innerhalb eines Playouts durchlaufene Nodes werden schließlich aktualisiert, indem vermerkt wird, dass sie einmal mehr besucht wurden und welches Spielergebnis sich ergeben hat \cite{Chaslot2008}. 
+Basierend auf einer Bestensuche und stochastischer Simulation  wählt der MCTS bei jedem Durchlauf den erfolgversprechendsten Knoten als nächsten Spielzug aus. Entsprechend wird ein Baum aufgebaut, in dem ein Knoten einen konkreten Spielzustand widerspiegelt\cite{Chaslot2008}. Dabei werden die drei Schritte Expansion, Simulation und Backpropagation durchgeführt \cite{Chaslot2008}.
+
+Zur Visualisierung dieses Vorgehens dienen Abbildung \ref{fig:mcts_exp_sim}, sowie Abbildung \ref{fig:mcts_backpropagation}. 
+Als erster Schritt erfolgt die Auswahl eines Knotens analog des \glqq{}Selection\grqq{}-Schrittes in Abbildung \ref{fig:mcts_exp_sim}.
+
+Falls der aktuelle Spielzustand noch nicht als Knoten existiert, wird der Baum zunächst expandiert \cite{Chaslot2008}. Dies kann in Abbildung \ref{fig:mcts_exp_sim} im Schritt \glqq{}Expand\grqq eingesehen werden und resultiert darin, dass die nächstmöglichen Aktionen als Kinderknoten an den aktuell betrachteten Knoten angehängt werden.
+
+Um nun die beste Aktion zu ermitteln, werden Spiele ausgehend vom aktuellen Zustand bis hin zum Spielende simuliert. Dabei werden valide Spielzüge zufällig ausgewählt \cite{Chaslot2008}, wie \glqq{}Simulation\grqq in Abbildung \ref{fig:mcts_exp_sim} veranschaulicht. An dieser Stelle werden nicht alle vorhandenen Folgepositionen eines Knotens berücksichtigt, sondern lediglich eine davon. Der letzte Knoten repräsentiert den finalen Spielstand.
+
+Hierbei ist jedoch zu beachten, dass eine reine Zufallsauswahl, die impliziert, dass die Selektion aller Möglichkeiten gleich wahrscheinlich ist, in eher primitivem Spielverhalten resultiert. Mithilfe einer Heuristik können daher aussichtsreichere Spielzüge favorisiert werden. Innerhalb eines Playouts durchlaufene Nodes werden schließlich aktualisiert, indem vermerkt wird, dass sie einmal mehr besucht wurden und welches Spielergebnis sich ergeben hat \cite{Chaslot2008}.
+
+Dieser Prozess ist in Abbildung \ref{fig:mcts_backpropagation} dargestellt. in dieser Grafik wurde der Baum um numerische Werte der Form \glqq{}X$|$Y\grqq  ergänzt, wobei X für die Anzahl an Besuchen steht und Y für die Anzahl, wie oft das Spiel ausgehend vom betrachteten Knoten gewonnen wurden. Die Zahl \glqq{}0\grqq signalisiert dabei das Verlieren, die Zahl \glqq{}1\grqq das Gewinnen des simulierten Spiels. Bevor der Simulationsdurchlauf gestartet wird hat der ausgewählte Knoten den Wert \glqq{}1$|$1\grqq{}. Am Ende angekommen, wird der Spielausgang ermittelt, wodurch der entsprechende Knoten zur Veranschaulichung mit dem entsprechenden Wert ergänzt wird (siehe \glqq{}1\grqq{} - \glqq{}1\grqq{} - \glqq{}0\grqq). Daraufhin werden die Resultate unten angefangen bis hin zum Wurzelknoten durch alle involvierten Nodes zurückgeleitet. Der anfangs betrachtete Knoten hat nun den Wert \glqq{}4$|$3\grqq{}, da er dreimal öfter besucht wurde, wobei das Spiel letztendlich zweimal davon gewonnen wurde. Im Wurzelknoten auf oberster Ebene kann entsprechend eine Änderung der Werte von \glqq{}4$|$2\grqq{} auf \glqq{}7$|$4\grqq{} festgestellt werden.
+
+\begin{figure}
+\centering
+\includegraphics[width=1.0\textwidth]{pics/SelectionExpandSimulation.png}	
+\caption{Auswahl eines Knotens mit nachfolgender Expansion und Simulation, eigene Abbildung}
+	\label{fig:mcts_exp_sim}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=1.0\textwidth]{pics/Backpropagation.png}
+\caption{Simulation und anschließende Backpropagation der entsprechenden Werte, eigene Abbildung}
+	\label{fig:mcts_backpropagation}
+\end{figure}
 
 Anzumerken ist, dass zwei verschiedene Policies genutzt werden. Für die Erweiterung des Baums wird eine Tree Policy angewendet, die besagt, dass entsprechende Blattknoten an bereits vorhandene, unbesuchte Knoten angefügt werden. Des Weiteren legt die Default Policy die Simulation fest. Hierbei wird in einem nichtterminalen Spielzustand, der gewöhnlich dem neu hinzugefügt Blattknoten entspricht, ein zufälliges Spiel durchlaufen, um ein ein Spielergebnis zu ermitteln \cite{Browne2012}. 
 
@@ -72,25 +97,25 @@ Der MCTS bleibt so lange aktiv, bis er unterbrochen wird, beispielsweise aufgrun
 Zu einem Knoten gehören der entsprechende Spielzustand, den er widerspiegelt, der Spielzug aus dem er resultierte, sowie der aus Simulationen resultierende Reward und wie oft er besucht wurde \cite{Browne2012}.
 
 Nachfolgend werden die konkreten Umsetzungsdetails des MCTS in AlphaGo Zero betrachtet, so wie sie von Silver et al. angewendet wurden \cite{Silver2017}.
-In AlphaGo Zero besteht der Selection-Schritt daraus, ausgehend von einem Wurzelknoten eine Simulationen bis hin zu einem Blattknoten zu durchlaufen. Dafür wird in jedem Schritt der Folgeknoten ausgewählt, der den maximalen UCT-Wert enthält \cite{Silver2017}.
 
-Entsprechend dem AlphaZero-Ansatz findet bei der Simulation keine zufällige Auswahl des Spielzuges statt, stattdessen wird eine Variante des Upper Confidence Bound (UCB) angewendet. Die konkrete Abwandlung ist der polynomiale UCB applied to Trees (UCT). Dieser errechnet sie wie folgt:
+In AlphaGo Zero wird eine Variante des Upper Confidence Bound (UCB) zur Auswahl der Knoten angewendet. Die konkrete Abwandlung ist der polynomiale UCB applied to Trees (UCT). Dieser errechnet sie wie folgt:
 
 \begin{equation}
 UCT = \frac{Q(n_i)}{N(n_i)} cP(n) \frac{\sqrt{N(n)}}{1+N(n_i)}
 \end{equation} 
 Wobei c eine Konstante darstellt, die das Maß an Exploration festlegt und P(s,a) für die a-priori-Wahrscheinlichkeit für die Auswahl des jeweiligen Spielzugs steht. Letztlich wird stets der Spielzug ausgewählt, der den maximalen UCT-Wert darstellt \cite{Silver2017}.
+Für Abbildung \ref{fig:mcts_exp_sim} bedeutet das, dass dies im \glqq{Selection}\grqq{}-Schritt der grau hinterlegte Knoten wäre.
 
 Ferner ist an dieser Stelle anzumerken, dass der UCB den Kompromiss zwischen Exploration und Exploitation widerspiegelt. Der erste Quotient der UCT-Gleichung steht für das Maß der Ausbeutung und lenkt den Algorithmus dahingehend vielversprechende Knoten weiter zu besuchen. Im Gegensatz dazu wird dazu angehalten Bereiche, die noch nicht oft aufgesucht wurden, verstärkt zu untersuchen. Dies wird als Erkundung bezeichnet und durch den letzten Term des UCT abgebildet. Wichtig hierbei ist es ein Gleichgewicht der beiden Komponenten zu finden \cite{Browne2012}.
 
 Die klassische Simulation von zufälligen Spieldurchläufen entfällt im MCTS vollständig, da noch nicht expandierte Knoten an das NN weitergegeben und dort evaluiert wird. Sobald ein solcher Blattknoten erreicht ist, wird dieser dem NN übergeben, woraufhin die a-priori-Wahrscheinlichkeit und die Bewertung des Spielzugs ermittelt werden. Daraufhin ist der Blattknoten expandiert und alle ausgehenden Kanten beziehungsweise Kinderknoten werden mit initialen Werten belegt.
-Anschließend erfolgt die Backpropagation, indem in allen durchlaufenen Knoten die Gewinnwahrscheinlichkeit aktualisiert, sowie die Anzahl der Besuche um den Wert Eins inkrementiert wird \cite{Silver2017}.
+Anschließend erfolgt die Backpropagation, indem in allen durchlaufenen Knoten die Gewinnwahrscheinlichkeit aktualisiert, sowie die Anzahl der Besuche um den Wert Eins inkrementiert wird \cite{Silver2017}. Im Vergleich zu Abbildung \ref{fig:mcts_backpropagation} bedeutet das, dass zur Expansion des jeweiligen Knotens nicht wie bei der Simulation weiter in die Tiefe gegangen wird, um letztendlich die Endewerte \glqq{}1\grqq - \glqq{}1\grqq - \glqq{}0\grqq zu ermitteln, sondern die vom NN berechneten Werte zur Verfügung stehen. Die Backpropagation bleibt hierbei gleich.
 
 Letztlich wird ein konkreter Spielzug ausgehend vom Wurzelknoten selektiert. Dabei wird der Knoten, der am häufigsten besucht wurde als der beste Spielzug aufgefasst. Der ausgewählte Kindknoten wird der neue Wurzelknoten. Der von ihm ausgehend aufgebaute Teilbaum wird beibehalten, während der der restliche Baum verworfen wird \cite{Silver2017}.
 
 \newpage
 \subsection{Neuronales Netz}
-Ein Neuronales Netz (NN) wird durch eine Vielzahl einzelner miteinander verknüpfter Neuronen beschrieben. Dabei erhalten sie Signale von anderen Neuronen als Input, verarbeiten diese und geben sie als Output an andere weiter. Diese Eingangswerte werden als Vektor X = $\{x_{1}, x_{2}, ..., x_{n}\}$ repräsentiert. Um adäquate Ausgangswerte zu erhalten werden die einzelnen Input-Elemente durch die entsprechenden Komponenten im Vektor W = $\{w_{1}, w_{2}, ..., w_{n}\}$ gewichtet. Des Weiteren kann es zu jedem Neuron einen Bias b geben. Zur Verarbeitung der Eingangswerte wird eine Aktivierungsfunktion herangezogen, die Z = $\{w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b(W^{T}X + b)\}$ als Input erhält. Das sich hieraus ergebende Resultat entspricht \^{y}. Im weiteren Verlauf wird versucht die Diskrepanz zwischen dem tatsächlichen Wert y und dem geschätzten Wert \^{y} durch Anwendung einer Verlustfunktion zu minimieren. Dieser Vorgang wird als \glqq{}Backpropagation\grqq bezeichnet. Dabei werden Fehler von dem letzten bis hin zum ersten layer zurück geleitet, um alle beteiligten Gewichte in die entsprechende Richtung anzupassen. Dies wird dadurch erreicht, dass man das Minimum der Fehlerfunktion lokalisiert, das durch Annäherung an den Gradienten der Funktion ermittelt werden kann \cite[S. 75-79]{Sewak2019}. 
+Ein Neuronales Netz (NN) wird durch eine Vielzahl einzelner miteinander verknüpfter Neuronen beschrieben. Dabei erhalten sie Signale von anderen Neuronen als Input, verarbeiten diese und geben sie als Output an andere weiter. Diese Eingangswerte werden als Vektor X = $\{x_{1}, x_{2}, ..., x_{n}\}$ repräsentiert. Um adäquate Ausgangswerte zu erhalten werden die einzelnen Input-Elemente durch die entsprechenden Komponenten im Vektor W = $\{w_{1}, w_{2}, ..., w_{n}\}$ gewichtet. Des Weiteren kann es zu jedem Neuron einen Bias b geben. Zur Verarbeitung der Eingangswerte wird eine Aktivierungsfunktion herangezogen, die Z = $\{w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b(W^{T}X + b)\}$ als Input erhält. Das sich hieraus ergebende Resultat entspricht \^{y}. Im weiteren Verlauf wird versucht die Diskrepanz zwischen dem tatsächlichen Wert y und dem geschätzten Wert \^{y} durch Anwendung einer Verlustfunktion zu minimieren. Dieser Vorgang wird als \glqq{}Backpropagation\grqq bezeichnet. Dabei werden Fehler von dem letzten bis hin zum ersten layer zurückgeleitet, um alle beteiligten Gewichte in die entsprechende Richtung anzupassen. Dies wird dadurch erreicht, dass man das Minimum der Fehlerfunktion lokalisiert, das durch Annäherung an den Gradienten der Funktion ermittelt werden kann \cite[S. 75-79]{Sewak2019}. 
 
 Neuronale Netze bestehen aus verschiedenen Schichten. Dabei existieren stets der input layer, ein oder mehrere hidden layer und der output layer. Während der input layer über genau so viele Neuronen, wie es Eingangswerte gibt, verfügt, weist der output layer so viele Neuronen auf, wie Ausgangsmerkmale vorhanden sind. Die Neuronenanzahl in den versteckten Zwischenschichten kann variieren. Sobald mehr als ein hidden layer vorliegt, spricht man von einem tiefen neuronalen Netz \cite[S. 77]{Sewak2019}.
 
@@ -108,7 +133,7 @@ Die Strategie zur Ermittlung der besten Aktion während des Lernprozesses wird a
 \begin{figure}
 \centering
 \includegraphics{pics/rl_agent_loop.png}	\caption{iterative Interaktion zwischen Agent und Environment, Abbildung entnommen aus \cite[S. 2]{Sewak2019}}
-	\label{fig:rl_agent_loop}
+\label{fig:rl_agent_loop}
 \end{figure}
 
 Ferner bringt das Aufstellen einer Rewardfunktion Schwierigkeiten mit sich, da sie versucht eine sinnvolle Vorhersage für die Bewertungen eines Zustandes zu ermitteln. Probleme können dabei beispielsweise darin liegen, dass Belohnungen womöglich erst im zukünftigen Verlauf zu Trage treten können oder dass sie zum gegenwärtigen Zeitpunkt schlichtweg noch ungewiss sind. Mögliche Lösungen hierfür sehen allerdings je nach Anwendungsdomäne verschieden aus \cite[S. 4-7]{Sewak2019}.
