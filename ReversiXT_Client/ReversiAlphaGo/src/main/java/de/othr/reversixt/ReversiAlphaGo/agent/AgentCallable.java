@@ -1,6 +1,5 @@
 package de.othr.reversixt.ReversiAlphaGo.agent;
 
-import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 

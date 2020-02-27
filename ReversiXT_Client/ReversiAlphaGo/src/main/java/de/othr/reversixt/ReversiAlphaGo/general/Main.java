@@ -1,10 +1,10 @@
 package de.othr.reversixt.ReversiAlphaGo.general;
 
-import de.othr.reversixt.ReversiAlphaGo.agent.Agent;
 import de.othr.reversixt.ReversiAlphaGo.agent.AgentCallable;
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
+import org.nd4j.jita.conf.CudaEnvironment;
 
 import java.io.IOException;
 import java.util.concurrent.*;
@@ -14,8 +14,15 @@ public class Main {
     private static String ip = "127.0.0.1"; // localhost
     private static int port = 7777;
     private static int groupNumber = 3;
+    public static boolean LEARNER_MODE = Boolean.FALSE;
 
     public static void main(String[] args) throws InterruptedException {
+
+        /* *******************************
+        *       Enable training on multi-gpu
+         */
+
+        CudaEnvironment.getInstance().getConfiguration().allowMultiGPU(true);
 
         /* ********************************
          *         Commandline options
@@ -103,6 +110,7 @@ public class Main {
         if (cli.hasOption(ICLIOptions.QUIET_MODE)) QUIET_MODE = Boolean.TRUE;
         if (cli.hasOption(ICLIOptions.IP_ADDRESS)) ip = cli.getOptionValue(ICLIOptions.IP_ADDRESS);
         if (cli.hasOption(ICLIOptions.PORT)) port = Integer.parseInt(cli.getOptionValue(ICLIOptions.PORT));
+        if (cli.hasOption(ICLIOptions.LEARNER_MODE)) LEARNER_MODE = Boolean.TRUE;
     }
 
     private static void serverInit(String IP, int port, ServerCommunicator serverComm, Environment environment) {

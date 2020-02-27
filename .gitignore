@@ -9,6 +9,7 @@ ReversiXT_Client/ReversiAlphaGo/target/*
 
 .idea/*.xml
 .idea/*.iml
+ReversiXT_Client/ReversAlphaGo/.idea/modules.xml
 
 # Source: https://github.com/github/gitignore/blob/master/Global/JetBrains.gitignore
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
@@ -22,7 +23,8 @@ ReversiXT_Client/ReversiAlphaGo/target/*
 .idea/**/shelf
 
 # Generated files
-.idea/**/contentModel.xml
+.idea/**/contentModel.xm
+*.zip
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -32,6 +34,7 @@ ReversiXT_Client/ReversiAlphaGo/target/*
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
+*idea*
 
 # Gradle
 .idea/**/gradle.xml
@@ -361,3 +364,4 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+.idea

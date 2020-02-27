@@ -1,0 +1,2 @@
+The client (alpha go zero for reversi/reversixt) will store the actual used model and the
+best learned model in this folder.
