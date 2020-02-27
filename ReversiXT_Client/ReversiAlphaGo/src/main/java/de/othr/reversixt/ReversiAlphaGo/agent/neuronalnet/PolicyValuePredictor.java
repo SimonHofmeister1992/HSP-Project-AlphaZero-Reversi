@@ -5,6 +5,7 @@ import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.general.AlphaGoZeroConstants;
 import de.othr.reversixt.ReversiAlphaGo.general.Main;
 import org.deeplearning4j.nn.graph.ComputationGraph;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
@@ -23,8 +24,8 @@ public class PolicyValuePredictor {
     private static NeuronalNet neuronalNet;
     private static ComputationGraph computationGraph;
     private static final int numberOfInputPlanes = AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET;
-    private static final File bestComputationGraphFile = new File("model" + File.pathSeparator +  "bestModel.txt");
-    private static final File actualComputationGraphFile = new File("model" + File.pathSeparator +  "actualModel.txt");
+    private static final File bestComputationGraphFile = new File("model" + File.separator +  "bestModel.zip");
+    private static final File actualComputationGraphFile = new File("model" + File.separator +  "actualModel.zip");
     private PlaygroundTransformer playgroundTransformer;
 
     //****************************************************************
@@ -59,20 +60,26 @@ public class PolicyValuePredictor {
     //****************************************************************
     //  loads and builds the configuration of the computation graph
     //****************************************************************
-    private static void createComputationGraph(){
+    public static void createComputationGraph(){
         ComputationGraph load = null;
         try {
             if(actualComputationGraphFile.exists() && Main.LEARNER_MODE){
                 load = ComputationGraph.load(actualComputationGraphFile, true);
+                if(!Main.QUIET_MODE) System.out.println("ComputationGraph: LearningGraph Loaded");
             }
             else if(!actualComputationGraphFile.exists() && Main.LEARNER_MODE){
                 load = ComputationGraph.load(bestComputationGraphFile, true);
+                if(!Main.QUIET_MODE) System.out.println("ComputationGraph: BestGraph Loaded");
+		saveAsActualModel();
             }
             else if(!Main.LEARNER_MODE && bestComputationGraphFile.exists()){
                 load = ComputationGraph.load(bestComputationGraphFile, true);
+                if(!Main.QUIET_MODE) System.out.println("ComputationGraph: BestGraph Loaded");
             }
             else if(!Main.LEARNER_MODE && !bestComputationGraphFile.exists()){
                 load = ComputationGraph.load(actualComputationGraphFile, true);
+                if(!Main.QUIET_MODE) System.out.println("ComputationGraph: LearningGraph Loaded");
+		saveAsBestModel();
             }
         } catch (IOException e) {
             load = null;
@@ -82,6 +89,9 @@ public class PolicyValuePredictor {
         else {
             PVP.neuronalNet = NeuronalNet.getInstance(numberOfInputPlanes);
             PolicyValuePredictor.computationGraph = PolicyValuePredictor.neuronalNet.getComputationGraph();
+            if(!Main.QUIET_MODE) System.out.println("ComputationGraph: New Graph Loaded");
+			saveAsActualModel();
+			saveAsBestModel();
         }
     }
 
@@ -108,15 +118,16 @@ public class PolicyValuePredictor {
     // @param players: player corresponding to each playground-state
     // @param policyOutputsToLearn: policies predicted by the neural net, corrected by the MCTS (INDArray containing INDArrays: one for each state)
     // @param valueOutputsToLearn: values predicted by the neural net, corrected by the MCTS (Reward)
+    // usage example see PolicyValuePreditorTest.testTrainAndEvaluateComputationGraph()
     //*********************************************************************************
     public void trainComputationGraph(Playground[] playgrounds, Player[] players, INDArray policyOutputsToLearn, INDArray valueOutputsToLearn){
 
-        if(playgrounds.length == policyOutputsToLearn.length() && playgrounds.length==valueOutputsToLearn.length() && playgrounds.length == players.length){
+        if(playgrounds.length == policyOutputsToLearn.size(0) && playgrounds.length==valueOutputsToLearn.size(0) && playgrounds.length == players.length){
 
-            INDArray transformedPlaygrounds = Nd4j.zeros(1,0, AlphaGoZeroConstants.DIMENSION_PLAYGROUND,AlphaGoZeroConstants.DIMENSION_PLAYGROUND);
+            INDArray transformedPlaygrounds = Nd4j.zeros(DataType.INT,0, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET, AlphaGoZeroConstants.DIMENSION_PLAYGROUND,AlphaGoZeroConstants.DIMENSION_PLAYGROUND);
             for(int i = 0; i < playgrounds.length; i++){
                 INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[i], players[i]);
-                transformedPlaygrounds = Nd4j.concat(1, transformedPlaygrounds, transformedPlayground);
+                transformedPlaygrounds = Nd4j.concat(0, transformedPlaygrounds, transformedPlayground);
             }
             computationGraph.fit(new INDArray[]{transformedPlaygrounds}, new INDArray[]{policyOutputsToLearn, valueOutputsToLearn});
         }
@@ -127,6 +138,7 @@ public class PolicyValuePredictor {
     // evaluates the neural net at a given state
     // @param playground: actual playground state
     // @param player: the player which shall play the next action
+    // usage example see PolicyValuePreditorTest.testTrainAndEvaluateComputationGraph()
     //*********************************************************************************
     public OutputNeuronalNet evaluate(Playground playground, Player player){
 
