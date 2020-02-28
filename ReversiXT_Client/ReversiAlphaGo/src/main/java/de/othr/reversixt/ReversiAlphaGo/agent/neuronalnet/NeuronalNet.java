@@ -2,10 +2,14 @@ package de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet;
 
 
 import de.othr.reversixt.ReversiAlphaGo.general.AlphaGoZeroConstants;
+<<<<<<< HEAD
+import org.deeplearning4j.nn.conf.*;
+=======
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.InputPreProcessor;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+>>>>>>> ec3d9d15dec3df6d8ae87ec234b74ba59740fc7a
 import org.deeplearning4j.nn.conf.graph.ElementWiseVertex;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.*;
@@ -95,6 +99,14 @@ class NeuronalNet {
         ComputationGraphConfiguration.GraphBuilder graphBuilder = new NeuralNetConfiguration.Builder()
                 .weightInit(WeightInit.XAVIER)
                 .updater(new Sgd())
+<<<<<<< HEAD
+                .miniBatch(true)
+                .trainingWorkspaceMode(WorkspaceMode.ENABLED)
+                .cacheMode(CacheMode.DEVICE)
+                .l1(0.9)
+                .l2(0.0001)
+=======
+>>>>>>> ec3d9d15dec3df6d8ae87ec234b74ba59740fc7a
                 .graphBuilder().setInputTypes(InputType.convolutional(MAP_SIZE, MAP_SIZE, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET));
 
         return graphBuilder;
