@@ -1,6 +1,7 @@
 package de.othr.reversixt.ReversiAlphaGo.general;
 
 import de.othr.reversixt.ReversiAlphaGo.agent.AgentCallable;
+import de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet.PolicyValuePredictor;
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
@@ -37,6 +38,9 @@ public class Main {
         ServerCommunicator serverCommunicator = new ServerCommunicator(groupNumber);
         Environment environment = new Environment();
         AgentCallable agentCallable;
+
+        // Initialize singleton neuronal net before connecting to server (time intensive)
+        PolicyValuePredictor.getInstance();
 
         /* *********************************
          *         Connect to server
