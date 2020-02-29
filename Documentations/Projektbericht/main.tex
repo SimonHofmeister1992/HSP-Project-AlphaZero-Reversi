@@ -141,7 +141,7 @@ Tiefe NN sind schwer zu trainieren. Zur Vereinfachung dieser Problematik besteht
 Das in AlphaGo Zero verwendete NN zeigt nachfolgenden von \cite{Silver2017} beschriebenen Aufbau.
 %TODO input, skip connection/residual
 Zunächst werden die Eingabedaten in einem \textit{residual block} verarbeitet. Dieser besteht aus einem \textit{convolutional block} und nachfolgend 19 oder 39 residualen Blöcken. Erst genannter führt eine Faltungsoperation mit 256 Filtern mit einem 3x3 Faltungskern und einer Schrittweite von 1 durch. Anschließend folgt die \textit{Batch Normalisation}, sowie die Aktivierung mithilfe der ReLU. Die Restblöcke verfügen ebenfalls über die drei genannten Komponenten – Faltung, Normalisierung und Aktivierung, sowie zusätzlich darauf anschließend erneut eine Faltung mit den gleichen Eigenschaften, gefolgt von der \textit{Batch Normalisation} und der Endposition der Abkürzungsmöglichkeit der Eingabedaten. Abschließend findet sich erneut die ReLU.
-Die resultierenden Daten werden an den den sogenannten \glqq{}Policy Head\grqq{}, sowie den \glqq{}Value Head\grqq weitergereicht. Diese beiden Komponenten sind für das Berechnen der \textit{Policy} beziehungsweise der Spielbewertung zuständig. Der \textit{Policy Head} setzt sich aus einer Faltung mit zwei Filtern mit einem 1x1 Faltungskern und einer Schrittweite von 1, einer Normalisierung, der ReLU und einem \textit{fully connected layer} zusammen. Letzterer gibt einen Vektor zurück, der die Logit-Wahrscheinlichkeiten für alle realisierbaren Aktionen beinhaltet.
+Die resultierenden Daten werden an den den sogenannten \glqq{}Policy Head\grqq{}, sowie den \glqq{}Value Head\grqq{} weitergereicht. Diese beiden Komponenten sind für das Berechnen der \textit{Policy} beziehungsweise der Spielbewertung zuständig. Der \textit{Policy Head} setzt sich aus einer Faltung mit zwei Filtern mit einem 1x1 Faltungskern und einer Schrittweite von 1, einer Normalisierung, der ReLU und einem \textit{fully connected layer} zusammen. Letzterer gibt einen Vektor zurück, der die Logit-Wahrscheinlichkeiten für alle realisierbaren Aktionen beinhaltet.
 Die ersten drei Schritte sind gleichermaßen im \textit{Value Head} wiederzufinden. Allerdings folgt hier einem \textit{fully connected layer} mit einer versteckten Schicht. Des Weiteren durchlaufen die Daten die ReLU und erneut eine vollständig verknüpfte Schicht, die in einem Skalar resultiert. Dieser wird abschließend durch die Aktivierungsfunktion tanh auf einen Punkt im Wertebereich zwischen [-1, 1] abgebildet \cite{Silver2017}.
 
 \subsection{Reinforcement Learning}
@@ -199,15 +199,42 @@ Nach Abschluss der Simulation wird der Reward zurückgegeben. Daraufhin wird in 
 % Aufgaben aufgeteilt und wie wurde kommuniziert, etc.
 Als Vierer-Team bestand unsere Gruppe aus Simon Hofmeister, Nadiia Matsko, Monika Silber und Simon Wasserburger. Anzumerken ist, dass Simona Hofmeister und Simon Wasserburger bereits im Bachelorkurs Erfahrung mit dem Implementieren einer künstlichen Intelligenz für Reversi sammeln konnten. Aus diesen Gründen griffen wir für den Aufbau dieses Projektes auf das Grundgerüst des bereits im Bachelorkurs erstellen Programms von Simon Hofmeister zurück, der dieses entsprechend an die Anforderungen des vorliegenden Projektes anpasste.
 
-Die weiteren Komponenten verteilten wir wie folgt:
-Simon Hofmeister: Aufsetzen des Grundgerüsts, Implementierung des NN
-Nadiia Matsko: Implementierung des NN, Verfassen des Kapitels Einleitung in der Dokumentation
-Monika Silber: Implementierung des MCTS, Verfassen der Kapitel theoretischen Grundlagen des MCTS und Organisation in der Dokumentation
-Simon Wasserburger: Implementierung des MCTS, Erstellen der Grafiken für MCTS, Code-Refactoring (Grundgerüst)
-%TODO Ergänzungen
-
-Hinsichtlich des Aufwands für diese Aufgaben ergab sich für die einzelnen Teammitglieder folgende Verteilung:
+Hinsichtlich der Verteilung der Aufgaben und des zugehörigen Aufwands ergab sich für die einzelnen Teammitglieder folgendes:
 %TODO Aufdröselung in Recherche, Implementierung, Doku und Orga
+Die weiteren Komponenten verteilten wir wie folgt:
+
+Simon Hofmeister (150 h):
+\begin{itemize}
+\item Recherche
+\item Implementierung (Grundgerüst, NN)
+\item Dokumentation ()
+\item Organisation
+\end{itemize}       
+
+Nadiia Matsko (150 h): 
+\begin{itemize}
+\item Recherche
+\item Implementierung (NN)
+\item Dokumentation (AlphaGo, AlphaZero)
+\item Organisation
+\end{itemize}  
+
+Monika Silber (150 h): 
+\begin{itemize}
+\item Recherche
+\item Implementierung (MCTS)
+\item Dokumentation (Reversi, Theoretische Grundlagen, Implementierung MCTS, Organisation)
+\item Organisation
+\end{itemize}  
+
+Simon Wasserburger (150 h): 
+\begin{itemize}
+\item Recherche
+\item Implementierung (MCTS, Code-Refactoring Grundgerüst)
+\item Dokumentation (Grafiken MCTS)
+\item Organisation
+\end{itemize}  
+%TODO Ergänzungen
 
 \subsection{Kommunikation}
 Die virtuelle Kommunikation fand hauptsächlich in unserer WhatsApp-Gruppe statt, wo wir einander auf Problemstellen aufmerksam machten, Lösungsansätze diskutierten, einander über Fortschritte informierten und Treffen ausmachten. Ebenfalls konnte durch Commits im Repository die Arbeit der Teamkollegen und entsprechend der Projektfortschritt verfolgt werden. Daneben verfügten wir über ein Trello-Board, in dem wir Aufgaben planten, dokumentierten und zuwiesen. In gemeinsamen Treffen besprachen und ergänzten wir dabei die offenen Punkte und kontrollierten den Projektablauf. 
@@ -222,7 +249,24 @@ Hinsichtlich Implementierung der Komponenten wurden eigene Branches angelegt, di
 
 \subsection{OS, IDE und Programmiersprache}
 %TODO OS
-Als Entwicklungsumgebung wurde IntelliJ IDEA\footnote{https://www.jetbrains.com/de-de/idea/} von JetBrains genutzt. Java wurde als Programmiersprache zur Impelementierung des Projektes verwendet. Zur Erstellung des Programms kam maven\footnote{https://maven.apache.org/} als Build-Management-Tool zum Einsatz.
+Als Entwicklungsumgebung wurde IntelliJ IDEA\footnote{https://www.jetbrains.com/de-de/idea/} von JetBrains genutzt. Da wir innerhalb der Gruppe bisher am meisten Erfahrung in Java hatten, wurde dies als Programmiersprache zur Implementierung des Projektes verwendet. Zur Erstellung des Programms kam maven\footnote{https://maven.apache.org/} als Build-Management-Tool zum Einsatz.
+
+Des Weiteren wurde zur Implementierung des NN die Library Eclipse deeplearning4j (DL4J) \cite{DL4J} zur Hilfe genommen. Hinsichtlich dieser Auswahl verschafften wir uns zunächst einen Überblick über vorhandene, gute Bibliotheken und recherchierten deren Vorteile und Anwendungsfälle, wobei die Entscheidung letztendlich auf die bereits genannte fiel.
+
+Entsprechend folgt nun die Darlegung der Eigenschaften von DL4J, wobei der Fokus auf der Ausarbeitung der für das vorliegende Projekte relevanten Aspekten liegt. Sämtliche Informationen sind, sofern nicht anders angegeben, der zugehörigen Website https://deeplearning4j.org/ entnommen.
+
+Die Library hat ihren Ursprung bei Entwicklern der Firma Konduit \footnote{https://konduit.ai/} in San Francisco und wurde unter der Apache Software Foundation License 2.0 \footnote{https://www.apache.org/licenses/LICENSE-2.0} veröffentlicht.
+
+DL4J ist vollständig open source und in Java geschrieben, wobei für die zugrundeliegenden Berechnungen C, C++ und Cuda genutzt wurden. Des Weiteren unterstützt sie ND4J (N-Dimensional Arrays for Java) - eine Bibliothek für das wissenschaftliche Rechnen, die eine hohe Performanz gewährleistet \footnote{https://nd4j.org/}. Diese werden im vorliegenden Projekt anhand von \texttt{INDArrays} referenziert.
+%TODO INDArrays
+
+Außerdem werden zahlreiche, hilfreiche Features unterstützt, unter anderem Batch Normalisation, Residual Learning, CNNs. In Form eines \texttt{ComputationGraph} kann daher ein verhältnismäßig einfach ein komplexes neuronales Netz aufgebaut werden.
+
+Weitere ausschlaggebende Vorteile liegen in der ausführlichen Dokumentation \footnote{https://deeplearning4j.org/api/latest/}, sowie den zahlreichen Hilfsmitteln, wie Tutorials \footnote{erreichbar über https://deeplearning4j.org/tutorials/setup}, Code-Beispiele \footnote{https://github.com/eclipse/deeplearning4j-examples} und Leitfäden zu sämtlichen Aspekten \footnote{erreichbar über https://deeplearning4j.org/docs/latest/}, die zudem alle schnell und unkompliziert über die eigene Website zu finden sind.
+
+%TODO
+Ergänzend dazu sei auf mögliche Alternativen dazu verwiesen, die in lägen...
+
 
 \subsection{Testumgebungen}
 

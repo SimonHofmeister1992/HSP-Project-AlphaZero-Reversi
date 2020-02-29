@@ -1,6 +1,13 @@
 \subsection{Reversi}
 
+In diesem Abschnitt werden die grundlegenden Spielregeln\footnote{$https://de.wikipedia.org/wiki/Othello_(Spiel)$} von Reversi, so wie sie ebenfalls im vorliegenden Projekt Anwendung finden, vorgestellt.
 
+%TODO Anzahl Spieler, Startzustand, Aussetzen (nur wenn man keinen Zug machen kann?)
+Reversi ist ein kompetitives Spiel, bei dem die Teilnehmer in einer vorgegebenen Reihenfolge Züge machen dürfen. Bei zwei Spielern bedeutet das, dass sich diese abwechseln, bei mehr als zwei geht es reihum. Jeder Spieler hat eine Farbe beziehungsweise ein Symbol für seine gelegten Steine. Ein Zug besteht darin, den eigenen Spielstein angrenzend an einen gegnerischen Stein so auf dem Spielfeld zu platzieren, dass mindestens ein gegnerischer eingeschlossen wird, wobei es stattdessen außerdem möglich ist auszusetzen. Sobald der eigene Spielstein positioniert ist, werden alle gegnerischen, die zwischen dem neuen und bereits vorhandenen Steinen liegen, so umgekehrt, dass sie die Farbe oder das Symbol des derzeitigen Spielers annehmen.
 
+Üblicherweise ist das Spielfeld ein Quadrat der Größe 8x8, wobei in Abwandlungen andere Dimensionen grundsätzlich möglich sind. Ein typischer Startzustand zeigt dich darin, dass bereits zwei Steine der beiden Spieler, also ingesamt vier, in der Mitte des Feldes in Form einer 2x2 Anordnung platziert sind. Die Steine der jeweiligen Teilnehmer sind dabei diagonal angeordnet.
 
-\subsection{ ReversiXT}
+Ziel ist es, möglichst viele Steine der eigenen Farbe oder mit dem eigenen Symbol auf dem Feld zu haben. Das Spiel ist beendet, sobald beide Spieler direkt hintereinander passen beziehungsweise beide keine Züge mehr machen können. Gewonnen hat entsprechend derjenige, der mehr Spielsteine auf dem Feld liegen hat. Falls beide Teilnehmer die gleiche Anzahl haben, so ist der Spielausgang unentschieden.
+
+%TODO XT bzw. Erweiterungen
+\subsection{ReversiXT}
