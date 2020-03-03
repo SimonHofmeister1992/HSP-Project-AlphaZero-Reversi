@@ -7,9 +7,16 @@ public class OutputNeuronalNet {
     INDArray outputValueHead;
     INDArray outputPolicyHead;
 
-    public OutputNeuronalNet(INDArray outputPolicyHead, INDArray outputValueHead){
-        this.outputPolicyHead=outputPolicyHead;
-        this.outputValueHead=outputValueHead;
+    public OutputNeuronalNet(INDArray outputPolicyHead, INDArray outputValueHead) {
+        this.outputPolicyHead = outputPolicyHead;
+        this.outputValueHead = outputValueHead;
     }
 
+    public INDArray getOutputValueHead() {
+        return outputValueHead;
+    }
+
+    public INDArray getOutputPolicyHead() {
+        return outputPolicyHead;
+    }
 }

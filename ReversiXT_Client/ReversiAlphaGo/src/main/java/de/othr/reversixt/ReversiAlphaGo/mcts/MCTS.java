@@ -1,12 +1,13 @@
 package de.othr.reversixt.ReversiAlphaGo.mcts;
 
 import de.othr.reversixt.ReversiAlphaGo.agent.ITurnChoiceAlgorithm;
+import de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet.OutputNeuronalNet;
+import de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet.PolicyValuePredictor;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
-
-
+import de.othr.reversixt.ReversiAlphaGo.general.AlphaGoZeroConstants;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,6 +23,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
     private Node root;
     private ArrayList<Node> leafNodes;
     private Node bestNode;
+    private ArrayList<Node> turnHistory = new ArrayList<>();
 
     public MCTS(Environment environment) {
         this.environment = environment;
@@ -41,6 +43,9 @@ public class MCTS implements ITurnChoiceAlgorithm {
             Date date = new Date(System.currentTimeMillis());
             System.out.println("Ende: " + formatter.format(date));
         }
+        System.out.println("bestNode: " + bestNode);
+        System.out.println("bestTurn: " + bestNode.getCurTurn().getColumn() + ", " + bestNode.getCurTurn().getRow());
+        turnHistory.add(bestNode);
         return bestNode.getCurTurn();
     }
 
@@ -91,6 +96,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         for (Node node : root.getChildren()) {
             nodeVisited = node.getNumVisited();
             if (nodeVisited > maxVisited) {
+                System.out.println("bestNode set");
                 bestNode = node;
                 maxVisited = nodeVisited;
             }
@@ -105,20 +111,42 @@ public class MCTS implements ITurnChoiceAlgorithm {
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
         Date date = new Date(System.currentTimeMillis());
         System.out.println("Start: " + formatter.format(date));
+
         Node chosenNode = root;
         double chosenNodeUCT;
         double nodeUCT;
+        double reward;
+
+        evaluateLeaf(chosenNode);
+        while (!leafNodes.isEmpty()) {
+            if (Thread.currentThread().isInterrupted()) {
+                return;
+            }
+            chosenNodeUCT = Double.MIN_VALUE;
+
+            for (Node child : chosenNode.getChildren()) {
+                reward = evaluateLeaf(child);
+                backpropagate(child, reward);
+                nodeUCT = child.calculateUCT();
+                System.out.println("node uct: " + nodeUCT);
+                if (nodeUCT > chosenNodeUCT) {
+                    chosenNodeUCT = nodeUCT;
+                    chosenNode = child;
+                }
+                setBestTurn();
+            }
+        }
+/*
         while (!leafNodes.isEmpty()) {
             //Check if Thread was interrupted
-            if(Thread.currentThread().isInterrupted()) {
+            if (Thread.currentThread().isInterrupted()) {
                 return;
             }
             //search best UCT in every loop of while
             chosenNodeUCT = Double.MIN_VALUE;
             System.out.println("LeafNodeSize: " + leafNodes.size());
-            expand(chosenNode);
-            //System.out.println("LeafNodeSize after expand: " + leafNodes.size());
-            traverse(chosenNode);
+            reward = evaluateLeaf(chosenNode);
+            backpropagate(chosenNode, reward);
             //System.out.println("LeafNodeSize after traverse: " + leafNodes.size());
             setBestTurn();
             //System.out.println("SetBestTurn finished!");
@@ -130,7 +158,67 @@ public class MCTS implements ITurnChoiceAlgorithm {
                     chosenNode = node;
                 }
             }
+        }*/
+    }
+
+    private void backpropagate(Node node, double reward) {
+        //Backpropagate the reward and numVisited to all parents
+        Node nodeBP = node;
+        while (nodeBP != root) {
+            nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
+            //TODO save current player?
+            if (nodeBP.getParent().getNextPlayer() == node.getParent().getNextPlayer()) {
+                nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
+            } else {
+                nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
+            }
+            nodeBP = nodeBP.getParent();
         }
+    }
+
+    /**
+     * hand over the leaf node to the neuronal net to evaluate game state
+     * reward represents the evaluation of the current game state, i.e. the probability of winning being in the current
+     * state
+     * to consider only valid turns (instead of all playground positions) the possible turns are obtained
+     * priors array holds the prior probabilities for every move/for every position in the playground,
+     * if it is a valid turn a child node is created and the corresponding prior is saved
+     * otherwise it is not a valid move, therefore it is not added to the list of child nodes
+     * priors is a one dimensional array representing the playground (a two dimensional array), therefore row and col
+     * are calculated using the value for the dimension of the playground deposited in AlphaGoZeroConstants
+     * <p>
+     * eventually the new child node is added to the array of leaf nodes and the node received as a parameter
+     * (chosenNode) is removed from it
+     *
+     * @param chosenNode is the node to be evaluated
+     */
+    private double evaluateLeaf(Node chosenNode) {
+        Playground playground = chosenNode.getPlayground().getCloneOfPlayground();
+        OutputNeuronalNet outputNN = PolicyValuePredictor.getInstance().evaluate(playground, chosenNode.getNextPlayer());
+        double reward = outputNN.getOutputValueHead().toDoubleVector()[0];
+        double[] priors = outputNN.getOutputPolicyHead().toDoubleVector();
+        System.out.println("evaluate node: " + chosenNode);
+        System.out.println("reward: " + reward);
+        //System.out.println("priors: " + Arrays.toString(priors));
+        //System.out.println("priors length: " + priors.length);
+        ArrayList<Turn> validTurns = getPossibleTurns(chosenNode.getPlayground(), chosenNode.getNextPlayer()); //row col
+        for (int i = 0; i < priors.length; i++) {
+            int col = i % AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
+            int row = (i - col) / AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
+
+            for (Turn turn : validTurns) {
+                if (col == turn.getColumn() && row == turn.getRow()) {
+                    playground = chosenNode.getPlayground().getCloneOfPlayground();
+                    Node child = new Node(playground, chosenNode, environment.getNextPlayer(turn.getPlayerIcon()), turn, priors[i]);
+                    chosenNode.getChildren().add(child);
+                    leafNodes.add(child);
+                }
+            }
+
+        }
+        System.out.println(chosenNode.getChildren().toString());
+        leafNodes.remove(chosenNode); //TODO leaf nodes necessary?
+        return reward;
     }
 
     /**
@@ -144,11 +232,17 @@ public class MCTS implements ITurnChoiceAlgorithm {
             Playground playground = child.getPlayground().getCloneOfPlayground();
             //Simulate one path to get a reward
             double reward = simulate(playground, child.getNextPlayer());
-            //Backpropagate the reward anv visitedNum to all Parents (except root)
+
+            //Backpropagate the reward and numVisited to all parents
             Node nodeBP = child;
             while (nodeBP != root) {
                 nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
-                nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
+                //TODO save current player?
+                if (nodeBP.getParent().getNextPlayer() == child.getParent().getNextPlayer()) {
+                    nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
+                } else {
+                    nodeBP.setSimulationReward(nodeBP.getSimulationReward() - reward);
+                }
                 nodeBP = nodeBP.getParent();
             }
         }
@@ -208,7 +302,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         for (Turn turn : possibleTurns) {
             Playground playground = expandNode.getPlayground().getCloneOfPlayground();
             environment.updatePlayground(turn, playground);
-            Node child = new Node(playground, expandNode, environment.getNextPlayer(turn.getPlayerIcon()), turn);
+            Node child = new Node(playground, expandNode, environment.getNextPlayer(turn.getPlayerIcon()), turn, 1);
             expandNode.getChildren().add(child);
             leafNodes.add(child);
         }

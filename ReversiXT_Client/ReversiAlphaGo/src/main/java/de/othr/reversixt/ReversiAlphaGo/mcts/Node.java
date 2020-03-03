@@ -13,7 +13,7 @@ public class Node {
 
     // TODO prior probability for a move (calculated by a nn) has to be added instead of the constant, for now an arbitrary constant is used (which will later be superfluous)
     // parameter for controlling the trade-off between exploration and exploitation in the mcts
-    private static final double UCB_CONSTANT = 1.2;
+    private static final double UCB_CONSTANT = 3.2;
 
     private int numVisited;
     private double simulationReward;
@@ -22,10 +22,11 @@ public class Node {
     private Playground playground;
     private Player nextPlayer;
     private Turn curTurn;
+    private double prior;
 
     /**
      * public constructor for the root node
-     * init: a new node is not yet visited, the inital win/loss and has no children
+     * init: a new node is not yet visited, the initial win/loss and has no children
      *
      * @param playground for the node
      * @param player      specifying whose turn it is (for the root node it is the current user not the opponent)
@@ -47,7 +48,7 @@ public class Node {
      * @param parent      of the node
      * @param nextPlayer      specifying whose turn it is
      */
-    public Node(Playground playground, Node parent, Player nextPlayer, Turn turn) {
+    public Node(Playground playground, Node parent, Player nextPlayer, Turn turn, double prior) {
         this.numVisited = 0;
         this.simulationReward = 0.0;
         this.parent = parent;
@@ -55,6 +56,7 @@ public class Node {
         this.playground = playground;
         this.nextPlayer = nextPlayer;
         this.curTurn = turn;
+        this.prior = prior;
     }
 
     /**
@@ -129,7 +131,7 @@ public class Node {
      * @return double exploration value
      */
     private double calculateExploration() {
-        return Math.sqrt(((double) parent.getNumVisited()) / (1 + numVisited));
+        return (Math.sqrt((double) parent.getNumVisited()) / (1 + numVisited));
     }
 
     /**
@@ -139,6 +141,6 @@ public class Node {
      * @return double uct value
      */
     public double calculateUCT() {
-        return calculateExploitation() + UCB_CONSTANT * calculateExploration();
+        return calculateExploitation() + UCB_CONSTANT * prior * calculateExploration();
     }
 }
