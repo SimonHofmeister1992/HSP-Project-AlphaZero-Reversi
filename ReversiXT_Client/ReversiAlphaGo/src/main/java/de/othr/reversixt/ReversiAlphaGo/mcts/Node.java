@@ -22,7 +22,7 @@ public class Node {
     private Playground playground;
     private Player nextPlayer;
     private Turn curTurn;
-    private double prior;
+    private ArrayList<Turn> nextTurns;
 
     /**
      * public constructor for the root node
@@ -38,6 +38,7 @@ public class Node {
         this.children = new ArrayList<Node>();
         this.playground = playground;
         this.nextPlayer = player;
+        this.nextTurns = new ArrayList<Turn>();
     }
 
     /**
@@ -48,15 +49,15 @@ public class Node {
      * @param parent      of the node
      * @param nextPlayer      specifying whose turn it is
      */
-    public Node(Playground playground, Node parent, Player nextPlayer, Turn turn, double prior) {
-        this.numVisited = 0;
-        this.simulationReward = 0.0;
+    public Node(Playground playground, Node parent, Player nextPlayer, Turn turn, ArrayList<Turn> nextTurns, double reward) {
+        this.numVisited = 1;
+        this.simulationReward = reward;
         this.parent = parent;
         this.children = new ArrayList<Node>();
         this.playground = playground;
         this.nextPlayer = nextPlayer;
         this.curTurn = turn;
-        this.prior = prior;
+        this.nextTurns = nextTurns;
     }
 
     /**
@@ -65,10 +66,6 @@ public class Node {
 
     public Turn getCurTurn() {
         return curTurn;
-    }
-
-    public void setCurTurn(Turn curTurn) {
-        this.curTurn = curTurn;
     }
 
     public int getNumVisited() {
@@ -91,10 +88,6 @@ public class Node {
         return parent;
     }
 
-    public void setParent(Node parent) {
-        this.parent = parent;
-    }
-
     public ArrayList<Node> getChildren() {
         return children;
     }
@@ -111,11 +104,15 @@ public class Node {
         return nextPlayer;
     }
 
-    public void setNextPlayer(Player nextPlayer) {
-        this.nextPlayer = nextPlayer;
+    public ArrayList<Turn> getNextTurns() {   return nextTurns;   }
+
+    public void setNextTurns(ArrayList<Turn> nextTurns) {  this.nextTurns = nextTurns;   }
+
+    public void incNumVistited() { this.numVisited = numVisited + 1; }
+
+    public void addReward(double reward) {
+        this.simulationReward = simulationReward + reward;
     }
-
-
     /**
      * calculates the exploitation component for the uct
      *
@@ -141,6 +138,7 @@ public class Node {
      * @return double uct value
      */
     public double calculateUCT() {
-        return calculateExploitation() + UCB_CONSTANT * prior * calculateExploration();
+        return calculateExploitation() + UCB_CONSTANT * calculateExploration();
     }
+
 }

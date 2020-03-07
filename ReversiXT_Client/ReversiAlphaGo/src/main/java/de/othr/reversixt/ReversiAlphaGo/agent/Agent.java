@@ -13,12 +13,12 @@ public class Agent {
 
     public Agent(Environment environment){
         this.environment = environment;
+        this.itca = new MCTS(environment);
     }
 
     public Turn play() {
-        Turn turn;
 
-        itca = new MCTS(environment);
+        Turn turn;
 
         switch (environment.getPhase()) {
             case IPhase.TURN_PHASE:

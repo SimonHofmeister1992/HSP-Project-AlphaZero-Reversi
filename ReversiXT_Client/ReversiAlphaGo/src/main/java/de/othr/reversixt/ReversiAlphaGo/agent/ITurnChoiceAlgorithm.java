@@ -10,4 +10,5 @@ public interface ITurnChoiceAlgorithm {
 
     void chooseTurnPhase2();
 
+    void enemyTurn(Turn turn);
 }
