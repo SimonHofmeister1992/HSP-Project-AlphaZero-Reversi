@@ -24,6 +24,10 @@ public class Node {
     private Turn curTurn;
     private ArrayList<Turn> nextTurns;
 
+    // Training Stuff
+    private double unchangedRewardNN;
+    private double[] priorsOfNN;
+
     /**
      * public constructor for the root node
      * init: a new node is not yet visited, the initial win/loss and has no children
@@ -141,4 +145,21 @@ public class Node {
         return calculateExploitation() + UCB_CONSTANT * calculateExploration();
     }
 
+
+    // Training Getter and Setter
+    public double getUnchangedRewardNN() {
+        return unchangedRewardNN;
+    }
+
+    public void setUnchangedRewardNN(double unchangedRewardNN) {
+        this.unchangedRewardNN = unchangedRewardNN;
+    }
+
+    public double[] getPriorsOfNN() {
+        return priorsOfNN;
+    }
+
+    public void setPriorsOfNN(double[] priorsOfNN) {
+        this.priorsOfNN = priorsOfNN;
+    }
 }

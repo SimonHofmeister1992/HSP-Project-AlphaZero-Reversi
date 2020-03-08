@@ -52,7 +52,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
             Date date = new Date(System.currentTimeMillis());
             System.out.println("Ende: " + formatter.format(date));
         }
-        if (!LEARNER_MODE) {
+        if (LEARNER_MODE) {
             turnHistory.add(bestNode);
         }
         //bestNode is next root-node of tree
@@ -109,6 +109,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
     private void setNewRootNode(Node nextNode) {
         this.root = nextNode;
     }
+
     /**
      * if there are no possible moves an empty ArrayList is returned
      *
@@ -346,6 +347,12 @@ public class MCTS implements ITurnChoiceAlgorithm {
         }
 
         Node newNode = new Node(playground, chosenNode, environment.getNextPlayer(nextTurn.getPlayerIcon()),nextTurn,validTurns, reward);
+
+        if (LEARNER_MODE) {
+            newNode.setPriorsOfNN(priors);
+            newNode.setUnchangedRewardNN(reward);
+        }
+        
         chosenNode.getNextTurns().remove(nextTurn);
         chosenNode.getChildren().add(newNode);
         return newNode;
