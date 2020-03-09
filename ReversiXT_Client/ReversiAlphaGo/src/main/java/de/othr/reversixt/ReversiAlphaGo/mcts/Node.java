@@ -13,7 +13,7 @@ public class Node {
 
     // TODO prior probability for a move (calculated by a nn) has to be added instead of the constant, for now an arbitrary constant is used (which will later be superfluous)
     // parameter for controlling the trade-off between exploration and exploitation in the mcts
-    private static final double UCB_CONSTANT = 3.2;
+    private static final double UCB_CONSTANT = 3.5;
 
     private int numVisited;
     private double simulationReward;
@@ -142,7 +142,7 @@ public class Node {
      * @return double uct value
      */
     public double calculateUCT() {
-        return calculateExploitation() + UCB_CONSTANT * calculateExploration();
+        return calculateExploitation() + UCB_CONSTANT * curTurn.getPrior() * calculateExploration();
     }
 
 
