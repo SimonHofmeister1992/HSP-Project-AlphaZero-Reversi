@@ -84,14 +84,14 @@ public class MCTS implements ITurnChoiceAlgorithm {
         int newRootNodeFound = 0;
         for (Node node : root.getChildren()) {
             if (node.getCurTurn().getRow() == turn.getRow() && node.getCurTurn().getColumn() == turn.getColumn()) {
-                System.out.println("New rootNode found");
+                System.out.println("RootNode updated");
                 setNewRootNode(node);
                 newRootNodeFound = 1;
             }
         }
         //enemy turn was not explored -> new root node
         if (newRootNodeFound == 0) {
-            System.out.println("New rootNode was not found -> create new Tree");
+            System.out.println("Discard tree");
             root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
             firstCall = Boolean.TRUE;
         }
@@ -194,14 +194,13 @@ public class MCTS implements ITurnChoiceAlgorithm {
         Node newNode;
         int count = 0;
         while (bestUCTNode != null && count < NR_SIMULATIONS) {
+            if(!QUIET_MODE) {
+                System.out.println("Nr Simulation: "+ count);
+            }
             //needed to interrupt thread
             if (Thread.currentThread().isInterrupted()) {
                 return;
             }
-            if (!QUIET_MODE) {
-                System.out.println("-- create next Node and evaluate --");
-            }
-
             newNode = createNextNodeAndEvaluate(bestUCTNode);
             backpropagate(newNode);
             setBestTurn();
@@ -338,7 +337,8 @@ public class MCTS implements ITurnChoiceAlgorithm {
         Turn nextTurn = choseNextTurn(chosenNode);
         Playground playground = chosenNode.getPlayground().getCloneOfPlayground();
         environment.updatePlayground(nextTurn, playground);
-        OutputNeuronalNet outputNN = PolicyValuePredictor.getInstance().evaluate(playground, environment.getNextPlayer(nextTurn.getPlayerIcon()));
+        Player nextplayer = environment.getNextPlayer(nextTurn.getPlayerIcon());
+        OutputNeuronalNet outputNN = PolicyValuePredictor.getInstance().evaluate(playground, nextplayer);
         double reward = outputNN.getOutputValueHead().toDoubleVector()[0];
         double[] priors = outputNN.getOutputPolicyHead().toDoubleVector();
 
@@ -347,17 +347,16 @@ public class MCTS implements ITurnChoiceAlgorithm {
             playground.printPlayground();
         }
 
-        ArrayList<Turn> validTurns = getPossibleTurns(chosenNode.getPlayground(), chosenNode.getNextPlayer()); //row col
+        ArrayList<Turn> validTurns = getPossibleTurns(playground, nextplayer); //row col
         for (Turn turn : validTurns) {
             int i = turn.getColumn() + turn.getRow() * AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
             turn.setPrior(priors[i]);
         }
 
-        Node newNode = new Node(playground, chosenNode, environment.getNextPlayer(nextTurn.getPlayerIcon()), nextTurn, validTurns, reward);
+        Node newNode = new Node(playground, chosenNode, nextplayer, nextTurn, validTurns, reward);
 
         if (LEARNER_MODE) {
             newNode.setPriorsOfNN(priors);
-            newNode.setUnchangedRewardNN(reward);
         }
 
         chosenNode.getNextTurns().remove(nextTurn);

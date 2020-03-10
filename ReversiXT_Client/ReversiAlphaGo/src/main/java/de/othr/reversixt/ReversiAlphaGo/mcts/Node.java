@@ -25,7 +25,6 @@ public class Node {
     private ArrayList<Turn> nextTurns;
 
     // Training Stuff
-    private double unchangedRewardNN;
     private double[] priorsOfNN;
 
     /**
@@ -147,14 +146,6 @@ public class Node {
 
 
     // Training Getter and Setter
-    public double getUnchangedRewardNN() {
-        return unchangedRewardNN;
-    }
-
-    public void setUnchangedRewardNN(double unchangedRewardNN) {
-        this.unchangedRewardNN = unchangedRewardNN;
-    }
-
     public double[] getPriorsOfNN() {
         return priorsOfNN;
     }
