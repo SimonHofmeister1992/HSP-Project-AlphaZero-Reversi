@@ -22,6 +22,8 @@ import static de.othr.reversixt.ReversiAlphaGo.general.Main.QUIET_MODE;
 
 public class MCTS implements ITurnChoiceAlgorithm {
 
+    private static final int NR_SIMULATIONS= 1600;
+
     private Environment environment;
     private char ourPlayerSymbol;
     private Node root;
@@ -189,8 +191,8 @@ public class MCTS implements ITurnChoiceAlgorithm {
             searchBestUCT(root);
         }
         Node newNode;
-        while (bestUCTNode != null) {
-
+        int count = 0;
+        while (bestUCTNode != null && count < NR_SIMULATIONS) {
             //needed to interrupt thread
             if (Thread.currentThread().isInterrupted()) {
                 return;
@@ -203,6 +205,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
             backpropagate(newNode);
             setBestTurn();
             searchBestUCT(root);
+            count++;
         }
     }
 
