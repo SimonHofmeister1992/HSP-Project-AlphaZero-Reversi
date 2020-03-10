@@ -24,32 +24,30 @@ public class PolicyValuePredictor {
     private static NeuronalNet neuronalNet;
     private static ComputationGraph computationGraph;
     private static final int numberOfInputPlanes = AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET;
-    private static final File bestComputationGraphFile = new File("model" + File.separator +  "bestModel.zip");
-    private static final File actualComputationGraphFile = new File("model" + File.separator +  "actualModel.zip");
+    private static final File bestComputationGraphFile = new File("model" + File.separator + "bestModel.zip");
+    private static final File actualComputationGraphFile = new File("model" + File.separator + "actualModel.zip");
     private PlaygroundTransformer playgroundTransformer;
 
     //****************************************************************
     //  creates an instance of the PolicyValueGraph
     //****************************************************************
-    public static PolicyValuePredictor getInstance(){
+    public static PolicyValuePredictor getInstance() {
 
-        if(PolicyValuePredictor.PVP == null) {
+        if (PolicyValuePredictor.PVP == null) {
             PolicyValuePredictor.PVP = new PolicyValuePredictor();
+            createComputationGraph();
         }
-
-        createComputationGraph();
-
         return PVP;
     }
 
-    private PolicyValuePredictor (){
+    private PolicyValuePredictor() {
         this.playgroundTransformer = new PlaygroundTransformer();
     }
 
     //****************************************************************
     //  returns the computation graph which shall be used
     //****************************************************************
-    public ComputationGraph getComputationGraph(){
+    public ComputationGraph getComputationGraph() {
         return PolicyValuePredictor.computationGraph;
     }
 
@@ -60,54 +58,51 @@ public class PolicyValuePredictor {
     //****************************************************************
     //  loads and builds the configuration of the computation graph
     //****************************************************************
-    public static void createComputationGraph(){
+    public static void createComputationGraph() {
         ComputationGraph load = null;
         try {
-            if(actualComputationGraphFile.exists() && Main.LEARNER_MODE){
+            if (actualComputationGraphFile.exists() && Main.LEARNER_MODE) {
                 load = ComputationGraph.load(actualComputationGraphFile, true);
-                if(!Main.QUIET_MODE) System.out.println("ComputationGraph: LearningGraph Loaded");
-            }
-            else if(!actualComputationGraphFile.exists() && Main.LEARNER_MODE){
+                if (!Main.QUIET_MODE) System.out.println("ComputationGraph: LearningGraph Loaded");
+            } else if (!actualComputationGraphFile.exists() && Main.LEARNER_MODE) {
                 load = ComputationGraph.load(bestComputationGraphFile, true);
-                if(!Main.QUIET_MODE) System.out.println("ComputationGraph: BestGraph Loaded");
-		        saveAsActualModel();
-            }
-            else if(!Main.LEARNER_MODE && bestComputationGraphFile.exists()){
+                if (!Main.QUIET_MODE) System.out.println("ComputationGraph: BestGraph Loaded");
+                saveAsActualModel();
+            } else if (!Main.LEARNER_MODE && bestComputationGraphFile.exists()) {
                 load = ComputationGraph.load(bestComputationGraphFile, true);
-                if(!Main.QUIET_MODE) System.out.println("ComputationGraph: BestGraph Loaded");
-            }
-            else if(!Main.LEARNER_MODE && !bestComputationGraphFile.exists()){
+                if (!Main.QUIET_MODE) System.out.println("ComputationGraph: BestGraph Loaded");
+            } else if (!Main.LEARNER_MODE && !bestComputationGraphFile.exists()) {
                 load = ComputationGraph.load(actualComputationGraphFile, true);
-                if(!Main.QUIET_MODE) System.out.println("ComputationGraph: LearningGraph Loaded");
-	        	saveAsBestModel();
+                if (!Main.QUIET_MODE) System.out.println("ComputationGraph: LearningGraph Loaded");
+                saveAsBestModel();
             }
         } catch (IOException e) {
             load = null;
         }
 
-        if(load != null) PolicyValuePredictor.computationGraph = load;
+        if (load != null) PolicyValuePredictor.computationGraph = load;
         else {
             PVP.neuronalNet = NeuronalNet.getInstance(numberOfInputPlanes);
             PolicyValuePredictor.computationGraph = PolicyValuePredictor.neuronalNet.getComputationGraph();
-            if(!Main.QUIET_MODE) System.out.println("ComputationGraph: New Graph Loaded");
-			saveAsActualModel();
-			saveAsBestModel();
+            if (!Main.QUIET_MODE) System.out.println("ComputationGraph: New Graph Loaded");
+            saveAsActualModel();
+            saveAsBestModel();
         }
     }
 
-    public static void saveAsBestModel(){
+    public static void saveAsBestModel() {
         try {
             computationGraph.save(bestComputationGraphFile, true);
         } catch (IOException e) {
-            if(!Main.QUIET_MODE) getLogger().warn("File: " + bestComputationGraphFile + " is not accessable");
+            if (!Main.QUIET_MODE) getLogger().warn("File: " + bestComputationGraphFile + " is not accessable");
         }
     }
 
-    public static void saveAsActualModel(){
+    public static void saveAsActualModel() {
         try {
             computationGraph.save(actualComputationGraphFile, true);
         } catch (IOException e) {
-            if(!Main.QUIET_MODE) getLogger().warn("File: " + actualComputationGraphFile + " is not accessable");
+            if (!Main.QUIET_MODE) getLogger().warn("File: " + actualComputationGraphFile + " is not accessable");
         }
     }
 
@@ -120,12 +115,12 @@ public class PolicyValuePredictor {
     // @param valueOutputsToLearn: values predicted by the neural net, corrected by the MCTS (Reward)
     // usage example see PolicyValuePredictorTest.testTrainAndEvaluateComputationGraph()
     //*********************************************************************************
-    public void trainComputationGraph(Playground[] playgrounds, Player[] players, INDArray policyOutputsToLearn, INDArray valueOutputsToLearn){
+    public void trainComputationGraph(Playground[] playgrounds, Player[] players, INDArray policyOutputsToLearn, INDArray valueOutputsToLearn) {
 
-        if(playgrounds.length == policyOutputsToLearn.size(0) && playgrounds.length==valueOutputsToLearn.size(0) && playgrounds.length == players.length){
+        if (playgrounds.length == policyOutputsToLearn.size(0) && playgrounds.length == valueOutputsToLearn.size(0) && playgrounds.length == players.length) {
 
-            INDArray transformedPlaygrounds = Nd4j.zeros(DataType.INT,0, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET, AlphaGoZeroConstants.DIMENSION_PLAYGROUND,AlphaGoZeroConstants.DIMENSION_PLAYGROUND);
-            for(int i = 0; i < playgrounds.length; i++){
+            INDArray transformedPlaygrounds = Nd4j.zeros(DataType.INT, 0, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET, AlphaGoZeroConstants.DIMENSION_PLAYGROUND, AlphaGoZeroConstants.DIMENSION_PLAYGROUND);
+            for (int i = 0; i < playgrounds.length; i++) {
                 INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[i], players[i]);
                 transformedPlaygrounds = Nd4j.concat(0, transformedPlaygrounds, transformedPlayground);
             }
@@ -140,10 +135,11 @@ public class PolicyValuePredictor {
     // @param player: the player which shall play the next action
     // usage example see PolicyValuePredictorTest.testTrainAndEvaluateComputationGraph()
     //*********************************************************************************
-    public OutputNeuronalNet evaluate(Playground playground, Player player){
+    public OutputNeuronalNet evaluate(Playground playground, Player player) {
 
         INDArray transformedPlayground = playgroundTransformer.transform(playground, player);
-        INDArray[] outputs = computationGraph.output(transformedPlayground);
+        INDArray[] outputs = computationGraph.output
+                (transformedPlayground);
 
         return new OutputNeuronalNet(outputs[0], outputs[1]);
     }

@@ -37,7 +37,6 @@ public class Main {
 
         ServerCommunicator serverCommunicator = new ServerCommunicator(groupNumber);
         Environment environment = new Environment();
-        AgentCallable agentCallable;
 
         // Initialize singleton neuronal net before connecting to server (time intensive)
         PolicyValuePredictor.getInstance();
@@ -47,7 +46,8 @@ public class Main {
          */
 
         serverInit(ip, port, serverCommunicator, environment);
-
+        AgentCallable agentCallable = null;
+        
         /* ********************************
          *             Game itself
          */
@@ -61,14 +61,16 @@ public class Main {
             switch (msgType) {
                 case IMsgType.PLAYER_ICON:
                     System.out.println("Set ourPlayer in environment: " + serverCommunicator.getPlayerIcon());
+                    //initialization of Agent Callable
                     environment.setOurPlayer(serverCommunicator.getPlayerIcon());
+                    agentCallable = new AgentCallable(environment);
                     break;
                 case IMsgType.ENEMY_TURN:
                     environment.updatePlayground(serverCommunicator.getEnemyTurn(), environment.getPlayground());
+                    agentCallable.getAgent().getITurnChoiceAlgorithm().enemyTurn(serverCommunicator.getEnemyTurn());
                     break;
                 case IMsgType.TURN_REQUEST:
                     System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
-                    agentCallable = new AgentCallable(environment);
                     ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
                     Future<Turn> futureTurn = executorService.submit(agentCallable);
                     //

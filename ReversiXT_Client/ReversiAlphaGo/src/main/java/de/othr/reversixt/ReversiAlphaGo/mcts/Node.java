@@ -13,7 +13,7 @@ public class Node {
 
     // TODO prior probability for a move (calculated by a nn) has to be added instead of the constant, for now an arbitrary constant is used (which will later be superfluous)
     // parameter for controlling the trade-off between exploration and exploitation in the mcts
-    private static final double UCB_CONSTANT = 1.2;
+    private static final double UCB_CONSTANT = 3.5;
 
     private int numVisited;
     private double simulationReward;
@@ -22,10 +22,15 @@ public class Node {
     private Playground playground;
     private Player nextPlayer;
     private Turn curTurn;
+    private ArrayList<Turn> nextTurns;
+
+    // Training Stuff
+    private double unchangedRewardNN;
+    private double[] priorsOfNN;
 
     /**
      * public constructor for the root node
-     * init: a new node is not yet visited, the inital win/loss and has no children
+     * init: a new node is not yet visited, the initial win/loss and has no children
      *
      * @param playground for the node
      * @param player      specifying whose turn it is (for the root node it is the current user not the opponent)
@@ -37,6 +42,7 @@ public class Node {
         this.children = new ArrayList<Node>();
         this.playground = playground;
         this.nextPlayer = player;
+        this.nextTurns = new ArrayList<Turn>();
     }
 
     /**
@@ -47,14 +53,15 @@ public class Node {
      * @param parent      of the node
      * @param nextPlayer      specifying whose turn it is
      */
-    public Node(Playground playground, Node parent, Player nextPlayer, Turn turn) {
-        this.numVisited = 0;
-        this.simulationReward = 0.0;
+    public Node(Playground playground, Node parent, Player nextPlayer, Turn turn, ArrayList<Turn> nextTurns, double reward) {
+        this.numVisited = 1;
+        this.simulationReward = reward;
         this.parent = parent;
         this.children = new ArrayList<Node>();
         this.playground = playground;
         this.nextPlayer = nextPlayer;
         this.curTurn = turn;
+        this.nextTurns = nextTurns;
     }
 
     /**
@@ -63,10 +70,6 @@ public class Node {
 
     public Turn getCurTurn() {
         return curTurn;
-    }
-
-    public void setCurTurn(Turn curTurn) {
-        this.curTurn = curTurn;
     }
 
     public int getNumVisited() {
@@ -89,10 +92,6 @@ public class Node {
         return parent;
     }
 
-    public void setParent(Node parent) {
-        this.parent = parent;
-    }
-
     public ArrayList<Node> getChildren() {
         return children;
     }
@@ -109,11 +108,15 @@ public class Node {
         return nextPlayer;
     }
 
-    public void setNextPlayer(Player nextPlayer) {
-        this.nextPlayer = nextPlayer;
+    public ArrayList<Turn> getNextTurns() {   return nextTurns;   }
+
+    public void setNextTurns(ArrayList<Turn> nextTurns) {  this.nextTurns = nextTurns;   }
+
+    public void incNumVistited() { this.numVisited = numVisited + 1; }
+
+    public void addReward(double reward) {
+        this.simulationReward = simulationReward + reward;
     }
-
-
     /**
      * calculates the exploitation component for the uct
      *
@@ -129,7 +132,7 @@ public class Node {
      * @return double exploration value
      */
     private double calculateExploration() {
-        return Math.sqrt(((double) parent.getNumVisited()) / (1 + numVisited));
+        return (Math.sqrt((double) parent.getNumVisited()) / (1 + numVisited));
     }
 
     /**
@@ -139,6 +142,24 @@ public class Node {
      * @return double uct value
      */
     public double calculateUCT() {
-        return calculateExploitation() + UCB_CONSTANT * calculateExploration();
+        return calculateExploitation() + UCB_CONSTANT * curTurn.getPrior() * calculateExploration();
+    }
+
+
+    // Training Getter and Setter
+    public double getUnchangedRewardNN() {
+        return unchangedRewardNN;
+    }
+
+    public void setUnchangedRewardNN(double unchangedRewardNN) {
+        this.unchangedRewardNN = unchangedRewardNN;
+    }
+
+    public double[] getPriorsOfNN() {
+        return priorsOfNN;
+    }
+
+    public void setPriorsOfNN(double[] priorsOfNN) {
+        this.priorsOfNN = priorsOfNN;
     }
 }
