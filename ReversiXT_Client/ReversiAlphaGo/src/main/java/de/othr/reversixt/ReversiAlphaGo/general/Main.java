@@ -4,10 +4,16 @@ import de.othr.reversixt.ReversiAlphaGo.agent.AgentCallable;
 import de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet.PolicyValuePredictor;
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
+import de.othr.reversixt.ReversiAlphaGo.environment.Player;
+import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
+import de.othr.reversixt.ReversiAlphaGo.mcts.Node;
 import org.nd4j.jita.conf.CudaEnvironment;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 
 public class Main {
@@ -39,7 +45,7 @@ public class Main {
         Environment environment = new Environment();
 
         // Initialize singleton neuronal net before connecting to server (time intensive)
-        PolicyValuePredictor.getInstance();
+        PolicyValuePredictor pvp = PolicyValuePredictor.getInstance();
 
         /* *********************************
          *         Connect to server
@@ -91,6 +97,33 @@ public class Main {
                     break;
                 case IMsgType.END_OF_FIRST_PHASE:
                     environment.nextPhase();
+                    break;
+                case IMsgType.END_OF_GAME:
+                    // Playground, Player, Reward, Policy
+                    ArrayList<Node> history = agentCallable.getAgent().getITurnChoiceAlgorithm().getTurnHistory();
+
+                    Playground[] playgrounds = new Playground[history.size()];
+                    Player[] players = new Player[history.size()];
+                    INDArray policyOutputs = Nd4j.create(0,AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+                    INDArray policy;
+
+                    INDArray valueOutputs = Nd4j.create(0,AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+                    INDArray value;
+
+                    int index = 0;
+                    for(Node node : history){
+                       playgrounds[index] = node.getPlayground();
+                       players[index] = node.getNextPlayer();
+
+                       policy = Nd4j.createFromArray(node.getPriorsOfNN());
+                       policyOutputs = Nd4j.concat(0, policyOutputs, policy);
+
+                       value = Nd4j.createFromArray(node.getSimulationReward());
+                       policyOutputs = Nd4j.concat(0, policyOutputs, value);
+                    }
+
+
+                    pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
                     break;
                 default:
                     break;

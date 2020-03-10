@@ -268,6 +268,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
     private void searchBestUCT(Node node) {
         double nodeUCT;
         double bestUCT = Double.MIN_VALUE;
+
         for (Node child : node.getChildren()) {
             //Node has unexplored Turns -> can be next bestUCTNode
             nodeUCT = child.calculateUCT();
@@ -535,5 +536,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         //leafNodes.remove(expandNode);
     }
 
-
+    public ArrayList<Node> getTurnHistory() {
+        return turnHistory;
+    }
 }

@@ -6,6 +6,7 @@ import java.util.Random;
 
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
+import de.othr.reversixt.ReversiAlphaGo.mcts.Node;
 
 public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 
@@ -93,5 +94,10 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
 
     private void setBestTurn(Turn bestTurn) {
         this.bestTurn = bestTurn;
+    }
+
+    @Override
+    public ArrayList<Node> getTurnHistory() {
+        return null;
     }
 }
