@@ -29,7 +29,6 @@ public class MCTS implements ITurnChoiceAlgorithm {
     private boolean firstCall = Boolean.TRUE;
 
     // Global Variable to save next Node to explore
-    private double bestUCT;
     private Node bestUCTNode;
 
     // Training
@@ -74,20 +73,21 @@ public class MCTS implements ITurnChoiceAlgorithm {
 
     /**
      * enemy makes a turn and the next his move will be the next root node
+     *
      * @param turn
      */
     @Override
     public void enemyTurn(Turn turn) {
         int newRootNodeFound = 0;
-        for(Node node : root.getChildren())  {
-            if(node.getCurTurn().getRow() == turn.getRow() && node.getCurTurn().getColumn() == turn.getColumn() ) {
+        for (Node node : root.getChildren()) {
+            if (node.getCurTurn().getRow() == turn.getRow() && node.getCurTurn().getColumn() == turn.getColumn()) {
                 System.out.println("New rootNode found");
                 setNewRootNode(node);
                 newRootNodeFound = 1;
             }
         }
         //enemy turn was not explored -> new root node
-        if(newRootNodeFound == 0) {
+        if (newRootNodeFound == 0) {
             System.out.println("New rootNode was not found -> create new Tree");
             root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
             firstCall = Boolean.TRUE;
@@ -98,12 +98,13 @@ public class MCTS implements ITurnChoiceAlgorithm {
      * set a next turn from current root node to the new root node
      * then removes all leaf nodes from the other next turns from the leaf array
      * Example:   R
-     *        A   B   C
-     *     D E   F G   H I
+     * A   B   C
+     * D E   F G   H I
      * Turn A was played in the game
      * -> set A as new root
      * New Tree:   A
-     *            D E
+     * D E
+     *
      * @param nextNode
      */
     private void setNewRootNode(Node nextNode) {
@@ -165,7 +166,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
             System.out.println("Start: " + formatter.format(date));
         }
 
-        if(firstCall) {
+        if (firstCall) {
             if (!QUIET_MODE) {
                 System.out.println("create new root node");
             }
@@ -185,8 +186,6 @@ public class MCTS implements ITurnChoiceAlgorithm {
             firstCall = Boolean.FALSE;
 
         } else {
-
-            bestUCT = Double.MIN_VALUE;
             searchBestUCT(root);
         }
         Node newNode;
@@ -203,18 +202,16 @@ public class MCTS implements ITurnChoiceAlgorithm {
             newNode = createNextNodeAndEvaluate(bestUCTNode);
             backpropagate(newNode);
             setBestTurn();
-
-            bestUCT = Double.MIN_VALUE;
             searchBestUCT(root);
         }
     }
 
-    /** DEPRECATED
-     *
+    /**
+     * DEPRECATED
+     * <p>
      * expands the tree with the corresponding child nodes (as possible next moves)
      * and simulates random playouts starting in each child node (which are eventually backpropagated)
-     *
-     * */
+     */
     public void searchBestTurn_deprecated() {
         if (!QUIET_MODE) {
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
@@ -232,21 +229,21 @@ public class MCTS implements ITurnChoiceAlgorithm {
         }
         evaluateLeaf(chosenNode); //expand
         //while (!leafNodes.isEmpty()) {
-            if (Thread.currentThread().isInterrupted()) {
-                return;
-            }
-            chosenNodeUCT = Double.MIN_VALUE;
+        if (Thread.currentThread().isInterrupted()) {
+            return;
+        }
+        chosenNodeUCT = Double.MIN_VALUE;
 
-            for (Node child : chosenNode.getChildren()) {
-                if (!QUIET_MODE) {
-                    System.out.println("-- evaluateLeaf --");
-                }
-                reward = evaluateLeaf(child); //call NeuronalNet
-                //backpropagate(child, reward);
-                setBestTurn();
+        for (Node child : chosenNode.getChildren()) {
+            if (!QUIET_MODE) {
+                System.out.println("-- evaluateLeaf --");
             }
+            reward = evaluateLeaf(child); //call NeuronalNet
+            //backpropagate(child, reward);
+            setBestTurn();
+        }
 
-            //set bestUCTNode
+        //set bestUCTNode
             /*for (Node node : leafNodes) {
                 nodeUCT = node.calculateUCT();
                 if (nodeUCT > chosenNodeUCT) {
@@ -255,34 +252,37 @@ public class MCTS implements ITurnChoiceAlgorithm {
                 }
             }*/
 
-            if (!QUIET_MODE) {
-                System.out.println("Next chosen Turn; row: " + chosenNode.getCurTurn().getRow() + " col: " + chosenNode.getCurTurn().getColumn());
-            }
+        if (!QUIET_MODE) {
+            System.out.println("Next chosen Turn; row: " + chosenNode.getCurTurn().getRow() + " col: " + chosenNode.getCurTurn().getColumn());
+        }
         //}
     }
 
     /**
      * go through the whole tree and looks for next Node to explore further
      * IMPORTANT: Set bestUCT to Double.MIN_VALUE before call searchBestUCT
-     * @param root
+     *
+     * @param node
      */
-    private void searchBestUCT(Node root) {
+    private void searchBestUCT(Node node) {
         double nodeUCT;
-        for(Node node : root.getChildren()) {
-           if(!node.getNextTurns().isEmpty()) {
-               //Node has unexplored Turns -> can be next bestUCTNode
-               nodeUCT = node.calculateUCT();
-               if(nodeUCT > bestUCT) {
-                   bestUCT = nodeUCT;
-                   bestUCTNode = node;
-               }
-           }
-           searchBestUCT(node);
+        double bestUCT = Double.MIN_VALUE;
+        for (Node child : node.getChildren()) {
+            //Node has unexplored Turns -> can be next bestUCTNode
+            nodeUCT = child.calculateUCT();
+            if (nodeUCT > bestUCT) {
+                bestUCT = nodeUCT;
+                bestUCTNode = child;
+            }
+        }
+        if (bestUCTNode != node) {
+            searchBestUCT(bestUCTNode);
         }
     }
 
     /**
      * searches the best turn in all valid moves from board state of node
+     *
      * @param node
      * @return turn with best prior
      */
@@ -290,7 +290,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         double bestPrior = Double.MIN_VALUE;
         Turn bestTurn = null;
         Node nextNode;
-        for(Turn turn : node.getNextTurns()) {
+        for (Turn turn : node.getNextTurns()) {
             if (turn.getPrior() > bestPrior) {
                 bestTurn = turn;
             }
@@ -301,6 +301,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
     /**
      * reward of node will be set on each parent
      * each parent will also increase the number of visits
+     *
      * @param node
      */
     private void backpropagate(Node node) {
@@ -325,13 +326,14 @@ public class MCTS implements ITurnChoiceAlgorithm {
      * 7) create new node
      * 8) set this new node as a child of chosenNode (now the new node is in the tree)
      * 9) delete this turn from all turns in chosenNode (no need to make this move again)
+     *
      * @param chosenNode
      */
     private Node createNextNodeAndEvaluate(Node chosenNode) {
         Turn nextTurn = choseNextTurn(chosenNode);
         Playground playground = chosenNode.getPlayground().getCloneOfPlayground();
         environment.updatePlayground(nextTurn, playground);
-        OutputNeuronalNet outputNN = PolicyValuePredictor.getInstance().evaluate(playground, chosenNode.getNextPlayer());
+        OutputNeuronalNet outputNN = PolicyValuePredictor.getInstance().evaluate(playground, environment.getNextPlayer(nextTurn.getPlayerIcon()));
         double reward = outputNN.getOutputValueHead().toDoubleVector()[0];
         double[] priors = outputNN.getOutputPolicyHead().toDoubleVector();
 
@@ -346,20 +348,21 @@ public class MCTS implements ITurnChoiceAlgorithm {
             turn.setPrior(priors[i]);
         }
 
-        Node newNode = new Node(playground, chosenNode, environment.getNextPlayer(nextTurn.getPlayerIcon()),nextTurn,validTurns, reward);
+        Node newNode = new Node(playground, chosenNode, environment.getNextPlayer(nextTurn.getPlayerIcon()), nextTurn, validTurns, reward);
 
         if (LEARNER_MODE) {
             newNode.setPriorsOfNN(priors);
             newNode.setUnchangedRewardNN(reward);
         }
-        
+
         chosenNode.getNextTurns().remove(nextTurn);
         chosenNode.getChildren().add(newNode);
         return newNode;
     }
 
-    /** DEPRECATED
-     *
+    /**
+     * DEPRECATED
+     * <p>
      * hand over the leaf node to the neuronal net to evaluate game state
      * reward represents the evaluation of the current game state, i.e. the probability of winning being in the current
      * state
