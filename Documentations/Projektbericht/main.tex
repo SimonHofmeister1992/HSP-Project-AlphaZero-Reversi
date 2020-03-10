@@ -116,16 +116,73 @@ Letztlich wird ein konkreter Spielzug ausgehend vom Wurzelknoten selektiert. Dab
 \newpage
 \subsection{Neuronales Netz}
 Ein Neuronales Netz (NN) wird durch eine Vielzahl einzelner miteinander verknüpfter Neuronen beschrieben. Dabei erhalten sie Signale von anderen Neuronen als Input, verarbeiten diese und geben sie als Output an andere weiter. Diese Eingangswerte werden als Vektor X = $\{x_{1}, x_{2}, ..., x_{n}\}$ repräsentiert. Um adäquate Ausgangswerte zu erhalten werden die einzelnen Input-Elemente durch die entsprechenden Komponenten im Vektor W = $\{w_{1}, w_{2}, ..., w_{n}\}$ gewichtet. Des Weiteren kann es zu jedem Neuron einen Bias b geben. Zur Verarbeitung der Eingangswerte wird eine Aktivierungsfunktion herangezogen, die Z = $\{w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b(W^{T}X + b)\}$ als Input erhält. Das sich hieraus ergebende Resultat entspricht \^{y}. Im weiteren Verlauf wird versucht die Diskrepanz zwischen dem tatsächlichen Wert y und dem geschätzten Wert \^{y} durch Anwendung einer Verlustfunktion zu minimieren. Dieser Vorgang wird als \glqq{}Backpropagation\grqq bezeichnet. Dabei werden Fehler von dem letzten bis hin zum ersten layer zurückgeleitet, um alle beteiligten Gewichte in die entsprechende Richtung anzupassen. Dies wird dadurch erreicht, dass man das Minimum der Fehlerfunktion lokalisiert, das durch Annäherung an den Gradienten der Funktion ermittelt werden kann \cite[S. 75-79]{Sewak2019}. 
+%TODO allgemein: mathemat. Funktion, die man approximiert
 
-Neuronale Netze bestehen aus verschiedenen Schichten. Dabei existieren stets der input layer, ein oder mehrere hidden layer und der output layer. Während der input layer über genau so viele Neuronen, wie es Eingangswerte gibt, verfügt, weist der output layer so viele Neuronen auf, wie Ausgangsmerkmale vorhanden sind. Die Neuronenanzahl in den versteckten Zwischenschichten kann variieren. Sobald mehr als ein hidden layer vorliegt, spricht man von einem tiefen neuronalen Netz \cite[S. 77]{Sewak2019}.
+Neuronale Netze bestehen aus verschiedenen Schichten. Dabei existieren stets der input layer, ein oder mehrere hidden layer und der output layer. Während der input layer über genau so viele Neuronen, wie es Eingangswerte gibt, verfügt, weist der output layer so viele Neuronen auf, wie Ausgangsmerkmale vorhanden sind. Die Neuronenanzahl in den versteckten Zwischenschichten kann variieren. Sobald mehr als ein hidden layer vorliegt, spricht man von einem tiefen neuronalen Netz \cite[S. 77]{Sewak2019}. Der Aufbau wird in Abbildung \ref{fig:aufbau_nn} veranschaulicht.
 
-Hinsichtlich der Fehlerfunktion spricht man von einem \glqq{}L1 loss\grqq{} beziehungsweise einem \glqq{}L2 loss\grqq{}, wenn der absolute respektive der quadratische Fehler berücksichtigt wird \cite[S. 82]{Sewak2019}.
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{pics/Aufbau_NN.png}	
+\caption{Exemplarischer Aufbau eines neuronalen Netzes, Abbildung entnommen aus \cite[S. 44]{Kruse2015}}
+\label{fig:aufbau_nn}
+\end{figure}
 
 Wenn in einer Schicht alle Neuronen mit allen Elementen aus dem vorangegangen, sowie dem nachfolgenden layer verknüpft sind, wird diese als fully connected bezeichnet \cite[S. 79]{Sewak2019}.
 
 Convolutional Neuronal Networks (CNNs) beschreiben tiefe Netze, die für die Bildverarbeitung ausgelegt sind. Dabei wird die Grafik typischerweise dreidimensional dargestellt, mit der Bildhöhe und -breite, sowie den Farbkanälen in der Tiefe. Hierbei kann eine Schicht als convolutional layer eingebunden werden, die entsprechend eine Faltungsoperation anhand eines vorgegebenen Kerns auf das vorliegende Bild anwendet \cite[S. 85]{Sewak2019}.
 
-%TODO Aktivierungsfunktion tanh, relu
+Hinsichtlich der Fehlerfunktion spricht man von einem \glqq{}L1 loss\grqq{} beziehungsweise einem \glqq{}L2 loss\grqq{}, wenn der absolute respektive der quadratische Fehler berücksichtigt wird \cite[S. 82]{Sewak2019}. An dieser Stelle ist zu beachten, dass man aufgrund von möglichen negativen Differenzen nicht schlichtweg eine Aufsummierung der Fehler vornehmen kann, da sich Zahlen kleiner und größer Null sonst gegenseitig aufheben können. Deshalb muss mindestens der Betrag der absoluten Zahl genutzt werden. Meist verwendet man jedoch die quadratischen Werte, da diese Vorteile gegenüber dem Betrag aufweisen. Zunächst sind die quadratischen Werte stetig differenzierbar, wodurch die Ableitung der Fehlerfunktion vereinfacht wird. Außerdem vorteilhaft ist, dass durch die Quadrierung größere Diskrepanzen stärker gewichtet werden \cite[S. 41]{Kruse2015}.
+
+Um die Parameter eines NN zu trainieren, wird das Gradientenabstiegsverfahren genutzt. Da der Output des NN und der gewünschte Wert voneinander abweichen, wie es in der Fehlerfunktion berechnet wird, ist es das Ziel aus dieser Verlustfunktion die Richtung abzuleiten, in die die Parameter angepasst werden müssen, um die Differenz zu minimieren. Die Richtung kann festgestellt werden, indem der Gradient $ \nabla $ der Verlustfunktion ermittelt wird. Dieser stellt einen Vektor da, der die partiellen Ableitungen, also die Ableitungen nach unterschiedlichen Funktionsargumenten, der Fehlerfunktion enthält. Der Gradient dient dabei zur Repräsentation des Steigungsverhaltens einer Funktion und zeigt stets in die Richtung des höchsten Anstiegs. Um Fehler zu verringern, werden Gewichte entsprechend in die entgegengesetzte Richtung verändert. Zur Reduktion der Abweichung werden nun Fehler und Gradient berechnet, woraufhin die Anpassung der Gewichte, die Backpropagation, folgt. Zur Fehlerminimierung wird dieser Prozess iterativ durchlaufen. Zur Berechnung des Fehlers des gesamten NN werden die jeweiligen einzelnen Diskrepanzen aufaddiert \cite[S. 58-60]{Kruse2015}. Ein ein ausführliches Beispiel zur Fehlerminimierung und Berechnung der partiellen Ableitungen findet sich in \cite[S. 64-68]{Kruse2015}.
+Des Weiteren ist zu berücksichtigen, dass beim Gradientenabstieg grundsätzlich nicht gewährleistet werden kann, dass ein globales Minimum gefunden wird. Lediglich die Annäherung an ein lokales Minimum kann sichergestellt werden \cite[S. 69]{Kruse2015}. Ein weiteres Problem beim vorgestellten Verfahren ist, die Wahl der optimalen Lernrate $ \theta $, die die Schrittweite angibt. Das bedeutet, je kleiner die die Lernrate ist, desto langsamer, in kleineren Schritten, approximiert man das gesuchte Minimum. Dies kann unter Umständen zu viel Zeit in Anspruch nehmen. Wählt man für die Lernrate allerdings einen großen Wert, so nähert man sich dem gewünschten Punkt in entsprechenden großen Schritten an. Auf diese Weise kann es passieren, dass das Minimum stets übersprungen wird \cite[S. 67]{Kruse2015}. 
+%TODO Grafik: Man erkennt diesen Prozess...
+%TODO optimale Werte für theta
+
+Eine Möglichkeit diesem Problem bei einer gleichzeitig hohen Lernrate entgegenzuwirken liegt in der Inklusion des Momentum. Dabei wird der Wert der vorangegangen Richtung für die Berechnung der neuen Richtung berücksichtigt, wodurch Oszillationen verringert werden und das Minimum schneller erreicht wird \cite{Rumelhart1985}.
+
+%TODO Aktivierungsfunktion grafiken, tanh, relu, hyperparameter (lernrate etc.), fehlerfunktionen
+Laut Nwankpa, Ijomah, Gachagan \& Marshall beeinflussen sowohl Hyperparameter als auch Aktivierungsfunktionen die Generalisierbarbeit, sowie die Effektivität des Lernprozesses \cite{Nwankpa2018}. Dementsprechend wichtig ist es eine Aktivierungsfunktion auszuwählen, die möglichst gut für den spezifischen Anwendungsfall geeignet ist. Mithilfe von AF wird entschieden, ob ein Neuron gefeuert wird oder nicht. Der Output eines NN berechnet sich durch y = $(w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$, was grundsätzlich einem linearen Ergebnis entspricht. Für den Lernprozess werden jedoch nicht-lineare Daten benötigt, da diese differenzierbar sind. Daher bilden AF die Ausgabedaten eines NN innerhalb eines bestimmten Wertebereichs ab und wandeln sie in nicht-lineare Werte um. Daher ergibt sich, y = $ \alpha (w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$ für den Output, wobei $\alpha $ für die entsprechende AF steht \cite{Nwankpa2018}.
+
+Ein Beispiel für eine Aktivierungsfunktion ist der tangens hyperbolicus (tanh), der durch 
+
+$ f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$ 
+
+repräsentiert wird \cite{Nwankpa2018} und dessen grafischer Verlauf in Abbildung \ref{fig:tanh} ersichtlich wird. Die Funktionen bildet Eingaben auf einen Wertebereich zwischen -1 und 1 ab. Ihre Stärke ist, dass sie null-zentriert ist, ihre Schwäche hingegen, dass mit ihr weiterhin verschwindende Gradienten vorkommen können \cite{Nwankpa2018}.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{pics/tanh.png}	
+\caption{Grafischer Verlauf der tanh-Funktion, Abbildung entnommen aus \cite[S. 45]{Kruse2015}}
+\label{fig:tanh}
+\end{figure}
+
+Die rectified linear unit (ReLU) bietet ebenfalls die Möglichkeit zur Aktivierung der Neuronen und ist gegeben durch:
+
+
+\begin{equation}
+ f(x) = max (0, x) = 
+\begin{cases}
+      x_i, & \text{if $x_i \geq 0$}\\
+      0, & \text{if $x_i<0$}
+    \end{cases}
+\end{equation}
+
+Negative Eingabewerte werden hierbei auf den Null abgebildet, wodurch vanishing gradients vermieden werden können. Allerdings ist der gravierendste Nachteil dieser Funktion, dass sie zu sogenannten dead neurons führen kann \cite{Nwankpa2018}. 
+Hinsichtlich dieses Problems kann jedoch die leaky ReLU (LReLU) Abhilfe schaffen, die die durch folgende Formel beschrieben wird:
+
+\begin{equation}
+ f(x) = \alpha x + x = 
+\begin{cases}
+      x, & \text{if $x > 0$}\\
+      \alpha x, & \text{if $x \leq $}
+    \end{cases}
+\end{equation}
+
+Durch die Multiplikation der Konstante $\alpha$, die den Wert 0.01 annimmt, können die Gradienten während des Trainings niemals Null werden \cite{Nwankpa2018}.
+
+Für eine detaillierte Analyse bestehender Aktivierungsfunktionen sei auf Nwankpa et al. \cite{Nwankpa2018} verwiesen.
+
+Ein weiteres Problem, bei dem Aktivierungsfunktionen Hilfestellung leisten ist das des vanishing beziehungsweise exploding gradient. Durch die wiederholte Multiplikation der Ableitungsterme, die entweder kleiner oder größer Eins sind, werden die Ergebnisse im Laufe der Zeit teils entweder verschwindend gering oder unendlich groß. AF können diese Werte durch entsprechende Abbildung innerhalb eines bestimmten Rahmens halten und dem Problem somit entgegenwirken \cite{Nwankpa2018}.
 
 Ein weiteres wichtiges Hilfsmittel findet sich in der Batch Normalisation, mithilfe der Mittelwerte und Varianzen in den Eingabedaten der einzelnen Schichten normalisiert werden können. Das ist sinnvoll, da sich die Schichten sonst laufend an die neue Verteilung anpassen müssen. Der ausschlaggebende Vorteil der Normalisierung ist, dass das Modell deutlich effizienter trainiert werden kann, da höhere Lernraten angewendet werden können  \cite{Ioffe2015}.
 
@@ -239,7 +296,7 @@ Simon Wasserburger (150 h):
 \subsection{Kommunikation}
 Die virtuelle Kommunikation fand hauptsächlich in unserer WhatsApp-Gruppe statt, wo wir einander auf Problemstellen aufmerksam machten, Lösungsansätze diskutierten, einander über Fortschritte informierten und Treffen ausmachten. Ebenfalls konnte durch Commits im Repository die Arbeit der Teamkollegen und entsprechend der Projektfortschritt verfolgt werden. Daneben verfügten wir über ein Trello-Board, in dem wir Aufgaben planten, dokumentierten und zuwiesen. In gemeinsamen Treffen besprachen und ergänzten wir dabei die offenen Punkte und kontrollierten den Projektablauf. 
 
-In den persönlichen Treffen, in denen meist alle Teammitglieder anwesend waren, konnten wir alle offenen Punkte konkretisieren und ausführlich diskutieren. Wir erarbeiteten gemeinsame Lösungsstrategien und halfen einander bei Verständnisproblemen. Abschließend trafen wir Absprachen zum weiteren Vorgehen, sowie zur Aufgabenverteilung.
+In den persönlichen Treffen, in denen meist alle Teammitglieder anwesend waren, konnten wir alle offenen Punkte konkretisieren und ausführlich diskutieren. Wir erarbeiteten gemeinsame Lösungsstrategien und halfen einander bei Verständnisproblemen. Abschließend trafen wir Absprachen zum weiteren Vorgehen, sowie zur Aufgabenverteilung. In Ausnahmefällen erfolgt dies online per Sprachkonferenzen.
 
 \subsection{Versionskontrolle}
 Als Versionskontrollsystem stand ein Gitlab-Repository der OTHR zur Verfügung. Zum Abrufen und Bearbeiten dessen wurde GitHub Desktop als GUI verwendet.
@@ -253,20 +310,24 @@ Als Entwicklungsumgebung wurde IntelliJ IDEA\footnote{https://www.jetbrains.com/
 
 Des Weiteren wurde zur Implementierung des NN die Library Eclipse deeplearning4j (DL4J) \cite{DL4J} zur Hilfe genommen. Hinsichtlich dieser Auswahl verschafften wir uns zunächst einen Überblick über vorhandene, gute Bibliotheken und recherchierten deren Vorteile und Anwendungsfälle, wobei die Entscheidung letztendlich auf die bereits genannte fiel.
 
-Entsprechend folgt nun die Darlegung der Eigenschaften von DL4J, wobei der Fokus auf der Ausarbeitung der für das vorliegende Projekte relevanten Aspekten liegt. Sämtliche Informationen sind, sofern nicht anders angegeben, der zugehörigen Website https://deeplearning4j.org/ entnommen.
+Da wir uns innerhalb der Gruppe auf die Programmiersprache Java geeignet hatten, suchten wir dementsprechend eine deep-learning-Library für Java. Zwar stellt beispielsweise das bekannte Python-Framework TensorFlow\footnote{https://www.tensorflow.org/} eine Java API bereit, diese besitzt jedoch experimentellen Charakter\footnote{$https://www.tensorflow.org/api_docs/java/reference/org/tensorflow/package-summary$} und ist daher für unsere Zwecke ungeeignet. 
 
-Die Library hat ihren Ursprung bei Entwicklern der Firma Konduit \footnote{https://konduit.ai/} in San Francisco und wurde unter der Apache Software Foundation License 2.0 \footnote{https://www.apache.org/licenses/LICENSE-2.0} veröffentlicht.
+Ebenfalls die beliebte Python-Bibliothek Keras\footnote{https://keras.io/} bietet Möglichkeiten zur Anbindung an Java. Zwar können in Keras trainierte Modelle mithilfe von DL4J nach Java importiert werden, jedoch müssen diese zuvor in Python konfiguriert und trainiert werden\footnote{https://deeplearning4j.org/docs/latest/keras-import-overview}.
 
-DL4J ist vollständig open source und in Java geschrieben, wobei für die zugrundeliegenden Berechnungen C, C++ und Cuda genutzt wurden. Des Weiteren unterstützt sie ND4J (N-Dimensional Arrays for Java) - eine Bibliothek für das wissenschaftliche Rechnen, die eine hohe Performanz gewährleistet \footnote{https://nd4j.org/}. Diese werden im vorliegenden Projekt anhand von \texttt{INDArrays} referenziert.
+Da DL4 hinsichtlich unserer individuellen Projektansprüche am besten schien, fiel die Entscheidung letztlich auf diese Wahl. Entsprechend folgt nun die Darlegung der Eigenschaften von DL4J, wobei der Fokus auf der Ausarbeitung der für das vorliegende Projekte relevanten Aspekten liegt. Sämtliche Informationen sind, sofern nicht anders angegeben, der zugehörigen Website (https://deeplearning4j.org/) entnommen.
+
+Die Library hat ihren Ursprung bei Entwicklern der Firma Konduit\footnote{https://konduit.ai/} in San Francisco und wurde unter der Apache Software Foundation License 2.0\footnote{https://www.apache.org/licenses/LICENSE-2.0} veröffentlicht.
+
+DL4J ist vollständig open source und in Java geschrieben, wobei für die zugrundeliegenden Berechnungen C, C++ und Cuda genutzt wurden. Des Weiteren unterstützt sie ND4J (N-Dimensional Arrays for Java) - eine Bibliothek für das wissenschaftliche Rechnen, die eine hohe Performanz gewährleistet\footnote{https://nd4j.org/}. Diese werden im vorliegenden Projekt anhand von \texttt{INDArrays} referenziert.
 %TODO INDArrays
 
 Außerdem werden zahlreiche, hilfreiche Features unterstützt, unter anderem Batch Normalisation, Residual Learning, CNNs. In Form eines \texttt{ComputationGraph} kann daher ein verhältnismäßig einfach ein komplexes neuronales Netz aufgebaut werden.
 
-Weitere ausschlaggebende Vorteile liegen in der ausführlichen Dokumentation \footnote{https://deeplearning4j.org/api/latest/}, sowie den zahlreichen Hilfsmitteln, wie Tutorials \footnote{erreichbar über https://deeplearning4j.org/tutorials/setup}, Code-Beispiele \footnote{https://github.com/eclipse/deeplearning4j-examples} und Leitfäden zu sämtlichen Aspekten \footnote{erreichbar über https://deeplearning4j.org/docs/latest/}, die zudem alle schnell und unkompliziert über die eigene Website zu finden sind.
+Weitere ausschlaggebende Vorteile liegen in der ausführlichen Dokumentation\footnote{https://deeplearning4j.org/api/latest/}, sowie den zahlreichen Hilfsmitteln, wie Tutorials\footnote{erreichbar über https://deeplearning4j.org/tutorials/setup}, Code-Beispiele\footnote{https://github.com/eclipse/deeplearning4j-examples} und Leitfäden zu sämtlichen Aspekten\footnote{erreichbar über https://deeplearning4j.org/docs/latest/}, die zudem alle schnell und unkompliziert über die eigene Website zu finden sind.
 
-%TODO
-Ergänzend dazu sei auf mögliche Alternativen dazu verwiesen, die in lägen...
+Zuletzt können wir nach Projektabschluss festhalten, dass wir DL4J als sehr benutzerfreundlich und unkompliziert empfanden. Ebenfalls der große Funktionsumfang erleichtert die Arbeit zum Aufbau und Training des Modells. Daher sehen wir DL4J insgesamt als hilfreiches und anwenderfreundliches Tool.
 
+%TODO Alternativen, abschließenden Bewertung (Kritikpunkte?)
 
 \subsection{Testumgebungen}
 
