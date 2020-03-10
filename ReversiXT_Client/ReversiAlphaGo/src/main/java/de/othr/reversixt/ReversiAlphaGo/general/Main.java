@@ -67,6 +67,10 @@ public class Main {
                     break;
                 case IMsgType.ENEMY_TURN:
                     environment.updatePlayground(serverCommunicator.getEnemyTurn(), environment.getPlayground());
+                    if(!QUIET_MODE) {
+                        System.out.println("Enemy Turn");
+                        environment.getPlayground().printPlayground();
+                    }
                     agentCallable.getAgent().getITurnChoiceAlgorithm().enemyTurn(serverCommunicator.getEnemyTurn());
                     break;
                 case IMsgType.TURN_REQUEST:
