@@ -32,11 +32,19 @@
 			<version>1.4</version>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>nd4j-native</artifactId>
+			<version>1.0.0-beta6</version>
+		</dependency>
 		<!-- enable deep learning computation on CPU -->
 		<dependency>
 			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native-platform</artifactId>
+			<artifactId>nd4j-native</artifactId>
 			<version>1.0.0-beta6</version>
+<!--			<classifier>windows-x86_64-avx2</classifier> -->
+			<classifier>linux-x86_64-avx2</classifier>
 		</dependency>
 
 		<!-- enable deep learning computation on GPU -->
@@ -55,7 +63,13 @@
 		-->
 		<dependency>
 			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-cuda-9.2-platform</artifactId>
+			<artifactId>nd4j-cuda-10.2-platform</artifactId>
+			<version>1.0.0-beta6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.deeplearning4j</groupId>
+			<artifactId>deeplearning4j-cuda-10.2</artifactId>
 			<version>1.0.0-beta6</version>
 		</dependency>
 
