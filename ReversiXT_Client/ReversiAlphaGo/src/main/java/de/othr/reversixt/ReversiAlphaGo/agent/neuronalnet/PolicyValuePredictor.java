@@ -158,7 +158,6 @@ public class PolicyValuePredictor {
     // usage example see PolicyValuePredictorTest.testTrainAndEvaluateComputationGraph()
     //*********************************************************************************
     public void trainComputationGraph(Playground[] playgrounds, Player[] players, INDArray policyOutputsToLearn, INDArray valueOutputsToLearn) {
-        computationGraph=null;
         loadPretrainedModel();
         if(pretrainedComputationGraph != null){
             if (playgrounds.length == policyOutputsToLearn.size(0) && playgrounds.length == valueOutputsToLearn.size(0) && playgrounds.length == players.length) {
