@@ -115,32 +115,15 @@ public class Main {
             System.err.println("Agent got disqualified");
         }
         else if(Main.LEARNER_MODE){
-            ArrayList<Node> history = agentCallable.getAgent().getITurnChoiceAlgorithm().getTurnHistory();
 
-            Playground[] playgrounds = new Playground[history.size()];
-            Player[] players = new Player[history.size()];
-            INDArray policyOutputs = Nd4j.create(0,AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
-            INDArray policy;
+            pretrainNetwork(pvp, agentCallable);
 
-            INDArray valueOutputs = Nd4j.create(0,1);
-            INDArray value;
+            updateStatisticsAndNeuronalNetworks(environment);
 
-            int index = 0;
-            for(Node node : history){
-                playgrounds[index] = node.getPlayground();
-                players[index] = node.getNextPlayer();
-
-                policy = Nd4j.createFromArray((Nd4j.createFromArray(node.getPriorsOfNN()).toFloatVector())).reshape(1, AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
-                policyOutputs = Nd4j.concat(0, policyOutputs, policy);
-
-                value = Nd4j.createFromArray(Nd4j.createFromArray(node.getSimulationReward()).toFloatVector()).reshape(1,1);
-                valueOutputs = Nd4j.concat(0, valueOutputs, value);
-                index++;
-            }
-
-
-            pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
         }
+
+
+
         if (!QUIET_MODE) {
             System.out.println("Game finished");
         }
@@ -176,6 +159,60 @@ public class Main {
             System.err.println("First message was not MAP");
             System.err.println("Aborting!!");
             serverComm.cleanup();
+        }
+    }
+
+    private static void pretrainNetwork(PolicyValuePredictor pvp, AgentCallable agentCallable){
+        ArrayList<Node> history = agentCallable.getAgent().getITurnChoiceAlgorithm().getTurnHistory();
+
+        Playground[] playgrounds = new Playground[history.size()];
+        Player[] players = new Player[history.size()];
+        INDArray policyOutputs = Nd4j.create(0,AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+        INDArray policy;
+
+        INDArray valueOutputs = Nd4j.create(0,1);
+        INDArray value;
+
+        int index = 0;
+        for(Node node : history){
+            playgrounds[index] = node.getPlayground();
+            players[index] = node.getNextPlayer();
+
+            policy = Nd4j.createFromArray((Nd4j.createFromArray(node.getPriorsOfNN()).toFloatVector())).reshape(1, AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+            policyOutputs = Nd4j.concat(0, policyOutputs, policy);
+
+            value = Nd4j.createFromArray(Nd4j.createFromArray(node.getSimulationReward()).toFloatVector()).reshape(1,1);
+            valueOutputs = Nd4j.concat(0, valueOutputs, value);
+            index++;
+        }
+
+        pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
+    }
+
+    private static void updateStatisticsAndNeuronalNetworks(Environment environment){
+        MultiGameHistory mgh = new MultiGameHistory();
+
+        // update statistics
+        if(environment.getRankOfPlayer(environment.getOurPlayer()) == 1){
+            mgh.declareGameAsWon();
+        }
+        else{
+            mgh.declareGameAsLost();
+        }
+
+        // update neuronalnetwork files
+        if(mgh.getNumberOfGames() == 0){
+            double rateWonGames = mgh.getNumberOfWonGames() / mgh.getNumberOfGames();
+
+            if(rateWonGames >= AlphaGoZeroConstants.NEEDED_WIN_RATE){
+                // first save actual model as best model, before overwriting the actual model
+                PolicyValuePredictor.saveAsBestModel();
+                PolicyValuePredictor.savePretrainedAsActualModel();
+            }
+            else {
+                PolicyValuePredictor.savePretrainedAsActualModel();
+            }
+
         }
     }
 }

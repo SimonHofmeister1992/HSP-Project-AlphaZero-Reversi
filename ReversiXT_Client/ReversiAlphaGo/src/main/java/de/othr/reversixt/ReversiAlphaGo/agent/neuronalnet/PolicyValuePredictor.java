@@ -116,6 +116,14 @@ public class PolicyValuePredictor {
         }
     }
 
+    public static void savePretrainedAsActualModel() {
+        try {
+            pretrainedComputationGraph.save(actualComputationGraphFile, true);
+        } catch (IOException e) {
+            if (!Main.QUIET_MODE) getLogger().warn("File: " + actualComputationGraphFile + " is not accessable");
+        }
+    }
+
     public static void saveAsPretrainedModel() {
         try {
             computationGraph.save(pretrainedComputationGraphFile, true);
@@ -162,13 +170,11 @@ public class PolicyValuePredictor {
                 }
                 for(int index = 0; index < playgrounds.length; index++){
                     pretrainedComputationGraph.fit(new INDArray[]{transformedPlaygrounds.slice(index).reshape(1,4,15,15)}, new INDArray[]{policyOutputsToLearn.slice(index).reshape(1,AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND +1), valueOutputsToLearn.slice(index).reshape(1,1)});
-
                 }
             }
             savePretrainedModel();
         }
     }
-
 
     //**********************************************************************************
     // evaluates the neural net at a given state
