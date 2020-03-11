@@ -95,6 +95,7 @@ class NeuronalNet {
 
         ComputationGraphConfiguration.GraphBuilder graphBuilder = new NeuralNetConfiguration.Builder()
                 .weightInit(WeightInit.RELU_UNIFORM)
+                .cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
                 .updater(new Sgd())
                 .miniBatch(true)
                 .trainingWorkspaceMode(WorkspaceMode.ENABLED)

@@ -60,7 +60,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         //bestNode is next root-node of tree
         setNewRootNode(bestNode);
         Turn bestTurn = bestNode.getCurTurn();
-        System.out.println("bestTurn: " + bestTurn.getColumn() + ", " + bestTurn.getRow());
+        if(!QUIET_MODE) System.out.println("bestTurn: " + bestTurn.getColumn() + ", " + bestTurn.getRow());
         return bestTurn;
     }
 
@@ -91,7 +91,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         }
         //enemy turn was not explored -> new root node
         if (newRootNodeFound == 0) {
-            System.out.println("Discard tree");
+            if(!QUIET_MODE) System.out.println("Discard tree");
             root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
             firstCall = Boolean.TRUE;
         }

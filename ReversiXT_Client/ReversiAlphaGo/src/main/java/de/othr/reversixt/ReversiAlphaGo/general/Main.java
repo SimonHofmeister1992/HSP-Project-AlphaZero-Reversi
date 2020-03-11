@@ -66,7 +66,7 @@ public class Main {
 
             switch (msgType) {
                 case IMsgType.PLAYER_ICON:
-                    System.out.println("Set ourPlayer in environment: " + serverCommunicator.getPlayerIcon());
+                    if(!Main.QUIET_MODE) System.out.println("Set ourPlayer in environment: " + serverCommunicator.getPlayerIcon());
                     //initialization of Agent Callable
                     environment.setOurPlayer(serverCommunicator.getPlayerIcon());
                     agentCallable = new AgentCallable(environment);
@@ -80,7 +80,7 @@ public class Main {
                     agentCallable.getAgent().getITurnChoiceAlgorithm().enemyTurn(serverCommunicator.getEnemyTurn());
                     break;
                 case IMsgType.TURN_REQUEST:
-                    System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
+                    if(!Main.QUIET_MODE) System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
                     ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
                     Future<Turn> futureTurn = executorService.submit(agentCallable);
                     //
@@ -102,33 +102,6 @@ public class Main {
                 case IMsgType.END_OF_FIRST_PHASE:
                     environment.nextPhase();
                     break;
-                case IMsgType.END_OF_GAME:
-                    // Playground, Player, Reward, Policy
-                    ArrayList<Node> history = agentCallable.getAgent().getITurnChoiceAlgorithm().getTurnHistory();
-
-                    Playground[] playgrounds = new Playground[history.size()];
-                    Player[] players = new Player[history.size()];
-                    INDArray policyOutputs = Nd4j.create(0,AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
-                    INDArray policy;
-
-                    INDArray valueOutputs = Nd4j.create(0,AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
-                    INDArray value;
-
-                    int index = 0;
-                    for(Node node : history){
-                       playgrounds[index] = node.getPlayground();
-                       players[index] = node.getNextPlayer();
-
-                       policy = Nd4j.createFromArray(node.getPriorsOfNN());
-                       policyOutputs = Nd4j.concat(0, policyOutputs, policy);
-
-                       value = Nd4j.createFromArray(node.getSimulationReward());
-                       policyOutputs = Nd4j.concat(0, policyOutputs, value);
-                    }
-
-
-                    pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
-                    break;
                 default:
                     break;
             }
@@ -140,6 +113,33 @@ public class Main {
 
         if (!QUIET_MODE && environment.isPlayerDisqualified(serverCommunicator.getPlayerIcon())) {
             System.err.println("Agent got disqualified");
+        }
+        else if(Main.LEARNER_MODE){
+            ArrayList<Node> history = agentCallable.getAgent().getITurnChoiceAlgorithm().getTurnHistory();
+
+            Playground[] playgrounds = new Playground[history.size()];
+            Player[] players = new Player[history.size()];
+            INDArray policyOutputs = Nd4j.create(0,AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+            INDArray policy;
+
+            INDArray valueOutputs = Nd4j.create(0,1);
+            INDArray value;
+
+            int index = 0;
+            for(Node node : history){
+                playgrounds[index] = node.getPlayground();
+                players[index] = node.getNextPlayer();
+
+                policy = Nd4j.createFromArray((Nd4j.createFromArray(node.getPriorsOfNN()).toFloatVector())).reshape(1, AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+                policyOutputs = Nd4j.concat(0, policyOutputs, policy);
+
+                value = Nd4j.createFromArray(Nd4j.createFromArray(node.getSimulationReward()).toFloatVector()).reshape(1,1);
+                valueOutputs = Nd4j.concat(0, valueOutputs, value);
+                index++;
+            }
+
+
+            pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
         }
         if (!QUIET_MODE) {
             System.out.println("Game finished");

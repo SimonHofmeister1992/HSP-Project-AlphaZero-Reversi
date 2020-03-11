@@ -108,9 +108,17 @@ public class PolicyValuePredictor {
         }
     }
 
-    public static void saveAsPretrainedModel() {
+    public static void savePretrainedModel() {
         try {
             pretrainedComputationGraph.save(pretrainedComputationGraphFile, true);
+        } catch (IOException e) {
+            if (!Main.QUIET_MODE) getLogger().warn("File: " + pretrainedComputationGraphFile + " is not accessable");
+        }
+    }
+
+    public static void saveAsPretrainedModel() {
+        try {
+            computationGraph.save(pretrainedComputationGraphFile, true);
         } catch (IOException e) {
             if (!Main.QUIET_MODE) getLogger().warn("File: " + pretrainedComputationGraphFile + " is not accessable");
         }
@@ -142,6 +150,7 @@ public class PolicyValuePredictor {
     // usage example see PolicyValuePredictorTest.testTrainAndEvaluateComputationGraph()
     //*********************************************************************************
     public void trainComputationGraph(Playground[] playgrounds, Player[] players, INDArray policyOutputsToLearn, INDArray valueOutputsToLearn) {
+        computationGraph=null;
         loadPretrainedModel();
         if(pretrainedComputationGraph != null){
             if (playgrounds.length == policyOutputsToLearn.size(0) && playgrounds.length == valueOutputsToLearn.size(0) && playgrounds.length == players.length) {
@@ -151,9 +160,11 @@ public class PolicyValuePredictor {
                     INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[i], players[i]);
                     transformedPlaygrounds = Nd4j.concat(0, transformedPlaygrounds, transformedPlayground);
                 }
+                //TODO: erase memory allocation error
                 pretrainedComputationGraph.fit(new INDArray[]{transformedPlaygrounds}, new INDArray[]{policyOutputsToLearn, valueOutputsToLearn});
+
             }
-            saveAsPretrainedModel();
+            savePretrainedModel();
         }
     }
 
