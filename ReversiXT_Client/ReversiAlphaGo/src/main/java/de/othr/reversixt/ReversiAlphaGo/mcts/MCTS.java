@@ -8,6 +8,7 @@ import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import de.othr.reversixt.ReversiAlphaGo.general.AlphaGoZeroConstants;
+import de.othr.reversixt.ReversiAlphaGo.general.Main;
 import org.deeplearning4j.nn.api.Layer;
 import org.nd4j.shade.yaml.snakeyaml.scanner.Constant;
 
@@ -59,7 +60,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         //bestNode is next root-node of tree
         setNewRootNode(bestNode);
         Turn bestTurn = bestNode.getCurTurn();
-        System.out.println("bestTurn: " + bestTurn.getColumn() + ", " + bestTurn.getRow());
+        if(!QUIET_MODE) System.out.println("bestTurn: " + bestTurn.getColumn() + ", " + bestTurn.getRow());
         return bestTurn;
     }
 
@@ -90,7 +91,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         }
         //enemy turn was not explored -> new root node
         if (newRootNodeFound == 0) {
-            System.out.println("Discard tree");
+            if(!QUIET_MODE) System.out.println("Discard tree");
             root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
             firstCall = Boolean.TRUE;
         }
@@ -269,6 +270,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
     private void searchBestUCT(Node node) {
         double nodeUCT;
         double bestUCT = Double.MIN_VALUE;
+
         for (Node child : node.getChildren()) {
             //Node has unexplored Turns -> can be next bestUCTNode
             nodeUCT = child.calculateUCT();
@@ -418,25 +420,53 @@ public class MCTS implements ITurnChoiceAlgorithm {
      * eventually the simulation results are backpropagated to the root node (number how often the node was visited and the the simulation reward are updated)
      */
     private void traverse(Node traverseNode) {
-        for (Node child : traverseNode.getChildren()) {
-            //clone map to "complete" the map
-            Playground playground = child.getPlayground().getCloneOfPlayground();
-            //Simulate one path to get a reward
-            double reward = simulate(playground, child.getNextPlayer());
 
-            //Backpropagate the reward and numVisited to all parents
-            Node nodeBP = child;
-            while (nodeBP != root) {
-                nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
-                //TODO save current player?
-                if (nodeBP.getParent().getNextPlayer() == child.getParent().getNextPlayer()) {
-                    nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
-                } else {
-                    nodeBP.setSimulationReward(nodeBP.getSimulationReward() - reward);
+        if(LEARNER_MODE){  // parallel execution on all cores
+            traverseNode.getChildren().parallelStream().forEach(child -> {
+
+                //clone map to "complete" the map
+                Playground playground = child.getPlayground().getCloneOfPlayground();
+                //Simulate one path to get a reward
+                double reward = simulate(playground, child.getNextPlayer());
+
+                //Backpropagate the reward and numVisited to all parents
+                Node nodeBP = child;
+                while (nodeBP != root) {
+                    nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
+                    //TODO save current player?
+                    if (nodeBP.getParent().getNextPlayer() == child.getParent().getNextPlayer()) {
+                        nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
+                    } else {
+                        nodeBP.setSimulationReward(nodeBP.getSimulationReward() - reward);
+                    }
+                    nodeBP = nodeBP.getParent();
                 }
-                nodeBP = nodeBP.getParent();
+
+            });
+        }
+
+        else{  // iterative execution
+            for (Node child : traverseNode.getChildren()) {
+                //clone map to "complete" the map
+                Playground playground = child.getPlayground().getCloneOfPlayground();
+                //Simulate one path to get a reward
+                double reward = simulate(playground, child.getNextPlayer());
+
+                //Backpropagate the reward and numVisited to all parents
+                Node nodeBP = child;
+                while (nodeBP != root) {
+                    nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
+                    //TODO save current player?
+                    if (nodeBP.getParent().getNextPlayer() == child.getParent().getNextPlayer()) {
+                        nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
+                    } else {
+                        nodeBP.setSimulationReward(nodeBP.getSimulationReward() - reward);
+                    }
+                    nodeBP = nodeBP.getParent();
+                }
             }
         }
+
     }
 
     /**
@@ -508,5 +538,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         //leafNodes.remove(expandNode);
     }
 
-
+    public ArrayList<Node> getTurnHistory() {
+        return turnHistory;
+    }
 }

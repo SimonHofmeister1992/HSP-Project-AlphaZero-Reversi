@@ -184,4 +184,39 @@ public class Environment {
         this.transitions.put(secondTransitionPart, firstTransitionPart);
     }
 
+    public int getRankOfPlayer(Player player){
+
+        HashMap<Character, Integer> rankMap = new HashMap<>();
+        for(Player p : players){
+            rankMap.put(p.getSymbol(), 0);
+        }
+
+        for(int row = 0; row < this.playground.getPlaygroundHeight(); row++){
+            for(int col = 0; col < this.playground.getPlaygroundWidth(); col++){
+                if(playground.getSymbolOnPlaygroundPosition(row, col) >= '1' && playground.getSymbolOnPlaygroundPosition(row, col) <= '8'){
+                    rankMap.replace(playground.getSymbolOnPlaygroundPosition(row, col),
+                            rankMap.get(playground.getSymbolOnPlaygroundPosition(row, col)),
+                            rankMap.get(playground.getSymbolOnPlaygroundPosition(row, col))+1);
+                }
+            }
+        }
+        int rank = 1;
+        Character ownPlayer = null;
+        for(Character key : rankMap.keySet()){
+            if((char)key == player.getSymbol()){
+                ownPlayer = key;
+            }
+        }
+
+
+        for(Character key : rankMap.keySet()){
+            if(key != ownPlayer){
+                if(rankMap.get(key) > rankMap.get(ownPlayer)){
+                    rank++;
+                }
+            }
+        }
+        return rank;
+    }
+
 }

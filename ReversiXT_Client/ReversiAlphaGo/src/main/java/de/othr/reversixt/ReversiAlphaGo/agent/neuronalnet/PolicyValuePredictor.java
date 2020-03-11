@@ -23,9 +23,11 @@ public class PolicyValuePredictor {
     private static PolicyValuePredictor PVP = null;
     private static NeuronalNet neuronalNet;
     private static ComputationGraph computationGraph;
+    private static ComputationGraph pretrainedComputationGraph;
     private static final int numberOfInputPlanes = AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET;
     private static final File bestComputationGraphFile = new File("model" + File.separator + "bestModel.zip");
     private static final File actualComputationGraphFile = new File("model" + File.separator + "actualModel.zip");
+    private static final File pretrainedComputationGraphFile = new File("model" + File.separator + "pretrainedModel.zip");
     private PlaygroundTransformer playgroundTransformer;
 
     //****************************************************************
@@ -106,6 +108,46 @@ public class PolicyValuePredictor {
         }
     }
 
+    public static void savePretrainedModel() {
+        try {
+            pretrainedComputationGraph.save(pretrainedComputationGraphFile, true);
+        } catch (IOException e) {
+            if (!Main.QUIET_MODE) getLogger().warn("File: " + pretrainedComputationGraphFile + " is not accessable");
+        }
+    }
+
+    public static void savePretrainedAsActualModel() {
+        try {
+            pretrainedComputationGraph.save(actualComputationGraphFile, true);
+        } catch (IOException e) {
+            if (!Main.QUIET_MODE) getLogger().warn("File: " + actualComputationGraphFile + " is not accessable");
+        }
+    }
+
+    public static void saveAsPretrainedModel() {
+        try {
+            computationGraph.save(pretrainedComputationGraphFile, true);
+        } catch (IOException e) {
+            if (!Main.QUIET_MODE) getLogger().warn("File: " + pretrainedComputationGraphFile + " is not accessable");
+        }
+    }
+
+    public void loadPretrainedModel(){
+
+        try {
+            pretrainedComputationGraph = ComputationGraph.load(pretrainedComputationGraphFile, true);
+        } catch (IOException e) {
+            saveAsPretrainedModel();
+            try{
+                pretrainedComputationGraph = ComputationGraph.load(pretrainedComputationGraphFile, true);
+            }
+            catch (IOException ex){
+                if (!Main.QUIET_MODE) getLogger().warn("File: " + pretrainedComputationGraphFile + " is not accessable");
+            }
+
+        }
+    }
+
 
     //**********************************************************************************
     // trains the neural net
@@ -116,18 +158,22 @@ public class PolicyValuePredictor {
     // usage example see PolicyValuePredictorTest.testTrainAndEvaluateComputationGraph()
     //*********************************************************************************
     public void trainComputationGraph(Playground[] playgrounds, Player[] players, INDArray policyOutputsToLearn, INDArray valueOutputsToLearn) {
+        loadPretrainedModel();
+        if(pretrainedComputationGraph != null){
+            if (playgrounds.length == policyOutputsToLearn.size(0) && playgrounds.length == valueOutputsToLearn.size(0) && playgrounds.length == players.length) {
 
-        if (playgrounds.length == policyOutputsToLearn.size(0) && playgrounds.length == valueOutputsToLearn.size(0) && playgrounds.length == players.length) {
-
-            INDArray transformedPlaygrounds = Nd4j.zeros(DataType.INT, 0, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET, AlphaGoZeroConstants.DIMENSION_PLAYGROUND, AlphaGoZeroConstants.DIMENSION_PLAYGROUND);
-            for (int i = 0; i < playgrounds.length; i++) {
-                INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[i], players[i]);
-                transformedPlaygrounds = Nd4j.concat(0, transformedPlaygrounds, transformedPlayground);
+                INDArray transformedPlaygrounds = Nd4j.zeros(DataType.INT, 0, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET, AlphaGoZeroConstants.DIMENSION_PLAYGROUND, AlphaGoZeroConstants.DIMENSION_PLAYGROUND);
+                for (int i = 0; i < playgrounds.length; i++) {
+                    INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[i], players[i]);
+                    transformedPlaygrounds = Nd4j.concat(0, transformedPlaygrounds, transformedPlayground);
+                }
+                for(int index = 0; index < playgrounds.length; index++){
+                    pretrainedComputationGraph.fit(new INDArray[]{transformedPlaygrounds.slice(index).reshape(1,4,15,15)}, new INDArray[]{policyOutputsToLearn.slice(index).reshape(1,AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND +1), valueOutputsToLearn.slice(index).reshape(1,1)});
+                }
             }
-            computationGraph.fit(new INDArray[]{transformedPlaygrounds}, new INDArray[]{policyOutputsToLearn, valueOutputsToLearn});
+            savePretrainedModel();
         }
     }
-
 
     //**********************************************************************************
     // evaluates the neural net at a given state
