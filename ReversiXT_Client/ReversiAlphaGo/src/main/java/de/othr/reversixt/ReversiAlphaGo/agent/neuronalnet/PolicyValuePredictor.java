@@ -160,9 +160,10 @@ public class PolicyValuePredictor {
                     INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[i], players[i]);
                     transformedPlaygrounds = Nd4j.concat(0, transformedPlaygrounds, transformedPlayground);
                 }
-                //TODO: erase memory allocation error
-                pretrainedComputationGraph.fit(new INDArray[]{transformedPlaygrounds}, new INDArray[]{policyOutputsToLearn, valueOutputsToLearn});
+                for(int index = 0; index < playgrounds.length; index++){
+                    pretrainedComputationGraph.fit(new INDArray[]{transformedPlaygrounds.slice(index).reshape(1,4,15,15)}, new INDArray[]{policyOutputsToLearn.slice(index).reshape(1,AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND +1), valueOutputsToLearn.slice(index).reshape(1,1)});
 
+                }
             }
             savePretrainedModel();
         }
