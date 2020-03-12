@@ -23,7 +23,7 @@ import static de.othr.reversixt.ReversiAlphaGo.general.Main.QUIET_MODE;
 
 public class MCTS implements ITurnChoiceAlgorithm {
 
-    private static final int NR_SIMULATIONS= 1600;
+    private static final int NR_SIMULATIONS= 800;
 
     private Environment environment;
     private char ourPlayerSymbol;
