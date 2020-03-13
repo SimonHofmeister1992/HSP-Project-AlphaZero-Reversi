@@ -36,6 +36,7 @@ public class Main {
          */
         CLI cli = new CLI(args);
         setValuesFromCLI(cli);
+        if(LEARNER_MODE) groupNumber=4;
 
         /* ********************************
          *     Create instances for game
@@ -201,8 +202,10 @@ public class Main {
         }
 
         // update neuronalnetwork files
+        
+
         if(mgh.getNumberOfGames() == 0){
-            double rateWonGames = mgh.getNumberOfWonGames() / mgh.getNumberOfGames();
+            double rateWonGames = mgh.getNumberOfWonGames() / AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE;
 
             if(rateWonGames >= AlphaGoZeroConstants.NEEDED_WIN_RATE){
                 // first save actual model as best model, before overwriting the actual model
