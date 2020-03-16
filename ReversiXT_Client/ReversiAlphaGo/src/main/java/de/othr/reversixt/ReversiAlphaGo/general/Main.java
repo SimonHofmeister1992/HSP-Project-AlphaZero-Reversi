@@ -209,7 +209,10 @@ public class Main {
 
             if(rateWonGames >= AlphaGoZeroConstants.NEEDED_WIN_RATE || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1){
                 // first save actual model as best model, before overwriting the actual model
-                PolicyValuePredictor.saveAsBestModel();
+                    if((AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1 && environment.getRankOfPlayer(environment.getOurPlayer()) == 1) 
+                        || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE > 1) {
+			                    PolicyValuePredictor.saveAsBestModel();
+	    	        }
                 PolicyValuePredictor.savePretrainedAsActualModel();
             }
             else {
