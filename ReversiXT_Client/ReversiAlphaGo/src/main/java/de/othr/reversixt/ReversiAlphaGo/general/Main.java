@@ -207,7 +207,7 @@ public class Main {
         if(mgh.getNumberOfGames() == 0){
             double rateWonGames = mgh.getNumberOfWonGames() / AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE;
 
-            if(rateWonGames >= AlphaGoZeroConstants.NEEDED_WIN_RATE){
+            if(rateWonGames >= AlphaGoZeroConstants.NEEDED_WIN_RATE || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1){
                 // first save actual model as best model, before overwriting the actual model
                 PolicyValuePredictor.saveAsBestModel();
                 PolicyValuePredictor.savePretrainedAsActualModel();
