@@ -70,6 +70,7 @@ public class Main {
                     if(!Main.QUIET_MODE) System.out.println("Set ourPlayer in environment: " + serverCommunicator.getPlayerIcon());
                     //initialization of Agent Callable
                     environment.setOurPlayer(serverCommunicator.getPlayerIcon());
+                    environment.parseRawMap(serverCommunicator.getRawMap());
                     agentCallable = new AgentCallable(environment);
                     break;
                 case IMsgType.ENEMY_TURN:

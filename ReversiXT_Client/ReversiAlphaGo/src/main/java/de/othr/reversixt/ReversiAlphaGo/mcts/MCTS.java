@@ -202,6 +202,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
                 return;
             }
             newNode = createNextNodeAndEvaluate(bestUCTNode);
+            newNode.setSimulationReward(rewardGameState(newNode.getPlayground()));
             backpropagate(newNode);
             setBestTurn();
             searchBestUCT(root);
@@ -343,7 +344,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         double[] priors = outputNN.getOutputPolicyHead().toDoubleVector();
 
         if (!QUIET_MODE) {
-            System.out.println("reward: " + reward);
+            System.out.println("predicted reward: " + reward);
             playground.printPlayground();
         }
 
@@ -389,7 +390,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         double[] priors = outputNN.getOutputPolicyHead().toDoubleVector();
 
         if (!QUIET_MODE) {
-            System.out.println("reward: " + reward);
+            System.out.println("predicted reward: " + reward);
             playground.printPlayground();
         }
 
@@ -480,6 +481,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
     private int rewardGameState(Playground playground) {
         //reward = count all our stones
         int reward = 0;
+
         for (int x = 0; x < playground.getPlaygroundHeight(); x++) {
             for (int y = 0; y < playground.getPlaygroundWidth(); y++) {
                 if (playground.getSymbolOnPlaygroundPosition(y, x) == this.ourPlayerSymbol) {
@@ -487,7 +489,20 @@ public class MCTS implements ITurnChoiceAlgorithm {
                 }
             }
         }
-        //System.out.println("The reward is " + reward);
+        reward = reward / (playground.getPlaygroundHeight()*playground.getPlaygroundWidth());
+
+        Playground pg = environment.getPlayground();
+        environment.setPlayground(playground);
+        int rank = environment.getRankOfPlayer(environment.getPlayerByPlayerIcon('1'));
+        if (rank == 1) {
+            reward += 1;
+        }
+        else {
+            reward += 0;
+        }
+        reward /= 2;
+        environment.setPlayground(pg);
+        System.out.println("The reward is " + reward);
         return reward;
     }
 

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 
 public class ServerCommunicator {
 
@@ -34,6 +35,8 @@ public class ServerCommunicator {
     private int timeLimit;
     private Turn enemyTurn;
     private char disqPlayer;
+
+    private static HashMap<Character, Character> externalToInternalPlayerMap = new HashMap<>();
 
 
     // ************************************************************************************
@@ -156,16 +159,45 @@ public class ServerCommunicator {
                 this.inStream.read(data, 0, msgLength);
 
                 this.rawMap = new String(data);
-
                 if (!Main.QUIET_MODE) System.out.println(this.rawMap);
             } else if (msgType == IMsgType.PLAYER_ICON) //playericon
             {
                 this.playerIcon = (char) (this.inStream.read() + 48);
+                // calculate offset to become player '1'
+
+                String basicPart, mapPart;
+                basicPart = rawMap.substring(0,16);
+                mapPart = rawMap.substring(16);
+                for(int i = 0; i < mapPart.length(); i++){
+                    if(mapPart.charAt(i) >= '1' && mapPart.charAt(i) <= '8'){
+                        this.externalToInternalPlayerMap.putIfAbsent(mapPart.charAt(i), mapPart.charAt(i));
+                    }
+                }
+                int numPlayers = this.externalToInternalPlayerMap.size();
+                int offset = 0;
+
+
+                while(((this.getPlayerIcon() - '1') + offset) % numPlayers != 0){
+                    offset++;
+                }
+                int finalOffset = offset, finalNumPlayers=numPlayers;
+
+                externalToInternalPlayerMap.replaceAll((key, value) -> (char) ((((key-'1')+ finalOffset)%finalNumPlayers)+'1'));
+                mapPart = mapPart.replace('1','9');
+                for(Character key : externalToInternalPlayerMap.keySet()){
+                    mapPart = mapPart.replace(key,externalToInternalPlayerMap.get(key));
+                }
+                mapPart = mapPart.replace('9',externalToInternalPlayerMap.get('1'));
+                rawMap = basicPart + mapPart;
+
+                this.playerIcon = externalToInternalPlayerMap.get(this.playerIcon);
+
             } else if (msgType == IMsgType.TURN_REQUEST) //turnrequest
             {
                 this.timeLimit = this.inStream.readInt();
                 if (this.timeLimit <= 0) this.timeLimit = Integer.MAX_VALUE;
                 this.maxDepth = this.inStream.read();
+
             } else if (msgType == IMsgType.ENEMY_TURN) //enemyTurn
             {
 
@@ -173,6 +205,7 @@ public class ServerCommunicator {
                 int row = this.inStream.readUnsignedShort();
                 int specialInfo = this.inStream.read();
                 char playerIcon = (char) (this.inStream.read() + 48);
+                playerIcon = this.externalToInternalPlayerMap.get(playerIcon);
 
                 this.enemyTurn = new Turn(playerIcon, row, col, specialInfo);
 
