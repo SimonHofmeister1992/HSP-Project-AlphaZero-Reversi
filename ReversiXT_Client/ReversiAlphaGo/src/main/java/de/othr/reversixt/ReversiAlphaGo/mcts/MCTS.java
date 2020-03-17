@@ -502,7 +502,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         }
         reward /= 2;
         environment.setPlayground(pg);
-        System.out.println("The reward is " + reward);
+        if(!Main.QUIET_MODE) System.out.println("The reward is " + reward);
         return reward;
     }
 
