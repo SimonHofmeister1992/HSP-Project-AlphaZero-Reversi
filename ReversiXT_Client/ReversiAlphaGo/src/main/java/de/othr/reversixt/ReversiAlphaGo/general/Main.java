@@ -187,13 +187,13 @@ public class Main {
         INDArray valueOutputs = Nd4j.create(0, 1);
         INDArray value;
         Node node;
-
+        
         for (int i = 0; i < history.size(); i++) {
             node = history.get(i);
             playgrounds[i] = node.getPlayground();
             players[i] = node.getNextPlayer();
 
-            policy = Nd4j.zeros(AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND + 1);
+            policy = Nd4j.zeros(AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND + 1).reshape(1, AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND + 1);
             int pos;
             double moveProbability;
             for (Node child : node.getChildren()) {
@@ -210,6 +210,8 @@ public class Main {
                 valueOutputs = Nd4j.concat(0, valueOutputs, value);
             }
         }
+        System.out.println("new policy: " + policyOutputs.toString());
+        System.out.println("new value: " + valueOutputs.toString());
         pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
     }
 
