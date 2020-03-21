@@ -1,6 +1,7 @@
 package de.othr.reversixt.ReversiAlphaGo.general;
 
 import de.othr.reversixt.ReversiAlphaGo.agent.AgentCallable;
+import de.othr.reversixt.ReversiAlphaGo.agent.ITurnChoiceAlgorithm;
 import de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet.PolicyValuePredictor;
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
@@ -26,7 +27,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
 
         /* *******************************
-        *       Enable training on multi-gpu
+         *       Enable training on multi-gpu
          */
 
         CudaEnvironment.getInstance().getConfiguration().allowMultiGPU(true);
@@ -36,7 +37,7 @@ public class Main {
          */
         CLI cli = new CLI(args);
         setValuesFromCLI(cli);
-        if(LEARNER_MODE) groupNumber=4;
+        if (LEARNER_MODE) groupNumber = 4;
 
         /* ********************************
          *     Create instances for game
@@ -54,7 +55,7 @@ public class Main {
 
         serverInit(ip, port, serverCommunicator, environment);
         AgentCallable agentCallable = null;
-        
+
         /* ********************************
          *             Game itself
          */
@@ -67,7 +68,8 @@ public class Main {
 
             switch (msgType) {
                 case IMsgType.PLAYER_ICON:
-                    if(!Main.QUIET_MODE) System.out.println("Set ourPlayer in environment: " + serverCommunicator.getPlayerIcon());
+                    if (!Main.QUIET_MODE)
+                        System.out.println("Set ourPlayer in environment: " + serverCommunicator.getPlayerIcon());
                     //initialization of Agent Callable
                     environment.setOurPlayer(serverCommunicator.getPlayerIcon());
                     environment.parseRawMap(serverCommunicator.getRawMap());
@@ -75,14 +77,14 @@ public class Main {
                     break;
                 case IMsgType.ENEMY_TURN:
                     environment.updatePlayground(serverCommunicator.getEnemyTurn(), environment.getPlayground());
-                    if(!QUIET_MODE) {
+                    if (!QUIET_MODE) {
                         System.out.println("Enemy Turn");
                         environment.getPlayground().printPlayground();
                     }
                     agentCallable.getAgent().getITurnChoiceAlgorithm().enemyTurn(serverCommunicator.getEnemyTurn());
                     break;
                 case IMsgType.TURN_REQUEST:
-                    if(!Main.QUIET_MODE) System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
+                    if (!Main.QUIET_MODE) System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
                     ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
                     Future<Turn> futureTurn = executorService.submit(agentCallable);
                     //
@@ -115,15 +117,13 @@ public class Main {
 
         if (!QUIET_MODE && environment.isPlayerDisqualified(serverCommunicator.getPlayerIcon())) {
             System.err.println("Agent got disqualified");
-        }
-        else if(Main.LEARNER_MODE){
+        } else if (Main.LEARNER_MODE) {
 
-            pretrainNetwork(pvp, agentCallable);
+            trainNetwork(pvp, agentCallable);
 
             updateStatisticsAndNeuronalNetworks(environment);
 
         }
-
 
 
         if (!QUIET_MODE) {
@@ -164,59 +164,79 @@ public class Main {
         }
     }
 
-    private static void pretrainNetwork(PolicyValuePredictor pvp, AgentCallable agentCallable){
-        ArrayList<Node> history = agentCallable.getAgent().getITurnChoiceAlgorithm().getTurnHistory();
+    /**
+     * prepares the data for the training process of the NN, called after each completed game
+     * needed are the improved values for the output of the NN (value and policy)
+     * considered are all actually played moves (saved in turnHistory)
+     * for each node the improved move probabilities are calculated which are needed to update NN priors
+     * as only moves that have been made are children of the corresponding node all other positions are 0
+     * for the last node the game outcome is retrieved (see rewardGame()) which is needed to update NN value
+     * finally calls the actual training method
+     * @param pvp
+     * @param agentCallable
+     */
+    private static void trainNetwork(PolicyValuePredictor pvp, AgentCallable agentCallable) {
+        ITurnChoiceAlgorithm algorithm = agentCallable.getAgent().getITurnChoiceAlgorithm();
+        ArrayList<Node> history = algorithm.getTurnHistory();
 
         Playground[] playgrounds = new Playground[history.size()];
         Player[] players = new Player[history.size()];
-        INDArray policyOutputs = Nd4j.create(0,AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+        INDArray policyOutputs = Nd4j.create(0, AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND + 1);
         INDArray policy;
 
-        INDArray valueOutputs = Nd4j.create(0,1);
+        INDArray valueOutputs = Nd4j.create(0, 1);
         INDArray value;
+        Node node;
 
-        int index = 0;
-        for(Node node : history){
-            playgrounds[index] = node.getPlayground();
-            players[index] = node.getNextPlayer();
+        for (int i = 0; i < history.size(); i++) {
+            node = history.get(i);
+            playgrounds[i] = node.getPlayground();
+            players[i] = node.getNextPlayer();
 
-            policy = Nd4j.createFromArray((Nd4j.createFromArray(node.getPriorsOfNN()).toFloatVector())).reshape(1, AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+            policy = Nd4j.zeros(AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND + 1);
+            int pos;
+            double moveProbability;
+            for (Node child : node.getChildren()) {
+                pos = child.getCurTurn().getRow() + child.getCurTurn().getColumn() * AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
+                moveProbability = ((double) child.getNumVisited()) / node.getNumVisited();
+                policy.putScalar(pos, moveProbability);
+            }
             policyOutputs = Nd4j.concat(0, policyOutputs, policy);
 
-            value = Nd4j.createFromArray(Nd4j.createFromArray(node.getSimulationReward()).toFloatVector()).reshape(1,1);
-            valueOutputs = Nd4j.concat(0, valueOutputs, value);
-            index++;
+            // last node, terminal state
+            if (i == history.size()) {
+                value = Nd4j.createFromArray(Nd4j.createFromArray(algorithm.rewardGame(node.getPlayground()))
+                        .toFloatVector()).reshape(1, 1);
+                valueOutputs = Nd4j.concat(0, valueOutputs, value);
+            }
         }
-
         pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
     }
 
-    private static void updateStatisticsAndNeuronalNetworks(Environment environment){
+    private static void updateStatisticsAndNeuronalNetworks(Environment environment) {
         MultiGameHistory mgh = new MultiGameHistory();
 
         // update statistics
-        if(environment.getRankOfPlayer(environment.getOurPlayer()) == 1){
+        if (environment.getRankOfPlayer(environment.getOurPlayer()) == 1) {
             mgh.declareGameAsWon();
-        }
-        else{
+        } else {
             mgh.declareGameAsLost();
         }
 
         // update neuronalnetwork files
-        
 
-        if(mgh.getNumberOfGames() == 0){
+
+        if (mgh.getNumberOfGames() == 0) {
             double rateWonGames = mgh.getNumberOfWonGames() / AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE;
 
-            if(rateWonGames >= AlphaGoZeroConstants.NEEDED_WIN_RATE || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1){
+            if (rateWonGames >= AlphaGoZeroConstants.NEEDED_WIN_RATE || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1) {
                 // first save actual model as best model, before overwriting the actual model
-                    if((AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1 && environment.getRankOfPlayer(environment.getOurPlayer()) == 1) 
+                if ((AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1 && environment.getRankOfPlayer(environment.getOurPlayer()) == 1)
                         || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE > 1) {
-			                    PolicyValuePredictor.saveAsBestModel();
-	    	        }
+                    PolicyValuePredictor.saveAsBestModel();
+                }
                 PolicyValuePredictor.savePretrainedAsActualModel();
-            }
-            else {
+            } else {
                 PolicyValuePredictor.savePretrainedAsActualModel();
             }
 

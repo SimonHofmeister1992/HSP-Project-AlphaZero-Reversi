@@ -1,5 +1,6 @@
 package de.othr.reversixt.ReversiAlphaGo.agent;
 
+import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import de.othr.reversixt.ReversiAlphaGo.mcts.Node;
 
@@ -16,4 +17,6 @@ public interface ITurnChoiceAlgorithm {
     void enemyTurn(Turn turn);
 
     ArrayList<Node> getTurnHistory();
+
+    int rewardGame(Playground playground);
 }

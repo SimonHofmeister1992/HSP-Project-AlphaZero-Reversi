@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
+import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import de.othr.reversixt.ReversiAlphaGo.mcts.Node;
 
@@ -99,5 +100,10 @@ public class RandomTurnChoiceAlgorithm implements ITurnChoiceAlgorithm {
     @Override
     public ArrayList<Node> getTurnHistory() {
         return null;
+    }
+
+    @Override
+    public int rewardGame(Playground playground) {
+        return 0;
     }
 }

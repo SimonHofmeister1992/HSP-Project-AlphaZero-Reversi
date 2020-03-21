@@ -32,7 +32,7 @@ public class Node {
      * init: a new node is not yet visited, the initial win/loss and has no children
      *
      * @param playground for the node
-     * @param player      specifying whose turn it is (for the root node it is the current user not the opponent)
+     * @param player     specifying whose turn it is (for the root node it is the current user not the opponent)
      */
     public Node(Playground playground, Player player) {
         this.numVisited = 0;
@@ -49,8 +49,8 @@ public class Node {
      * init: a new node is not yet visited, the initial win/loss and has no children
      *
      * @param playground for the node
-     * @param parent      of the node
-     * @param nextPlayer      specifying whose turn it is
+     * @param parent     of the node
+     * @param nextPlayer specifying whose turn it is
      */
     public Node(Playground playground, Node parent, Player nextPlayer, Turn turn, ArrayList<Turn> nextTurns, double reward) {
         this.numVisited = 1;
@@ -107,15 +107,22 @@ public class Node {
         return nextPlayer;
     }
 
-    public ArrayList<Turn> getNextTurns() {   return nextTurns;   }
+    public ArrayList<Turn> getNextTurns() {
+        return nextTurns;
+    }
 
-    public void setNextTurns(ArrayList<Turn> nextTurns) {  this.nextTurns = nextTurns;   }
+    public void setNextTurns(ArrayList<Turn> nextTurns) {
+        this.nextTurns = nextTurns;
+    }
 
-    public void incNumVistited() { this.numVisited = numVisited + 1; }
+    public void incNumVistited() {
+        this.numVisited = numVisited + 1;
+    }
 
     public void addReward(double reward) {
         this.simulationReward = simulationReward + reward;
     }
+
     /**
      * calculates the exploitation component for the uct
      *
@@ -153,4 +160,5 @@ public class Node {
     public void setPriorsOfNN(double[] priorsOfNN) {
         this.priorsOfNN = priorsOfNN;
     }
+
 }

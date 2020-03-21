@@ -23,7 +23,7 @@ import static de.othr.reversixt.ReversiAlphaGo.general.Main.QUIET_MODE;
 
 public class MCTS implements ITurnChoiceAlgorithm {
 
-    private static final int NR_SIMULATIONS= 800;
+    private static final int NR_SIMULATIONS = 800;
 
     private Environment environment;
     private char ourPlayerSymbol;
@@ -60,7 +60,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         //bestNode is next root-node of tree
         setNewRootNode(bestNode);
         Turn bestTurn = bestNode.getCurTurn();
-        if(!QUIET_MODE) System.out.println("bestTurn: " + bestTurn.getColumn() + ", " + bestTurn.getRow());
+        if (!QUIET_MODE) System.out.println("bestTurn: " + bestTurn.getColumn() + ", " + bestTurn.getRow());
         return bestTurn;
     }
 
@@ -91,7 +91,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         }
         //enemy turn was not explored -> new root node
         if (newRootNodeFound == 0) {
-            if(!QUIET_MODE) System.out.println("Discard tree");
+            if (!QUIET_MODE) System.out.println("Discard tree");
             root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
             firstCall = Boolean.TRUE;
         }
@@ -194,15 +194,14 @@ public class MCTS implements ITurnChoiceAlgorithm {
         Node newNode;
         int count = 0;
         while (bestUCTNode != null && count < NR_SIMULATIONS) {
-            if(!QUIET_MODE) {
-                System.out.println("Nr Simulation: "+ count);
+            if (!QUIET_MODE) {
+                System.out.println("Nr Simulation: " + count);
             }
             //needed to interrupt thread
             if (Thread.currentThread().isInterrupted()) {
                 return;
             }
             newNode = createNextNodeAndEvaluate(bestUCTNode);
-            newNode.setSimulationReward(rewardGameState(newNode.getPlayground()));
             backpropagate(newNode);
             setBestTurn();
             searchBestUCT(root);
@@ -338,8 +337,8 @@ public class MCTS implements ITurnChoiceAlgorithm {
         Turn nextTurn = choseNextTurn(chosenNode);
         Playground playground = chosenNode.getPlayground().getCloneOfPlayground();
         environment.updatePlayground(nextTurn, playground);
-        Player nextplayer = environment.getNextPlayer(nextTurn.getPlayerIcon());
-        OutputNeuronalNet outputNN = PolicyValuePredictor.getInstance().evaluate(playground, nextplayer);
+        Player nextPlayer = environment.getNextPlayer(nextTurn.getPlayerIcon());
+        OutputNeuronalNet outputNN = PolicyValuePredictor.getInstance().evaluate(playground, nextPlayer);
         double reward = outputNN.getOutputValueHead().toDoubleVector()[0];
         double[] priors = outputNN.getOutputPolicyHead().toDoubleVector();
 
@@ -348,13 +347,13 @@ public class MCTS implements ITurnChoiceAlgorithm {
             playground.printPlayground();
         }
 
-        ArrayList<Turn> validTurns = getPossibleTurns(playground, nextplayer); //row col
+        ArrayList<Turn> validTurns = getPossibleTurns(playground, nextPlayer); //row col
         for (Turn turn : validTurns) {
             int i = turn.getColumn() + turn.getRow() * AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
             turn.setPrior(priors[i]);
         }
 
-        Node newNode = new Node(playground, chosenNode, nextplayer, nextTurn, validTurns, reward);
+        Node newNode = new Node(playground, chosenNode, nextPlayer, nextTurn, validTurns, reward);
 
         if (LEARNER_MODE) {
             newNode.setPriorsOfNN(priors);
@@ -422,7 +421,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
      */
     private void traverse(Node traverseNode) {
 
-        if(LEARNER_MODE){  // parallel execution on all cores
+        if (LEARNER_MODE) {  // parallel execution on all cores
             traverseNode.getChildren().parallelStream().forEach(child -> {
 
                 //clone map to "complete" the map
@@ -444,9 +443,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
                 }
 
             });
-        }
-
-        else{  // iterative execution
+        } else {  // iterative execution
             for (Node child : traverseNode.getChildren()) {
                 //clone map to "complete" the map
                 Playground playground = child.getPlayground().getCloneOfPlayground();
@@ -471,6 +468,42 @@ public class MCTS implements ITurnChoiceAlgorithm {
     }
 
     /**
+     * counts the number of stones on the playground for the corresponding player
+     * if the playground field contains a stone from the corresponding player the reward is incremented
+     * if the playground field is empty (== 0) the field is ignored
+     * if the field contains a stone from the opponent the reward decremented
+     *
+     * @param playground represents the current game state and holds the current playground
+     * @return the game result: 0 for a draw, -1 for a loss, +1 for winning
+     */
+
+    public int rewardGame(Playground playground) {
+        int reward = 0;
+
+        for (int x = 0; x < playground.getPlaygroundHeight(); x++) {
+            for (int y = 0; y < playground.getPlaygroundWidth(); y++) {
+                if (playground.getSymbolOnPlaygroundPosition(y, x) == this.ourPlayerSymbol) {
+                    reward++;
+                } else if (playground.getSymbolOnPlaygroundPosition(y, x) == '0') {
+                    //ignore case, do nothing
+                } else {
+                    reward--;
+                }
+                //TODO how many players? now 2
+                //TODO not updated for deprecated methods
+            }
+        }
+
+        if (reward > 0) {
+            return AlphaGoZeroConstants.GAME_WON;
+        } else if (reward == 0) {
+            return AlphaGoZeroConstants.GAME_DRAWN;
+        } else {
+            return AlphaGoZeroConstants.GAME_LOST;
+        }
+    }
+
+    /**
      * DEPRECATED
      * <p>
      * calculates the reward as counting the stones one the playground from the corresponding player
@@ -489,20 +522,6 @@ public class MCTS implements ITurnChoiceAlgorithm {
                 }
             }
         }
-        reward = reward / (playground.getPlaygroundHeight()*playground.getPlaygroundWidth());
-
-        Playground pg = environment.getPlayground();
-        environment.setPlayground(playground);
-        int rank = environment.getRankOfPlayer(environment.getPlayerByPlayerIcon('1'));
-        if (rank == 1) {
-            reward += 1;
-        }
-        else {
-            reward += 0;
-        }
-        reward /= 2;
-        environment.setPlayground(pg);
-        if(!Main.QUIET_MODE) System.out.println("The reward is " + reward);
         return reward;
     }
 
