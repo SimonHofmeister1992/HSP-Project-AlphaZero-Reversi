@@ -181,7 +181,7 @@ class NeuronalNet {
         graphBuilder.addLayer(conv, new ConvolutionLayer.Builder().kernelSize(kernelSize).stride(stride).convolutionMode(cMode).nIn(256).nOut(2).build(), nameLastLayer);
         graphBuilder.addLayer(batchNorm, new BatchNormalization.Builder().nOut(2).build(), conv);
         graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.LEAKYRELU).build(), batchNorm);
-        graphBuilder.addLayer(dense, new OutputLayer.Builder().nIn(MAP_SIZE*MAP_SIZE*2).nOut(MAP_SIZE*MAP_SIZE+1).build(), activation);
+        graphBuilder.addLayer(dense, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT).nIn(MAP_SIZE*MAP_SIZE*2).nOut(MAP_SIZE*MAP_SIZE+1).build(), activation);
 
         HashMap<String, InputPreProcessor> map = new HashMap<String, InputPreProcessor>();
         map.put(dense, new CnnToFeedForwardPreProcessor(MAP_SIZE,MAP_SIZE,2));
@@ -201,7 +201,7 @@ class NeuronalNet {
         graphBuilder.addLayer(batchNorm, new BatchNormalization.Builder().nOut(1).build(), conv);
         graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.LEAKYRELU).build(), batchNorm);
         graphBuilder.addLayer(dense, new DenseLayer.Builder().nIn(MAP_SIZE * MAP_SIZE).nOut(256).build(), activation);
-        graphBuilder.addLayer(output, new OutputLayer.Builder(LossFunctions.LossFunction.XENT).activation(Activation.SIGMOID).nIn(256).nOut(1).build(), dense);
+        graphBuilder.addLayer(output, new OutputLayer.Builder(LossFunctions.LossFunction.MSE).activation(Activation.TANH).nIn(256).nOut(1).build(), dense);
 
         HashMap<String, InputPreProcessor> map = new HashMap<String, InputPreProcessor>();
         map.put(dense, new CnnToFeedForwardPreProcessor(MAP_SIZE,MAP_SIZE,1));
