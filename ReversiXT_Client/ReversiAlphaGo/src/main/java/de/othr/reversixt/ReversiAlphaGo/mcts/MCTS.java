@@ -469,37 +469,54 @@ public class MCTS implements ITurnChoiceAlgorithm {
 
     /**
      * counts the number of stones on the playground for the corresponding player
-     * if the playground field contains a stone from the corresponding player the reward is incremented
-     * if the playground field is empty (== 0) the field is ignored
-     * if the field contains a stone from the opponent the reward decremented
+     * checks if we have the most stones and return the result below
      *
      * @param playground represents the current game state and holds the current playground
      * @return the game result: 0 for a draw, -1 for a loss, +1 for winning
      */
 
     public int rewardGame(Playground playground) {
-        int reward = 0;
 
+        //initialize an array of integer for each player
+        int[] stonesOfPlayer = new int[environment.getNumOfPlayers()];
+        for (int i = 0; i < environment.getNumOfPlayers(); i++) {
+            stonesOfPlayer[i] = 0;
+        }
+
+        //count all stones on the playground for each player
+        char playgroundSymbol;
+        int playerIndex;
         for (int x = 0; x < playground.getPlaygroundHeight(); x++) {
             for (int y = 0; y < playground.getPlaygroundWidth(); y++) {
-                if (playground.getSymbolOnPlaygroundPosition(y, x) == this.ourPlayerSymbol) {
-                    reward++;
-                } else if (playground.getSymbolOnPlaygroundPosition(y, x) == '0') {
-                    //ignore case, do nothing
-                } else {
-                    reward--;
+                playgroundSymbol = playground.getSymbolOnPlaygroundPosition(y, x);
+                playerIndex = (playgroundSymbol - 49); //Player 1 -> index 0; Player 2 -> index 1
+                if (playerIndex < environment.getNumOfPlayers() && playerIndex >= 0) {
+                    stonesOfPlayer[playerIndex]++;
                 }
-                //TODO how many players? now 2
-                //TODO not updated for deprecated methods
             }
         }
 
-        if (reward > 0) {
+        //check if our stone count is the highest
+        int ourIndex = (environment.getOurPlayer().getSymbol() - 49);
+        int ourNumOfStones = stonesOfPlayer[ourIndex];
+        int sameNumOfStones = 0; //check if a player has the same reward
+        for (int j = 0; j < environment.getNumOfPlayers(); j++) {
+            if (!(j == ourIndex)) {
+                if (stonesOfPlayer[j] > ourNumOfStones) {
+                    return AlphaGoZeroConstants.GAME_LOST;
+                }
+                if (stonesOfPlayer[j] == ourNumOfStones) {
+                    sameNumOfStones++;
+                }
+            }
+        }
+
+        //no player has more stones then our player
+        //so chose if we have a draw or won
+        if (sameNumOfStones == 0) {
             return AlphaGoZeroConstants.GAME_WON;
-        } else if (reward == 0) {
-            return AlphaGoZeroConstants.GAME_DRAWN;
         } else {
-            return AlphaGoZeroConstants.GAME_LOST;
+            return AlphaGoZeroConstants.GAME_DRAWN;
         }
     }
 
