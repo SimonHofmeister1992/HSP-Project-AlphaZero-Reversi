@@ -14,7 +14,6 @@ import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import java.util.Random;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +50,6 @@ public class Main {
 
         // Initialize singleton neuronal net before connecting to server (time intensive)
         PolicyValuePredictor pvp = PolicyValuePredictor.getInstance();
-        pvp.setEnvironment(environment);
 
         /* *********************************
          *         Connect to server
@@ -86,7 +84,6 @@ public class Main {
                         environment.getPlayground().printPlayground();
                     }
                     agentCallable.getAgent().getITurnChoiceAlgorithm().enemyTurn(serverCommunicator.getEnemyTurn());
-                    environment.increaseNumOfTurns();
                     break;
                 case IMsgType.TURN_REQUEST:
                     if (!Main.QUIET_MODE) System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
@@ -103,7 +100,6 @@ public class Main {
                         bestTurn = agentCallable.getAgent().getITurnChoiceAlgorithm().getBestTurn();
                     }
                     //
-                    environment.increaseNumOfTurns();
                     serverCommunicator.sendOwnTurn(bestTurn);
                     break;
                 case IMsgType.DISQUALIFIED_PLAYER:
@@ -124,8 +120,11 @@ public class Main {
         if (!QUIET_MODE && environment.isPlayerDisqualified(serverCommunicator.getPlayerIcon())) {
             System.err.println("Agent got disqualified");
         } else if (Main.LEARNER_MODE) {
-	    updateStatisticsAndNeuronalNetworks(environment);
-            trainNetwork(pvp, agentCallable);        
+
+            trainNetwork(pvp, agentCallable);
+
+            updateStatisticsAndNeuronalNetworks(environment);
+
         }
 
 
@@ -202,52 +201,44 @@ public class Main {
             for (Node child : node.getChildren()) {
                 pos = child.getCurTurn().getRow() + child.getCurTurn().getColumn() * AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
                 moveProbability = ((double) child.getNumVisited()) / node.getNumVisited();
-                policy = policy.putScalar(pos, moveProbability);
+                policy.putScalar(pos, moveProbability);
             }
             policyOutputs = Nd4j.concat(0, policyOutputs, policy);
 
             // last node, terminal state
-
             if (i == history.size() - 1) {
                 for(int posInHistory = 0; posInHistory < history.size(); posInHistory++){
-                    value = Nd4j.createFromArray(Nd4j.createFromArray(algorithm.rewardGame(node.getPlayground())).toFloatVector()).reshape(1, 1);
+                    value = Nd4j.createFromArray(Nd4j.createFromArray(algorithm.rewardGame(node.getPlayground()))
+                            .toFloatVector()).reshape(1, 1);
                     valueOutputs = Nd4j.concat(0, valueOutputs, value);
                 }
             }
         }
 
+        // checks if training the computationGraph works by using one dataset
+        if(!Main.QUIET_MODE){
+            ComputationGraph computationGraph = pvp.getComputationGraph();
 
-        // checks if training the computationGraph works by using one dataset - PART 1
-        ComputationGraph computationGraph = pvp.getComputationGraph();
-        INDArray[] beforeOutputs = null, afterOutputs=null;
+            PlaygroundTransformer playgroundTransformer = new PlaygroundTransformer();
+            INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[0], players[0]);
 
-        PlaygroundTransformer playgroundTransformer = new PlaygroundTransformer();
-        INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[0], players[0]);
+            INDArray[] beforeOutputs = computationGraph.output(false, transformedPlayground);
 
-        if(!Main.QUIET_MODE) {
-            beforeOutputs = computationGraph.output(false, transformedPlayground);
-        }
+            pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
 
-
-
-                        /** REAL TRAINING **/
-        pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
-	PolicyValuePredictor.saveAsActualModel();
-
-
-        // checks if training the computationGraph works by using one dataset - PART 2
-        if(!Main.QUIET_MODE) {
-            afterOutputs = computationGraph.output(false, transformedPlayground);
+            INDArray[] afterOutputs = computationGraph.output(false, transformedPlayground);
 
             System.out.println("policy before train: " + beforeOutputs[0].toStringFull());
             System.out.println("value before train: " + beforeOutputs[1].toStringFull());
 
             System.out.println("policy after train: " + afterOutputs[0].toStringFull());
             System.out.println("value after train: " + afterOutputs[1].toStringFull());
-            System.out.println("policy changed?: " + !(beforeOutputs[0].toStringFull().equals(afterOutputs[0].toStringFull())));
-            System.out.println("values changed?: " + !(beforeOutputs[1].toStringFull().equals(afterOutputs[1].toStringFull())));
+
+            System.out.println("policy changed?: " + beforeOutputs[0].toStringFull().equals(afterOutputs[0].toStringFull()));
+            System.out.println("values changed?: " + beforeOutputs[1].toStringFull().equals(afterOutputs[1].toStringFull()));
         }
-        }
+        pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
+    }
 
     private static void updateStatisticsAndNeuronalNetworks(Environment environment) {
         MultiGameHistory mgh = new MultiGameHistory();
@@ -259,9 +250,8 @@ public class Main {
             mgh.declareGameAsLost();
         }
 
-
-
         // update neuronalnetwork files
+
 
         if (mgh.getNumberOfGames() == 0) {
             double rateWonGames = mgh.getNumberOfWonGames() / AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE;
@@ -272,7 +262,11 @@ public class Main {
                         || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE > 1) {
                     PolicyValuePredictor.saveAsBestModel();
                 }
+                PolicyValuePredictor.savePretrainedAsActualModel();
+            } else {
+                PolicyValuePredictor.savePretrainedAsActualModel();
             }
+
         }
     }
 }
