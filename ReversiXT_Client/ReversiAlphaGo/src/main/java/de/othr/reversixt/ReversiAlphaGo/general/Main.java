@@ -201,7 +201,7 @@ public class Main {
             for (Node child : node.getChildren()) {
                 pos = child.getCurTurn().getRow() + child.getCurTurn().getColumn() * AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
                 moveProbability = ((double) child.getNumVisited()) / node.getNumVisited();
-                policy.putScalar(pos, moveProbability);
+                policy = policy.putScalar(pos, moveProbability);
             }
             policyOutputs = Nd4j.concat(0, policyOutputs, policy);
 
@@ -215,30 +215,38 @@ public class Main {
             }
         }
 
-        // checks if training the computationGraph works by using one dataset
-        if(!Main.QUIET_MODE){
-            ComputationGraph computationGraph = pvp.getComputationGraph();
 
-            PlaygroundTransformer playgroundTransformer = new PlaygroundTransformer();
-            INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[0], players[0]);
+        // checks if training the computationGraph works by using one dataset - PART 1
+        ComputationGraph computationGraph = pvp.getComputationGraph();
+        INDArray[] beforeOutputs = null, afterOutputs=null;
 
-            INDArray[] beforeOutputs = computationGraph.output(false, transformedPlayground);
+        PlaygroundTransformer playgroundTransformer = new PlaygroundTransformer();
+        INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[0], players[0]);
 
-            pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
+        if(!Main.QUIET_MODE) {
+            beforeOutputs = computationGraph.output(false, transformedPlayground);
+        }
 
-            INDArray[] afterOutputs = computationGraph.output(false, transformedPlayground);
+
+
+                        /** REAL TRAINING **/
+        pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
+
+
+
+        // checks if training the computationGraph works by using one dataset - PART 2
+        if(!Main.QUIET_MODE) {
+            afterOutputs = computationGraph.output(false, transformedPlayground);
 
             System.out.println("policy before train: " + beforeOutputs[0].toStringFull());
             System.out.println("value before train: " + beforeOutputs[1].toStringFull());
 
             System.out.println("policy after train: " + afterOutputs[0].toStringFull());
             System.out.println("value after train: " + afterOutputs[1].toStringFull());
-
-            System.out.println("policy changed?: " + beforeOutputs[0].toStringFull().equals(afterOutputs[0].toStringFull()));
-            System.out.println("values changed?: " + beforeOutputs[1].toStringFull().equals(afterOutputs[1].toStringFull()));
+            System.out.println("policy changed?: " + !(beforeOutputs[0].toStringFull().equals(afterOutputs[0].toStringFull())));
+            System.out.println("values changed?: " + !(beforeOutputs[1].toStringFull().equals(afterOutputs[1].toStringFull())));
         }
-        pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
-    }
+        }
 
     private static void updateStatisticsAndNeuronalNetworks(Environment environment) {
         MultiGameHistory mgh = new MultiGameHistory();
@@ -250,8 +258,9 @@ public class Main {
             mgh.declareGameAsLost();
         }
 
-        // update neuronalnetwork files
 
+
+        // update neuronalnetwork files
 
         if (mgh.getNumberOfGames() == 0) {
             double rateWonGames = mgh.getNumberOfWonGames() / AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE;
@@ -262,11 +271,7 @@ public class Main {
                         || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE > 1) {
                     PolicyValuePredictor.saveAsBestModel();
                 }
-                PolicyValuePredictor.savePretrainedAsActualModel();
-            } else {
-                PolicyValuePredictor.savePretrainedAsActualModel();
             }
-
         }
     }
 }
