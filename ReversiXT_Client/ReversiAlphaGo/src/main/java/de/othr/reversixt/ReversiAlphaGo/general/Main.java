@@ -2,6 +2,7 @@ package de.othr.reversixt.ReversiAlphaGo.general;
 
 import de.othr.reversixt.ReversiAlphaGo.agent.AgentCallable;
 import de.othr.reversixt.ReversiAlphaGo.agent.ITurnChoiceAlgorithm;
+import de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet.PlaygroundTransformer;
 import de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet.PolicyValuePredictor;
 import de.othr.reversixt.ReversiAlphaGo.communication.ServerCommunicator;
 import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
@@ -9,6 +10,7 @@ import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.environment.Turn;
 import de.othr.reversixt.ReversiAlphaGo.mcts.Node;
+import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -204,14 +206,37 @@ public class Main {
             policyOutputs = Nd4j.concat(0, policyOutputs, policy);
 
             // last node, terminal state
-            if (i == history.size()) {
-                value = Nd4j.createFromArray(Nd4j.createFromArray(algorithm.rewardGame(node.getPlayground()))
-                        .toFloatVector()).reshape(1, 1);
-                valueOutputs = Nd4j.concat(0, valueOutputs, value);
+            if (i == history.size() - 1) {
+                for(int posInHistory = 0; posInHistory < history.size(); posInHistory++){
+                    value = Nd4j.createFromArray(Nd4j.createFromArray(algorithm.rewardGame(node.getPlayground()))
+                            .toFloatVector()).reshape(1, 1);
+                    valueOutputs = Nd4j.concat(0, valueOutputs, value);
+                }
             }
         }
-        System.out.println("new policy: " + policyOutputs.toString());
-        System.out.println("new value: " + valueOutputs.toString());
+
+        // checks if training the computationGraph works by using one dataset
+        if(!Main.QUIET_MODE){
+            ComputationGraph computationGraph = pvp.getComputationGraph();
+
+            PlaygroundTransformer playgroundTransformer = new PlaygroundTransformer();
+            INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[0], players[0]);
+
+            INDArray[] beforeOutputs = computationGraph.output(false, transformedPlayground);
+
+            pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
+
+            INDArray[] afterOutputs = computationGraph.output(false, transformedPlayground);
+
+            System.out.println("policy before train: " + beforeOutputs[0].toStringFull());
+            System.out.println("value before train: " + beforeOutputs[1].toStringFull());
+
+            System.out.println("policy after train: " + afterOutputs[0].toStringFull());
+            System.out.println("value after train: " + afterOutputs[1].toStringFull());
+
+            System.out.println("policy changed?: " + beforeOutputs[0].toStringFull().equals(afterOutputs[0].toStringFull()));
+            System.out.println("values changed?: " + beforeOutputs[1].toStringFull().equals(afterOutputs[1].toStringFull()));
+        }
         pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
     }
 

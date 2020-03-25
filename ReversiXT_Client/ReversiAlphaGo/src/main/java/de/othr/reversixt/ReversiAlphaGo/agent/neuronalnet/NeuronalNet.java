@@ -85,7 +85,7 @@ class NeuronalNet {
 
         ComputationGraph computationGraph = new ComputationGraph(graphBuilder.build());
         computationGraph.init();
-
+        computationGraph.feedForward(true);
         this.computationGraph = computationGraph;
     }
 
@@ -94,15 +94,18 @@ class NeuronalNet {
 
 
         ComputationGraphConfiguration.GraphBuilder graphBuilder = new NeuralNetConfiguration.Builder()
-                .weightInit(WeightInit.RELU_UNIFORM)
-                .cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
-                .updater(new Sgd())
-                .miniBatch(true)
-                .trainingWorkspaceMode(WorkspaceMode.ENABLED)
-                .cacheMode(CacheMode.DEVICE)
-                .l1(0.9)
-                .l2(0.0001)
-                .graphBuilder().setInputTypes(InputType.convolutional(MAP_SIZE, MAP_SIZE, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET));
+                    .weightInit(WeightInit.RELU_UNIFORM)
+                    .cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
+                    .updater(new Sgd())
+                    .trainingWorkspaceMode(WorkspaceMode.ENABLED)
+                    .cacheMode(CacheMode.DEVICE)
+                    .l1(0.9)
+                    .l1Bias(0.9)
+                    .l2(0.0001)
+                    .l2Bias(0.0001)
+                    .graphBuilder()
+                .backpropType(BackpropType.Standard)
+                .setInputTypes(InputType.convolutional(MAP_SIZE, MAP_SIZE, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET));
 
         return graphBuilder;
     }
