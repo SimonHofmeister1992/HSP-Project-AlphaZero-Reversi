@@ -1,11 +1,8 @@
 package de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet;
 
-import cc.mallet.types.Dirichlet;
-import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.general.AlphaGoZeroConstants;
-import de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet.Hash;
 import de.othr.reversixt.ReversiAlphaGo.general.Main;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.nd4j.linalg.api.buffer.DataType;
@@ -16,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 
 // *******************************************
 // Singleton class, use getInstance() to get access to this object
@@ -31,7 +27,6 @@ public class PolicyValuePredictor {
     private static final File bestComputationGraphFile = new File("model" + File.separator + "bestModel.zip");
     private static final File actualComputationGraphFile = new File("model" + File.separator + "actualModel.zip");
     private PlaygroundTransformer playgroundTransformer;
-    private Environment environment;
 
     //****************************************************************
     //  creates an instance of the PolicyValueGraph
@@ -47,9 +42,6 @@ public class PolicyValuePredictor {
 
     private PolicyValuePredictor() {
         this.playgroundTransformer = new PlaygroundTransformer();
-    }
-    public void setEnvironment(Environment environment){
-           this.environment=environment;
     }
 
     //****************************************************************
@@ -71,20 +63,14 @@ public class PolicyValuePredictor {
         try {
             if (actualComputationGraphFile.exists() && Main.LEARNER_MODE) {
                 load = ComputationGraph.load(actualComputationGraphFile, true);
-                if (!Main.QUIET_MODE) {
-			System.out.println("ComputationGraph: LearningGraph Loaded");
-						System.out.println("Actual model SHA-256: " + Hash.SHA256.checksum(actualComputationGraphFile));	
-		}
+                if (!Main.QUIET_MODE) System.out.println("ComputationGraph: LearningGraph Loaded");
             } else if (!actualComputationGraphFile.exists() && Main.LEARNER_MODE) {
                 load = ComputationGraph.load(bestComputationGraphFile, true);
                 if (!Main.QUIET_MODE) System.out.println("ComputationGraph: BestGraph Loaded");
                 saveAsActualModel();
             } else if (!Main.LEARNER_MODE && bestComputationGraphFile.exists()) {
                 load = ComputationGraph.load(bestComputationGraphFile, true);
-                if (!Main.QUIET_MODE) {
-			System.out.println("ComputationGraph: BestGraph Loaded");
-			System.out.println("Best model SHA-256: " + Hash.SHA256.checksum(bestComputationGraphFile));		
-		}
+                if (!Main.QUIET_MODE) System.out.println("ComputationGraph: BestGraph Loaded");
             } else if (!Main.LEARNER_MODE && !bestComputationGraphFile.exists()) {
                 load = ComputationGraph.load(actualComputationGraphFile, true);
                 if (!Main.QUIET_MODE) System.out.println("ComputationGraph: LearningGraph Loaded");
@@ -107,7 +93,6 @@ public class PolicyValuePredictor {
     public static void saveAsBestModel() {
         try {
             computationGraph.save(bestComputationGraphFile, true);
-	    if(!Main.QUIET_MODE) System.out.println("saved as best model");
         } catch (IOException e) {
             if (!Main.QUIET_MODE) getLogger().warn("File: " + bestComputationGraphFile + " is not accessable");
         }
@@ -116,7 +101,6 @@ public class PolicyValuePredictor {
     public static void saveAsActualModel() {
         try {
             computationGraph.save(actualComputationGraphFile, true);
-	    if(!Main.QUIET_MODE) System.out.println("saved as actual model");
         } catch (IOException e) {
             if (!Main.QUIET_MODE) getLogger().warn("File: " + actualComputationGraphFile + " is not accessable");
         }
@@ -138,33 +122,16 @@ public class PolicyValuePredictor {
             if (playgrounds.length == policyOutputsToLearn.size(0) && playgrounds.length == valueOutputsToLearn.size(0) && playgrounds.length == players.length) {
 
                 INDArray transformedPlaygrounds = Nd4j.zeros(DataType.INT, 0, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET, AlphaGoZeroConstants.DIMENSION_PLAYGROUND, AlphaGoZeroConstants.DIMENSION_PLAYGROUND);
-
                 for (int i = 0; i < playgrounds.length; i++) {
                     INDArray transformedPlayground = playgroundTransformer.transform(playgrounds[i], players[i]);
                     transformedPlaygrounds = Nd4j.concat(0, transformedPlaygrounds, transformedPlayground);
                 }
-	/*	
-INDArray splitTransfPlaygr, splitValOut, splitPolOut; 
-int batches = 0;
-batches = playgrounds.length / 8;
-if(playgrounds.length % 8 != 0) batches++;
-*/
                 for (int index = 0; index < playgrounds.length; index++) {
-/*
-	splitTransfPlaygr = Nd4j.zeros(DataType.INT, 0, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET, AlphaGoZeroConstants.DIMENSION_PLAYGROUND, AlphaGoZeroConstants.DIMENSION_PLAYGROUND);
-	splitPolOut = Nd4j.zeros(DataType.FLOAT, 0, AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
-	splitValOut = Nd4j.zeros(DataType.FLOAT, 0, 1);
-
-	splitTransfPlaygr=getMiniBatch(transformedPlaygrounds.reshape(playgrounds.length, AlphaGoZeroConstants.NUMBER_OF_FEATURE_PLANES_INPUT_NEURONAL_NET, AlphaGoZeroConstants.DIMENSION_PLAYGROUND, AlphaGoZeroConstants.DIMENSION_PLAYGROUND), splitTransfPlaygr, index*8, index*8+8, playgrounds.length);
-	splitPolOut=getMiniBatch(policyOutputsToLearn.reshape(playgrounds.length, AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND + 1), splitPolOut, index*8, index*8+8, playgrounds.length);
-	splitValOut=getMiniBatch(valueOutputsToLearn.reshape(playgrounds.length, 1), splitValOut, index*8, index*8+8, playgrounds.length);
-
-                    computationGraph.fit(new INDArray[]{splitTransfPlaygr}, new INDArray[]{splitPolOut, splitValOut});
-*/
                     computationGraph.fit(new INDArray[]{transformedPlaygrounds.slice(index).reshape(1, 4, 15, 15)}, new INDArray[]{policyOutputsToLearn.slice(index).reshape(1, AlphaGoZeroConstants.DIMENSION_PLAYGROUND * AlphaGoZeroConstants.DIMENSION_PLAYGROUND + 1), valueOutputsToLearn.slice(index).reshape(1, 1)});
                 }
- 	              computationGraph.feedForward(true);
+                computationGraph.feedForward(true);
             }
+            saveAsActualModel();
         }
     }
 
@@ -179,20 +146,6 @@ if(playgrounds.length % 8 != 0) batches++;
         INDArray transformedPlayground = playgroundTransformer.transform(playground, player);
         INDArray[] outputs = computationGraph.output
                 (transformedPlayground);
-
-        double magnitude = 1.0;
-        if(Main.LEARNER_MODE && environment.getNumOfTurns() <= 30) {
-            Random random = new Random();
-            int helper = random.nextInt(100);
-            if(helper < 25) magnitude = 0.1;
-            else if(helper < 50) magnitude = 0.2;
-            else if(helper < 75) magnitude = 0.4;
-            else  magnitude = 0.8;
-        }
-
-        Dirichlet dirichlet = new Dirichlet(magnitude, outputs[0].toDoubleVector());
-
-        outputs[0] = Nd4j.create(dirichlet.nextDistribution()).reshape(AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
 
         return new OutputNeuronalNet(outputs[0], outputs[1]);
     }
