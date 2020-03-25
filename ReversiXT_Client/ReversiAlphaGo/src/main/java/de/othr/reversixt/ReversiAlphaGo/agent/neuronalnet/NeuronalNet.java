@@ -85,7 +85,6 @@ class NeuronalNet {
 
         ComputationGraph computationGraph = new ComputationGraph(graphBuilder.build());
         computationGraph.init();
-        computationGraph.feedForward(true);
         this.computationGraph = computationGraph;
     }
 
