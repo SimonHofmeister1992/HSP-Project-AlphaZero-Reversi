@@ -14,6 +14,7 @@ import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import java.util.Random;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -206,10 +207,10 @@ public class Main {
             policyOutputs = Nd4j.concat(0, policyOutputs, policy);
 
             // last node, terminal state
+
             if (i == history.size() - 1) {
                 for(int posInHistory = 0; posInHistory < history.size(); posInHistory++){
-                    value = Nd4j.createFromArray(Nd4j.createFromArray(algorithm.rewardGame(node.getPlayground()))
-                            .toFloatVector()).reshape(1, 1);
+                    value = Nd4j.createFromArray(Nd4j.createFromArray(algorithm.rewardGame(node.getPlayground())).toFloatVector()).reshape(1, 1);
                     valueOutputs = Nd4j.concat(0, valueOutputs, value);
                 }
             }
@@ -270,6 +271,9 @@ public class Main {
                 if ((AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1 && environment.getRankOfPlayer(environment.getOurPlayer()) == 1)
                         || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE > 1) {
                     PolicyValuePredictor.saveAsBestModel();
+		    if(!Main.QUIET_MODE) {
+		    	System.out.println("model saved as best model");
+		    }
                 }
             }
         }

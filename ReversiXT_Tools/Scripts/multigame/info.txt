@@ -1,0 +1,5 @@
+before starting the multigame:
+
+if you don't want to start using a new model:
+
+cp ../../../ReversiXT_Client/ReversiAlphaGo/model/bestModel.zip model/
