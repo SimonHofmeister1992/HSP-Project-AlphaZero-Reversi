@@ -63,8 +63,6 @@
 			<classifier>linux-x86_64-avx2</classifier>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
