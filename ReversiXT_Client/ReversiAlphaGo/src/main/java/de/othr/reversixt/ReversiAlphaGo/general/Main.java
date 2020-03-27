@@ -121,11 +121,8 @@ public class Main {
         if (!QUIET_MODE && environment.isPlayerDisqualified(serverCommunicator.getPlayerIcon())) {
             System.err.println("Agent got disqualified");
         } else if (Main.LEARNER_MODE) {
-
-            trainNetwork(pvp, agentCallable);
-
-            updateStatisticsAndNeuronalNetworks(environment);
-
+	    updateStatisticsAndNeuronalNetworks(environment);
+            trainNetwork(pvp, agentCallable);        
         }
 
 
@@ -232,7 +229,7 @@ public class Main {
 
                         /** REAL TRAINING **/
         pvp.trainComputationGraph(playgrounds, players, policyOutputs, valueOutputs);
-
+	PolicyValuePredictor.saveAsActualModel();
 
 
         // checks if training the computationGraph works by using one dataset - PART 2
@@ -271,9 +268,6 @@ public class Main {
                 if ((AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE <= 1 && environment.getRankOfPlayer(environment.getOurPlayer()) == 1)
                         || AlphaGoZeroConstants.NUMBER_OF_TRAINING_GAMES_UNTIL_UPDATE > 1) {
                     PolicyValuePredictor.saveAsBestModel();
-		    if(!Main.QUIET_MODE) {
-		    	System.out.println("model saved as best model");
-		    }
                 }
             }
         }
