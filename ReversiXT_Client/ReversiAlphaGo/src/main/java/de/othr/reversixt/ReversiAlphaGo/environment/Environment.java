@@ -12,7 +12,7 @@ public class Environment {
     private Player[] players;
     private Player ourPlayer;
     private HashMap<TransitionPart, TransitionPart> transitions;
-
+    int numOfTurns = 0;
 
     public Environment() {
         setPhase(IPhase.TURN_PHASE);
@@ -92,6 +92,14 @@ public class Environment {
                 getPlayground().updatePlaygroundPhase2(turn, player, getStrengthOfBombs());
             }
         }*/
+    }
+
+    public int getNumOfTurns() {
+        return numOfTurns;
+    }
+
+    public void increaseNumOfTurns(){
+        numOfTurns++;
     }
 
     public void disqualifyPlayer(char playerIcon) {

@@ -51,6 +51,7 @@ public class Main {
 
         // Initialize singleton neuronal net before connecting to server (time intensive)
         PolicyValuePredictor pvp = PolicyValuePredictor.getInstance();
+        pvp.setEnvironment(environment);
 
         /* *********************************
          *         Connect to server
@@ -85,6 +86,7 @@ public class Main {
                         environment.getPlayground().printPlayground();
                     }
                     agentCallable.getAgent().getITurnChoiceAlgorithm().enemyTurn(serverCommunicator.getEnemyTurn());
+                    environment.increaseNumOfTurns();
                     break;
                 case IMsgType.TURN_REQUEST:
                     if (!Main.QUIET_MODE) System.out.println("Turn Request - TotalTime: " + timeToWaitInMilis);
@@ -101,6 +103,7 @@ public class Main {
                         bestTurn = agentCallable.getAgent().getITurnChoiceAlgorithm().getBestTurn();
                     }
                     //
+                    environment.increaseNumOfTurns();
                     serverCommunicator.sendOwnTurn(bestTurn);
                     break;
                 case IMsgType.DISQUALIFIED_PLAYER:
