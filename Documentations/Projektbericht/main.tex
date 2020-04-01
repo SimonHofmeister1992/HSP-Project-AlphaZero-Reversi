@@ -259,9 +259,41 @@ Eine weitere Verzweigung von MCTS und NN tritt bei dem Update der Parameter des 
 \section{Implementierung}
 
 \subsection{Aufbau des Programms}
-%TODO klassen, kommunikation etc.
+Der Aufbau des Programms unterteilt sich fünf größere Bereiche: \texttt{General}, \texttt{Server Communication}, \texttt{Environment}, \texttt{Monte Carlo Tree Search} und \texttt{Neuronales Netz}. In folgenden Abschnitten werden alle Bereiche kurz erläutert und die Funktionsweise geschildert.
 
-\subsection{Monte Carlo Tree Search}
+\subsubsection{General}
+%ToDo
+
+\subsubsection{Server Communication}
+In diesem Bereich wird die Kommunikation zwischen Programm und Server abgebildet. Es wird eine Verbindung zum Server aufgebaut und auf jede Nachricht reagiert. Eine vollständige Spezifikation welche Nachrichten der Server versendet gibt es in der Spezifikation des Wahlpflichtfach: Client-K.I.s für Brettspiele (ReversiXT).
+
+Die Initialisierung Phase besteht aus der Registrierung unseres Programms am Server, der Zuweisung der zugehörigen Spieler-Nummer und des Aufbaus des Spielfelds. Hier wird zunächst eine Verbindung zum Server aufgebaut und dieser vergibt die Spieler-Nummer. Sobald alle Spieler eines Spielfelds registriert sind, beginnt der Server das Spielfeld zu versenden. Das Spielfeld besteht aus einem String der an die Funktion \texttt{parseRawMap} im Bereich \texttt{Environment} weiter gegeben wird. Nachdem das Spielfeld eingelesen ist, wird auf weitere Anweisungen des Servers gewartet. Zu diesem Zeitpunkt kommen Anweisungen in Form einer Zugaufforderung oder es wird ein Spielzugs eines Gegners geschickt. In beiden Fällen wird das \texttt{Environment} benachrichtigt diese Anweisung auszuführen. Wenn der Server eine Disqualifizierung oder ein Spielende verschickt, wird das Programm beendet.
+
+\subsubsection{Environment}
+Zum Bereich \texttt{Environment} gehören die Klassen \texttt{Environment}, \texttt{Player}, \texttt{Playground} und \texttt{Turn}. Hauptsächlich sind hier Funktionen vorhanden, die zum Spielen benötigt werden.
+
+\begin{itemize}
+
+\item{Jeder Spieler wird als eine eigene Instanz der Klasse \texttt{Player} angelegt. In der Klasse wird das Spieler-Symbol gespeichert. Alle weiteren Funktionen der Klasse haben in unserer Version des Programms keine Auswirkung.}
+
+\item{Die Klasse \texttt{Turn} wird verwendet um Spielzüge darzustellen, daher sind Variablen für die Position des Spielzugs und das Spieler-Symbol vorhanden. Die Variable mit dem Namen \texttt{prior} wird für die Bewertung eines Zuges verwendet. Wie hoch diese Bewertung ist entscheidet das Neuronale Netz und die Verwendung wird im Abschnitt \ref{MCTS} beschrieben. Es wird zusätzlich noch gespeichert welcher Wert auf dem Spielbrett an der Position des Spielzugs steht.}
+
+\item{In der Klasse \texttt{Playground} wird das Spielfeld, die zugehörige Höhe und Breite abgespeichert. Die Funktion \texttt{updatePlaygroundPhase1} führt einen Zug auf das Spielfeld aus, welches in der Klasse gespeichert wird. Hierzu wird ein \texttt{Turn} und ein \texttt{Player} übergeben. Damit geprüft werden kann ob ein Zug gültig anhand den Spielregeln ist wird die Funktion \texttt{validateTurnPhase1} verwendet. Dieser Funktion werden ebenso \texttt{Turn} und \texttt{Player} übergeben, der Rückgabe wert gibt an ob der Zug gespielt werden darf. Innerhalb des Programms ist es oft notwendig ein Spielfeld zu kopieren, dafür wird die Funktion \texttt{getCloneOfPlayground} verwendet.}
+
+\item{Die gleichnamige Klasse \texttt{Environment} wird während der Programmausführung nur einmal global instantiiert. Hier wird immer das momentane Spielfeld gespeichert und nach jedem Spielzug, der zum Server geschickt oder empfangen wird, aktualisiert. Weiterhin wird ein Array aller \texttt{Player} Instanzen und eine Referenz auf unsere \texttt{Player} Instanz gespeichert. Damit wir den nächsten Spieler in Zugreihenfolge erhalten gibt es die Funktion \texttt{getNextPlayer}.}
+
+\end{itemize}
+
+\subsubsection{Monte Carlo Tree Search}
+Sobald unser Programm eine Zugaufforderung vom Server erhalten ruft die \texttt{Main} Funktion den MCTS (Monte Carlo Tree Search) auf. Der MCTS baut im groben einen Suchbaum auf indem verschiedene Spielzüge simuliert werden. Mithilfe eines Neuronalen Netz werden Spielzüge bewertet und somit kann der MCTS den am besten Bewerteten Spielzug zurück geben. Eine detaillierte Implementierung ist im Abschnitt \ref{MCTS} gegeben.
+
+Für den MCTS war eine neue Klasse \texttt{Node} notwendig, die Spielzüge mit ihren zugehörigen Spielfeldern beinhaltet. Die \texttt {Nodes} repräsentieren Knoten des Suchbaum, daher ist es wichtig den vorherigen Knoten (\texttt{Node parent}) und alle nachfolgenden Knoten (\texttt{ArrayList<Node> children}) zu speichern.
+
+\subsubsection{Neuronales Netz}
+Das NN (Neuronale Netz) wird innerhalb des MCTS verwendet um Spielfelder und Spielzüge zu bewerten. Hierfür wird dem NN ein Spielfeld und der Spieler, der den nächsten Zug auf diesem Spielfeld hat, übergeben. Dir Rückgabe besteht aus einer Zahl zur Bewertung des Spielfeldes und einem Array mit einer Bewertungen für jede Position des Spielfeldes. 
+
+
+\subsection{Monte Carlo Tree Search}\label{MCTS}
 Um den MCTS für Reversi zu realisieren wurden die Klassen MCTS und Node angelegt. Letztere enhält zwei überladene Konstruktoren zum Anlegen von Wurzel- und Kindknoten. Ein Node enthält zusätzliche Attribute. Sowohl der Elternknoten als auch eine ArrayList vom Typ Node, die die direkten Kinder enthält, werden abgespeichert. Die Anzahl, wie oft ein Knoten besucht wurde, wird in der Variable \texttt{numVisited} hinterlegt. Außerdem gespeichert wird das Ergebnis eines simulierten Spieldurchlaufs in \texttt{simulationReward}. Der aktuelle Spielzustand, der im Playground repräsentiert wird, wird ebenfalls im Node hinterlegt. Des Weiteren wird in dem Attribut \texttt{nextPlayer} festgehalten, welcher Spieler als Nächstes an der Reihe ist und welche Züge (\texttt{nextTurns}) dieser als nächstes ausspielen kann. Für das Training werden außerdem die vom NN erhaltenen A-Priori-Wahrscheinlichkeiten abgespeichert. Dies geschieht allerdings ausschließlich, wenn der dem \texttt{Node} zugehörige \texttt{Turn} vom Agent gespielt wird.
 
 Es gibt einen überladenen Konstruktor, der einerseits für das Anlegen einer neuen Wurzel und andererseits für das Erzeugen eines neuen Kinderknotens zuständig ist. Bei der Instanziierung durch die Konstruktoren werden sinnvolle initiale Werte vergeben. \texttt{numVisited} und \texttt{simulationReward} werden auf 0 beziehungsweise 0.0  für den \texttt{root}, und 1 beziehungsweise dem vom NN erhaltenen, übergebenen \texttt{reward} gesetzt. Für den Wurzelknoten gilt, dass er keinen Parent besitzt, für alle weiteren Knoten wird der Parent übergeben und gesetzt. Die Children werden zunächst durch eine leere Liste initialisiert. Der \texttt{nextPlayer} wird ebenfalls übergeben und gesetzt. Außerdem zu erwähnen ist die Methode \texttt{calculateUCT()}, die den Upper Confidence Bound applied to Trees (UCT) für einen Knoten berechnet. Sie ermittelt zunächst die Exploitation-Komponente, indem sie den simulationReward durch die Anzahl an Besuchen dividiert. Die Exploration berechnet sich aus dem Verhältnis, wie oft der Parent besucht wurde, geteilt durch den inkrementierten Wert, wie oft der aktuelle Knoten besucht wurde. Aus dem Quotient wird anschließend die Wurzel gezogen. Um den Kompromiss zwischen diesen beiden Komponenten zu kontrollieren, wird die Exploration mit einer festgelegten Konstante und der A-priori-Wahrscheinlichkeit, die im NN trainiert wird, für einen Zug multipliziert. Die Konstante verhält sich wie ein Hyperparameter und wurde daher manuell festgelegt. In anderen recherchierten Projekten wurden beispielsweise Werte zwischen 1 und 6 getestet, wobei sich ein Wert Nahe an 4 als ideal herausstellte \cite{MediumPart3}. Daher haben wir ebenfalls verschiedene Einstellungen getestet und konnten mit einem Wert von 3.5 das beste Ergebnis erzielen.
@@ -322,37 +354,38 @@ Hinsichtlich der Verteilung der Aufgaben und des zugehörigen Aufwands ergab sic
 %TODO Aufdröselung in Recherche, Implementierung, Doku und Orga
 Die weiteren Komponenten verteilten wir wie folgt:
 
-Simon Hofmeister (150 h):
-\begin{itemize}
-\item Recherche
-\item Implementierung (Grundgerüst, NN)
-\item Dokumentation ()
-\item Organisation
-\end{itemize}       
+\begin{tabular}{*{3}{p{4cm}p{3cm}p{8cm}}}
+\multicolumn{3}{l}{\textbf{Simon Hofmeister (150 h):}} \\
+Bereiche & Zeitaufwand & Komponenten \\
+\cline{1-3}
+Recherche & 30 Std &  \\
+Implementierung & 80 Std & Grundgerüst, NN  \\
+Dokumentation & 10 Std &   \\
+Organisation & 30 Std &  Besprechungen\\
+\end{tabular}
 
-Nadiia Matsko (150 h): 
-\begin{itemize}
-\item Recherche
-\item Implementierung (NN)
-\item Dokumentation (AlphaGo, AlphaZero)
-\item Organisation
-\end{itemize}  
 
-Monika Silber (150 h): 
-\begin{itemize}
-\item Recherche
-\item Implementierung (MCTS)
-\item Dokumentation (Reversi, Theoretische Grundlagen, Implementierung MCTS, Organisation)
-\item Organisation
-\end{itemize}  
+\begin{tabular}{*{3}{p{4cm}p{3cm}p{8cm}}}
+\multicolumn{3}{l}{\textbf{Monika Silber (150 h):}} \\
+Bereiche & Zeitaufwand & Komponenten \\
+\cline{1-3}
+Recherche & 40 Std &  \\
+Implementierung & 50 Std & MCTS  \\
+Dokumentation & 30 Std &  Reversi, Theoretische Grundlagen, Implementierung MCTS, Organisation \\
+Organisation & 30 Std &  Besprechungen\\
+\end{tabular}
 
-Simon Wasserburger (150 h): 
-\begin{itemize}
-\item Recherche
-\item Implementierung (MCTS, Code-Refactoring Grundgerüst)
-\item Dokumentation (Grafiken MCTS)
-\item Organisation
-\end{itemize}  
+
+\begin{tabular}{*{3}{p{4cm}p{3cm}p{8cm}}}
+\multicolumn{3}{l}{\textbf{Simon Wasserburger (130 h):}} \\
+Bereiche & Zeitaufwand & Komponenten \\
+\cline{1-3}
+Recherche & 20 Std &  \\
+Implementierung & 70 Std & MCTS, Code-Refactoring Grundgerüst  \\
+Dokumentation & 10 Std &  Grafiken MCTS \\
+Organisation & 30 Std &  Besprechungen\\
+\end{tabular}
+
 %TODO Ergänzungen
 
 \subsection{Kommunikation}
