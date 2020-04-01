@@ -1,5 +1,7 @@
 package de.othr.reversixt.ReversiAlphaGo.agent.neuronalnet;
 
+import cc.mallet.types.Dirichlet;
+import de.othr.reversixt.ReversiAlphaGo.environment.Environment;
 import de.othr.reversixt.ReversiAlphaGo.environment.Player;
 import de.othr.reversixt.ReversiAlphaGo.environment.Playground;
 import de.othr.reversixt.ReversiAlphaGo.general.AlphaGoZeroConstants;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 // *******************************************
 // Singleton class, use getInstance() to get access to this object
@@ -28,6 +31,7 @@ public class PolicyValuePredictor {
     private static final File bestComputationGraphFile = new File("model" + File.separator + "bestModel.zip");
     private static final File actualComputationGraphFile = new File("model" + File.separator + "actualModel.zip");
     private PlaygroundTransformer playgroundTransformer;
+    private Environment environment;
 
     //****************************************************************
     //  creates an instance of the PolicyValueGraph
@@ -43,6 +47,9 @@ public class PolicyValuePredictor {
 
     private PolicyValuePredictor() {
         this.playgroundTransformer = new PlaygroundTransformer();
+    }
+    public void setEnvironment(Environment environment){
+           this.environment=environment;
     }
 
     //****************************************************************
@@ -173,16 +180,21 @@ if(playgrounds.length % 8 != 0) batches++;
         INDArray[] outputs = computationGraph.output
                 (transformedPlayground);
 
+        double magnitude = 1.0;
+        if(Main.LEARNER_MODE && environment.getNumOfTurns() <= 30) {
+            Random random = new Random();
+            int helper = random.nextInt(100);
+            if(helper < 25) magnitude = 0.1;
+            else if(helper < 50) magnitude = 0.2;
+            else if(helper < 75) magnitude = 0.4;
+            else  magnitude = 0.8;
+        }
+
+        Dirichlet dirichlet = new Dirichlet(magnitude, outputs[0].toDoubleVector());
+
+        outputs[0] = Nd4j.create(dirichlet.nextDistribution()).reshape(AlphaGoZeroConstants.DIMENSION_PLAYGROUND*AlphaGoZeroConstants.DIMENSION_PLAYGROUND+1);
+
         return new OutputNeuronalNet(outputs[0], outputs[1]);
     }
 
-    private INDArray getMiniBatch(INDArray arrayToSplit, INDArray subArray, int fromIndex, int toIndex, int lengthCompleteDataset){
-	int length = toIndex > lengthCompleteDataset ? lengthCompleteDataset : toIndex;
-	long[] shape = subArray.shape();
-	shape[0]=1;
-	for(int i = fromIndex; i < length; i++){
-		subArray = Nd4j.concat(0, subArray, arrayToSplit.slice(i).reshape(shape));
-	}
-	return subArray;	
-    }
 }
