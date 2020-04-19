@@ -62,7 +62,7 @@
 \section{Theoretische Grundlagen}
 
 \subsection{Monte Carlo Tree Search}
-Der MCTS findet als Alternative zum Alpha-Beta-Search Anwendung. Da der Alpha-Beta-Ansatz einen geringen Verzweigungsgrad und eine angemessene Bewertungsfunktion fordert, ist dessen in Anwendung in Brettspielen, die diese Bedingungen nicht erfüllen, ungeeignet. Der MCTS hingegen bewies sich im Umgang mit solchen Situation \cite{Chaslot2008}.
+Der MCTS findet als Alternative zum Alpha-Beta-Search Anwendung. Da der Alpha-Beta-Ansatz einen geringen Verzweigungsgrad und eine angemessene Bewertungsfunktion fordert, ist dessen in Anwendung in Brettspielen, die diese Bedingungen nicht erfüllen, ungeeignet. Der MCTS hingegen bewies sich im Umgang mit solchen Situationen \cite{Chaslot2008}.
 Basierend auf einer Bestensuche und stochastischer Simulation  wählt der MCTS bei jedem Durchlauf den erfolgversprechendsten Knoten als nächsten Spielzug aus. Entsprechend wird ein Baum aufgebaut, in dem ein Knoten einen konkreten Spielzustand widerspiegelt\cite{Chaslot2008}. Dabei werden die drei Schritte Expansion, Simulation und Backpropagation durchgeführt \cite{Chaslot2008}.
 
 Zur Visualisierung dieses Vorgehens dienen Abbildung \ref{fig:mcts_exp_sim}, sowie Abbildung \ref{fig:mcts_backpropagation}. 
@@ -92,9 +92,9 @@ Dieser Prozess ist in Abbildung \ref{fig:mcts_backpropagation} dargestellt. in d
 
 Anzumerken ist, dass zwei verschiedene Policies genutzt werden. Für die Erweiterung des Baums wird eine Tree Policy angewendet, die besagt, dass entsprechende Blattknoten an bereits vorhandene, unbesuchte Knoten angefügt werden. Des Weiteren legt die Default Policy die Simulation fest. Hierbei wird in einem nichtterminalen Spielzustand, der gewöhnlich dem neu hinzugefügt Blattknoten entspricht, ein zufälliges Spiel durchlaufen, um ein ein Spielergebnis zu ermitteln \cite{Browne2012}. 
 
-Der MCTS bleibt so lange aktiv, bis er unterbrochen wird, beispielsweise aufgrund von abgelaufener Rechenzeit. Der zu diesem Zeitpunkt als am erfolgreichsten ermittelte Knoten beziehungsweise Spielzug steht daraufhin fest \cite{Browne2012}.
+Der MCTS bleibt so lange aktiv, bis er unterbrochen wird, beispielsweise aufgrund von abgelaufener Rechenzeit. Der zu diesem Zeitpunkt als am erfolgreichsten ermittelten Knoten beziehungsweise Spielzug steht daraufhin fest \cite{Browne2012}.
 
-Zu einem Knoten gehören der entsprechende Spielzustand, den er widerspiegelt, der Spielzug aus dem er resultierte, sowie der aus Simulationen resultierende Reward und wie oft er besucht wurde \cite{Browne2012}.
+Zu einem Knoten gehören der entsprechende Spielzustand, den er widerspiegelt, der Spielzug, aus dem er resultierte, sowie der aus Simulationen resultierende Reward und wie oft er besucht wurde \cite{Browne2012}.
 
 Nachfolgend werden die konkreten Umsetzungsdetails des MCTS in AlphaGo Zero betrachtet, so wie sie von Silver et al. angewendet wurden \cite{Silver2017}.
 
@@ -157,16 +157,16 @@ Des Weiteren ist zu berücksichtigen, dass beim Gradientenabstieg grundsätzlich
 %TODO Grafik: Man erkennt diesen Prozess...
 %TODO optimale Werte für theta
 
-Eine Möglichkeit diesem Problem bei einer gleichzeitig hohen Lernrate entgegenzuwirken liegt in der Inklusion des Momentum. Dabei wird der Wert der vorangegangen Richtung für die Berechnung der neuen Richtung berücksichtigt, wodurch Oszillationen verringert werden und das Minimum schneller erreicht wird \cite{Rumelhart1985}.
+Eine Möglichkeit diesem Problem bei einer gleichzeitig hohen Lernrate entgegenzuwirken liegt in der Inklusion des Momentums. Dabei wird der Wert der vorangegangenen Richtung für die Berechnung der neuen Richtung berücksichtigt, wodurch Oszillationen verringert werden und das Minimum schneller erreicht wird \cite{Rumelhart1985}.
 
-Als Hyperparameter bezeichnet man in NN Konfigurationsparameter durch die man das Verhalten des Netzes steuern kann. Diese Variablen werden manuell festgelegt und nicht wie die übrigen Netz-Parameter vom Programm gelernt \cite[S. 113]{Goodfellow2015}.
+Als Hyperparameter bezeichnet man in NN Konfigurationsparameter, durch die man das Verhalten des Netzes steuern kann. Diese Variablen werden manuell festgelegt und nicht wie die übrigen Netz-Parameter vom Programm gelernt \cite[S. 113]{Goodfellow2015}.
 %TODO Aktivierungsfunktion grafiken, tanh, relu, 
 Laut Nwankpa, Ijomah, Gachagan \& Marshall beeinflussen sowohl Hyperparameter als auch Aktivierungsfunktionen die Generalisierbarbeit, sowie die Effektivität des Lernprozesses \cite{Nwankpa2018}. Dementsprechend wichtig ist es eine Aktivierungsfunktion auszuwählen, die möglichst gut für den spezifischen Anwendungsfall geeignet ist. Mithilfe von AF wird entschieden, ob ein Neuron gefeuert wird oder nicht. Der Output eines NN berechnet sich durch y = $(w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$, was grundsätzlich einem linearen Ergebnis entspricht. Für den Lernprozess werden jedoch nicht-lineare Daten benötigt, da diese differenzierbar sind. Daher bilden AF die Ausgabedaten eines NN innerhalb eines bestimmten Wertebereichs ab und wandeln sie in nicht-lineare Werte um. Daher ergibt sich, y = $ \alpha (w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$ für den Output, wobei $\alpha $ für die entsprechende AF steht \cite{Nwankpa2018}.
 
 Ein Beispiel für eine Aktivierungsfunktion ist der tangens hyperbolicus (tanh), der durch 
-
-$ f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$ 
-
+\begin{equation}
+f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+\end{equation}
 repräsentiert wird \cite{Nwankpa2018} und dessen grafischer Verlauf in Abbildung \ref{fig:tanh} ersichtlich wird. Die Funktionen bildet Eingaben auf einen Wertebereich zwischen -1 und 1 ab. Ihre Stärke ist, dass sie null-zentriert ist, ihre Schwäche hingegen, dass mit ihr weiterhin verschwindende Gradienten vorkommen können \cite{Nwankpa2018}.
 
 \begin{figure}
