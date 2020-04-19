@@ -1,0 +1,23 @@
+
+This is REVERSI, (c) 2006,2007,2008,2009,2010 by i2 of RWTH-Aachen.de
+
+This tarball is not meant for public distribution!
+
+List of authors:
+
+	Carsten Kern
+	David R. Piegdon
+	Stefan Rieger
+	Stefan Schulz
+
+This distribution package of REVERSI includes:
+
+	server_nogl:
+		game server, text-only version
+			you can disable ANSI-color and possible moves
+			(marked by single-quote right of field) via
+			command-line switches
+
+	For information about command-line arguments,
+	please refer to ``command --help''
+
