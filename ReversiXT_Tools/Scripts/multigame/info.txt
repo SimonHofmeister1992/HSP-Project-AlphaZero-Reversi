@@ -1,5 +1,24 @@
-before starting the multigame:
+this is used only for training!
+before starting the multiple games (*multigame.sh):
 
 if you don't want to start using a new model:
 
 cp ../../../ReversiXT_Client/ReversiAlphaGo/model/bestModel.zip model/
+
+also make the needed changes:
+
+go to the ../../../ReversiXT_Client/ReversiAlphaGo module
+copy this module to ReversiXT_Client/ReversiAlphaGo2
+
+compile both using: mvn clean compile package
+
+try to start the multigame-script. if you can see the game playing in the logfile
+everything is fine. 
+
+if not: kill the processes: "*multigame.sh", "server_nogl", "ReversiAlphaGo"
+which you can retrieve by using ps -ef | grep <keyword-from-above>
+open the pom.xml files, comment the dependencies containing the "cuda-xx.x"-keyword
+move down the src directories to general/Main.java and comment the import of Cuda 
+and in the main-function comment the cuda adjustment to allow multiple gpus.
+
+recompile everything and the program should run on cpu
