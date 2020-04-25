@@ -1,10 +1,12 @@
-﻿% [12pt,a4paper,bibliography=totocnumbered,listof=totocnumbered]{scrartcl}
-\documentclass[12pt,a4paper]{article}
+% [12pt,a4paper,bibliography=totocnumbered,listof=totocnumbered]{scrartcl}
+%\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,bibliography=totocnumbered,listof=totocnumbered]{scrartcl}
 \usepackage{mathtools}
 \input{includes}
+\input{commands}
+\addbibresource{literatur.bib}
 
 \begin{document}
-\input{commands}
 
 
 % ----------------------------------------------------------------------------------------------------------
@@ -12,10 +14,10 @@
 % ----------------------------------------------------------------------------------------------------------
 \MyTitlepage{}{
 \texttt{simon1.hofmeister@st.oth-regensburg.de}\\
-\texttt{nadiia1.matsko@st.oth-regensburg.de}\\
 \texttt{monika.silber@st.oth-regensburg.de}\\
+\texttt{nadiia1.matsko@st.oth-regensburg.de}\\
 \texttt{simon.wasserburger@st.oth-regensburg.de}}
-{15.03.\the\year}
+{30.04.\the\year}
 
 \setcounter{page}{1} 
 % ----------------------------------------------------------------------------------------------------------
@@ -74,7 +76,7 @@ Um nun die beste Aktion zu ermitteln, werden Spiele ausgehend vom aktuellen Zust
 
 Hierbei ist jedoch zu beachten, dass eine reine Zufallsauswahl, die impliziert, dass die Selektion aller Möglichkeiten gleich wahrscheinlich ist, in eher primitivem Spielverhalten resultiert. Mithilfe einer Heuristik können daher aussichtsreichere Spielzüge favorisiert werden. Innerhalb eines Playouts durchlaufene Nodes werden schließlich aktualisiert, indem vermerkt wird, dass sie einmal mehr besucht wurden und welches Spielergebnis sich ergeben hat \cite{Chaslot2008}.
 
-Dieser Prozess ist in Abbildung \ref{fig:mcts_backpropagation} dargestellt. in dieser Grafik wurde der Baum um numerische Werte der Form \glqq{}X$|$Y\grqq  ergänzt, wobei X für die Anzahl an Besuchen steht und Y für die Anzahl, wie oft das Spiel ausgehend vom betrachteten Knoten gewonnen wurden. Die Zahl \glqq{}0\grqq signalisiert dabei das Verlieren, die Zahl \glqq{}1\grqq das Gewinnen des simulierten Spiels. Bevor der Simulationsdurchlauf gestartet wird hat der ausgewählte Knoten den Wert \glqq{}1$|$1\grqq{}. Am Ende angekommen, wird der Spielausgang ermittelt, wodurch der entsprechende Knoten zur Veranschaulichung mit dem entsprechenden Wert ergänzt wird (siehe \glqq{}1\grqq{} - \glqq{}1\grqq{} - \glqq{}0\grqq). Daraufhin werden die Resultate unten angefangen bis hin zum Wurzelknoten durch alle involvierten Nodes zurückgeleitet. Der anfangs betrachtete Knoten hat nun den Wert \glqq{}4$|$3\grqq{}, da er dreimal öfter besucht wurde, wobei das Spiel letztendlich zweimal davon gewonnen wurde. Im Wurzelknoten auf oberster Ebene kann entsprechend eine Änderung der Werte von \glqq{}4$|$2\grqq{} auf \glqq{}7$|$4\grqq{} festgestellt werden.
+Dieser Prozess ist in Abbildung \ref{fig:mcts_backpropagation} dargestellt. in dieser Grafik wurde der Baum um numerische Werte der Form \glqq{}X$|$Y\grqq  ergänzt, wobei X für die Anzahl an Besuchen steht und Y für die Anzahl, wie oft das Spiel ausgehend vom betrachteten Knoten gewonnen wurden. Die Zahl \glqq{}0\grqq signalisiert dabei das Verlieren, die Zahl \glqq{}1\grqq das Gewinnen des simulierten Spiels. Bevor der Simulationsdurchlauf gestartet wird hat der ausgewählte Knoten den Wert \glqq{}1$|$1\grqq{}. Am Ende angekommen, wird der Spielausgang ermittelt, wodurch der entsprechende Knoten zur Veranschaulichung mit dem entsprechenden Wert ergänzt wird (siehe \glqq{}1\grqq{} - \glqq{}1\grqq{} - \glqq{}0\grqq). Daraufhin werden die Resultate unten angefangen bis hin zum Wurzelknoten durch alle involvierten Nodes zurückgeleitet. Der anfangs betrachtete Knoten hat nun den Wert \glqq{}4$|$3\grqq{}, da er dreimal öfter besucht wurde, wobei das Spiel letztendlich zweimal davon gewonnen wurde. Im Wurzelknoten auf oberster Ebene kann eine entsprechende Änderung der Werte von \glqq{}4$|$2\grqq{} auf \glqq{}7$|$4\grqq{} festgestellt werden.
 
 \begin{figure}
 \centering
@@ -90,7 +92,7 @@ Dieser Prozess ist in Abbildung \ref{fig:mcts_backpropagation} dargestellt. in d
 	\label{fig:mcts_backpropagation}
 \end{figure}
 
-Anzumerken ist, dass zwei verschiedene Policies genutzt werden. Für die Erweiterung des Baums wird eine Tree Policy angewendet, die besagt, dass entsprechende Blattknoten an bereits vorhandene, unbesuchte Knoten angefügt werden. Des Weiteren legt die Default Policy die Simulation fest. Hierbei wird in einem nichtterminalen Spielzustand, der gewöhnlich dem neu hinzugefügt Blattknoten entspricht, ein zufälliges Spiel durchlaufen, um ein ein Spielergebnis zu ermitteln \cite{Browne2012}. 
+Anzumerken ist, dass zwei verschiedene Policies genutzt werden. Für die Erweiterung des Baums wird eine Tree Policy angewendet, die besagt, dass entsprechende Blattknoten an bereits vorhandene, unbesuchte Knoten angefügt werden. Des Weiteren legt die Default Policy die Simulation fest. Hierbei wird in einem nichtterminalen Spielzustand, der gewöhnlich dem neu hinzugefügt Blattknoten entspricht, ein zufälliges Spiel durchlaufen, um ein Spielergebnis zu ermitteln \cite{Browne2012}. 
 
 Der MCTS bleibt so lange aktiv, bis er unterbrochen wird, beispielsweise aufgrund von abgelaufener Rechenzeit. Der zu diesem Zeitpunkt als am erfolgreichsten ermittelten Knoten beziehungsweise Spielzug steht daraufhin fest \cite{Browne2012}.
 
@@ -109,7 +111,7 @@ Für Abbildung \ref{fig:mcts_exp_sim} bedeutet das, dass dies im \glqq{Selection
 Ferner ist an dieser Stelle anzumerken, dass der UCB den Kompromiss zwischen Exploration und Exploitation widerspiegelt. Der erste Quotient der UCT-Gleichung steht für das Maß der Ausbeutung und lenkt den Algorithmus dahingehend vielversprechende Knoten weiter zu besuchen. Im Gegensatz dazu wird dazu angehalten Bereiche, die noch nicht oft aufgesucht wurden, verstärkt zu untersuchen. Dies wird als Erkundung bezeichnet und durch den letzten Term des UCT abgebildet. Wichtig hierbei ist es ein Gleichgewicht der beiden Komponenten zu finden \cite{Browne2012}.
 
 Die klassische Simulation von zufälligen Spieldurchläufen entfällt im MCTS vollständig, da noch nicht expandierte Knoten an das NN weitergegeben und dort evaluiert wird. Sobald ein solcher Blattknoten erreicht ist, wird dieser dem NN übergeben, woraufhin die A-priori-Wahrscheinlichkeit und die Bewertung des Spielzugs ermittelt werden. Daraufhin ist der Blattknoten expandiert und alle ausgehenden Kanten beziehungsweise Kinderknoten werden mit initialen Werten belegt.
-Anschließend erfolgt die Backpropagation, indem in allen durchlaufenen Knoten die Gewinnwahrscheinlichkeit aktualisiert, sowie die Anzahl der Besuche um den Wert Eins inkrementiert wird \cite{Silver2017}. Im Vergleich zu Abbildung \ref{fig:mcts_backpropagation} bedeutet das, dass zur Expansion des jeweiligen Knotens nicht wie bei der Simulation weiter in die Tiefe gegangen wird, um letztendlich die Endewerte \glqq{}1\grqq - \glqq{}1\grqq - \glqq{}0\grqq zu ermitteln, sondern die vom NN berechneten Werte zur Verfügung stehen. Die Backpropagation bleibt hierbei gleich.
+Anschließend erfolgt die Backpropagation, indem in allen durchlaufenen Knoten die Gewinnwahrscheinlichkeit aktualisiert, sowie die Anzahl der Besuche um den Wert Eins inkrementiert wird \cite{Silver2017}. Im Vergleich zu Abbildung \ref{fig:mcts_backpropagation} bedeutet das, dass zur Expansion des jeweiligen Knotens nicht wie bei der Simulation weiter in die Tiefe gegangen wird, um letztendlich die Endwerte \glqq{}1\grqq - \glqq{}1\grqq - \glqq{}0\grqq zu ermitteln, sondern die vom NN berechneten Werte zur Verfügung stehen. Die Backpropagation bleibt hierbei gleich.
 
 Insgesamt wird die Baumsuche 800 mal durchlaufen\cite{SilverHubert2017}. Letztlich wird ein konkreter Spielzug ausgehend vom Wurzelknoten selektiert. Dabei wird der Knoten, der am häufigsten besucht wurde als der beste Spielzug aufgefasst. Der ausgewählte Kindknoten wird der neue Wurzelknoten. Der von ihm ausgehend aufgebaute Teilbaum wird beibehalten, während der restliche Baum verworfen wird \cite{Silver2017}.
 
@@ -123,7 +125,7 @@ Dieses Kapitel widmet sich zunächst der grundlegenden Funktionsweise neuronaler
 Ein NN wird durch eine Vielzahl einzelner miteinander verknüpfter Neuronen beschrieben. Dabei erhalten sie Signale von anderen Neuronen als Input, verarbeiten diese und geben sie als Output an andere weiter. Diese Eingangswerte werden als Vektor X = $\{x_{1}, x_{2}, ..., x_{n}\}$ repräsentiert. Um adäquate Ausgangswerte zu erhalten werden die einzelnen Input-Elemente durch die entsprechenden Komponenten im Vektor W = $\{w_{1}, w_{2}, ..., w_{n}\}$ gewichtet. Des Weiteren kann es zu jedem Neuron einen Bias b geben. Zur Verarbeitung der Eingangswerte wird eine Aktivierungsfunktion herangezogen, die Z = $\{w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b(W^{T}X + b)\}$ als Input erhält. Das sich hieraus ergebende Resultat entspricht \^{y}. Im weiteren Verlauf wird versucht die Diskrepanz zwischen dem tatsächlichen Wert y und dem geschätzten Wert \^{y} durch Anwendung einer Verlustfunktion zu minimieren. Dieser Vorgang wird als \glqq{}Backpropagation\grqq bezeichnet. Dabei werden Fehler von dem letzten bis hin zum ersten layer zurückgeleitet, um alle beteiligten Gewichte in die entsprechende Richtung anzupassen. Dies wird dadurch erreicht, dass man das Minimum der Fehlerfunktion lokalisiert, das durch Annäherung an den Gradienten der Funktion ermittelt werden kann \cite[S. 75-79]{Sewak2019}. 
 %TODO allgemein: mathemat. Funktion, die man approximiert
 
-Neuronale Netze bestehen aus verschiedenen Schichten. Dabei existieren stets der input layer, ein oder mehrere hidden layer und der output layer. Während der input layer über genau so viele Neuronen, wie es Eingangswerte gibt, verfügt, weist der output layer so viele Neuronen auf, wie Ausgangsmerkmale vorhanden sind. Die Neuronenanzahl in den versteckten Zwischenschichten kann variieren. Sobald mehr als ein hidden layer vorliegt, spricht man von einem tiefen neuronalen Netz \cite[S. 77]{Sewak2019}. Der Aufbau wird in Abbildung \ref{fig:aufbau_nn} veranschaulicht.
+Neuronale Netze bestehen aus verschiedenen Schichten. Dabei existieren stets der input layer, ein oder mehrere hidden layer und der output layer. Während der input layer über genauso viele Neuronen, wie es Eingangswerte gibt, verfügt, weist der output layer so viele Neuronen auf, wie Ausgangsmerkmale vorhanden sind. Die Neuronenzahl in den versteckten Zwischenschichten kann variieren. Sobald mehr als ein hidden layer vorliegt, spricht man von einem tiefen neuronalen Netz \cite[S. 77]{Sewak2019}. Der Aufbau wird in Abbildung \ref{fig:aufbau_nn} veranschaulicht.
 
 \begin{figure}
 \centering
@@ -161,7 +163,7 @@ Eine Möglichkeit diesem Problem bei einer gleichzeitig hohen Lernrate entgegenz
 
 Als Hyperparameter bezeichnet man in NN Konfigurationsparameter, durch die man das Verhalten des Netzes steuern kann. Diese Variablen werden manuell festgelegt und nicht wie die übrigen Netz-Parameter vom Programm gelernt \cite[S. 113]{Goodfellow2015}.
 %TODO Aktivierungsfunktion grafiken, tanh, relu, 
-Laut Nwankpa, Ijomah, Gachagan \& Marshall beeinflussen sowohl Hyperparameter als auch Aktivierungsfunktionen die Generalisierbarbeit, sowie die Effektivität des Lernprozesses \cite{Nwankpa2018}. Dementsprechend wichtig ist es eine Aktivierungsfunktion auszuwählen, die möglichst gut für den spezifischen Anwendungsfall geeignet ist. Mithilfe von AF wird entschieden, ob ein Neuron gefeuert wird oder nicht. Der Output eines NN berechnet sich durch y = $(w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$, was grundsätzlich einem linearen Ergebnis entspricht. Für den Lernprozess werden jedoch nicht-lineare Daten benötigt, da diese differenzierbar sind. Daher bilden AF die Ausgabedaten eines NN innerhalb eines bestimmten Wertebereichs ab und wandeln sie in nicht-lineare Werte um. Daher ergibt sich, y = $ \alpha (w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$ für den Output, wobei $\alpha $ für die entsprechende AF steht \cite{Nwankpa2018}.
+Laut Nwankpa, Ijomah, Gachagan \& Marshall beeinflussen sowohl Hyperparameter als auch Aktivierungsfunktionen die Generalisierbarkeit, sowie die Effektivität des Lernprozesses \cite{Nwankpa2018}. Dementsprechend wichtig ist es eine Aktivierungsfunktion auszuwählen, die möglichst gut für den spezifischen Anwendungsfall geeignet ist. Mithilfe von AF wird entschieden, ob ein Neuron gefeuert wird oder nicht. Der Output eines NN berechnet sich durch y = $(w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$, was grundsätzlich einem linearen Ergebnis entspricht. Für den Lernprozess werden jedoch nicht-lineare Daten benötigt, da diese differenzierbar sind. Daher bilden AF die Ausgabedaten eines NN innerhalb eines bestimmten Wertebereichs ab und wandeln sie in nicht-lineare Werte um. Daher ergibt sich, y = $ \alpha (w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$ für den Output, wobei $\alpha $ für die entsprechende AF steht \cite{Nwankpa2018}.
 
 Ein Beispiel für eine Aktivierungsfunktion ist der tangens hyperbolicus (tanh), der durch 
 \begin{equation}
@@ -240,15 +242,15 @@ Die Strategie zur Ermittlung der besten Aktion während des Lernprozesses wird a
 \label{fig:rl_agent_loop}
 \end{figure}
 
-Ferner bringt das Aufstellen einer Rewardfunktion Schwierigkeiten mit sich, da sie versucht eine sinnvolle Vorhersage für die Bewertungen eines Zustandes zu ermitteln. Probleme können dabei beispielsweise darin liegen, dass Belohnungen womöglich erst im zukünftigen Verlauf zu Trage treten können oder dass sie zum gegenwärtigen Zeitpunkt schlichtweg noch ungewiss sind. Mögliche Lösungen hierfür sehen allerdings je nach Anwendungsdomäne verschieden aus \cite[S. 4-7]{Sewak2019}.
+Ferner bringt das Aufstellen einer Rewardfunktion Schwierigkeiten mit sich, da sie versucht eine sinnvolle Vorhersage für die Bewertungen eines Zustandes zu ermitteln. Probleme können dabei beispielsweise darin liegen, dass Belohnungen womöglich erst im zukünftigen Verlauf zu Tage treten können oder dass sie zum gegenwärtigen Zeitpunkt schlichtweg noch ungewiss sind. Mögliche Lösungen hierfür sehen allerdings je nach Anwendungsdomäne verschieden aus \cite[S. 4-7]{Sewak2019}.
 
-Reinforcement Learning Modelle sind als \glqq Markov Devision Process\grqq{} (MDP) anzusehen. Das hat zur Folge, dass aufgrund der zugrundeliegenden \glqq Markov Property, sowie Markov Chain\grqq{} die Wahrscheinlichkeiten für die nächstmöglichen Aktionen lediglich vom derzeitigen Zustand und nicht von weiteren vorangegangen abhhängen. Der MDP wendet diese Regeln auf den Entscheidungsprozess an, der im Fall von RL die Policy darstellt. Des Weiteren liefert der MDP die Wahrscheinlichkeiten für Zustandsübergange in der Form $P_{a}(s, s')$ an, wobei a für die mögliche Aktion, s für den aktuellen und s' für den resultierenden Zustand steht. Die Notation des entsprechenden Rewards lautet $R_{a}(s, s')$ \cite[S. 19f.]{Sewak2019}.
+Reinforcement Learning Modelle sind als \glqq Markov Devision Process\grqq{} (MDP) anzusehen. Das hat zur Folge, dass aufgrund der zugrundeliegenden \glqq Markov Property, sowie Markov Chain\grqq{} die Wahrscheinlichkeiten für die nächstmöglichen Aktionen lediglich vom derzeitigen Zustand und nicht von weiteren vorangegangen abhängen. Der MDP wendet diese Regeln auf den Entscheidungsprozess an, der im Fall von RL die Policy darstellt. Des Weiteren liefert der MDP die Wahrscheinlichkeiten für Zustandsübergange in der Form $P_{a}(s, s')$ an, wobei a für die mögliche Aktion, s für den aktuellen und s' für den resultierenden Zustand steht. Die Notation des entsprechenden Rewards lautet $R_{a}(s, s')$ \cite[S. 19f.]{Sewak2019}.
 
 Weitere Begriffe, die im Kontext von RL von Bedeutung sind, sind \glqq{}Policy Evaluation\grqq{} und \glqq{}Policy Iteration\grqq{}. Erstere steht für die geschätzte Bewertung des Zustandes. Letztere beschreibt einen Iteration Prozess mit dem Ziel, dass die Policy konvergiert \cite[S. 27]{Sewak2019}.
 
 \subsection{Zusammenspiel von Monte Carlo Tree Search und neuronalem Netz}
 AlphaGoZero und AlphaZero basieren auf der Kombination des MCTS und des NN. Dabei gibt es zwei Schnittstellen zwischen diesen beiden Komponenten. 
-Erstere liegt in der bereits erwähnten Bewertung von Blattknoten. Der MCTS durchläuft keinen simulierten Spielablauf, sondern überlässt die Evaluation des Knotens dem NN und arbeitet mit den zurückgegeben Daten weiter. Dies spiegelt die policy evaluation wider \cite{Silver2017}.
+Erstere liegt in der bereits erwähnten Bewertung von Blattknoten. Der MCTS durchläuft keinen simulierten Spielablauf, sondern überlässt die Evaluation des Knotens dem NN und arbeitet mit den zurückgegebenen Daten weiter. Dies spiegelt die policy evaluation wider \cite{Silver2017}.
 
 Eine weitere Verzweigung von MCTS und NN tritt bei dem Update der Parameter des NN auf. Das NN ermittelt zu jedem Spielstand die möglichen Züge und gibt deren Gewinnwahrscheinlichkeit, sowie die Wahrscheinlichkeit für die Auswahl des Zuges an. Für die Aktualisierung der Parameter werden die genannten Werte dahingehend angepasst, dass sie den im MCTS ermittelten Werten entsprechend beziehungsweise sich diesen annähern. Eine Anpassung in diese Richtung ist sinnvoll, da die Daten im MCTS als deutlich genauer gelten. Dieser Vorgang entspricht der policy improvement \cite{Silver2017}.
 
@@ -264,12 +266,12 @@ Der Aufbau des Programms unterteilt sich fünf größere Bereiche: \texttt{Gener
 \subsubsection{General}
 Das Paket General beinhaltet die Grundfunktionalität des Programms sowie verbindende Elemente zwischen mehreren Paketen.
 So befinden sich hierin unter anderem die Main-Klasse mit der das Programm gestartet wird, mitsamt der zugehörigen Grundfunktionalität. Hier wird der Standardablauf des Spielstarts und eines Spielzuges definiert, sowie die weiteren benötigten Klassen initialisiert. Des Weiteren k\"{u}mmert sich die Klasse um die Nutzung der Grafikkarte (konkret: ob mehrere Grafikkarten genutzt werden d\"{u}rfen) und um den Aufbau des Trainings des Neuronalen Netzes am Spielende.\\
-Des weiteren beinhaltet das Paket die Definition der Kommandozeilenparameter und von spielrelevanten und klassenübergreifenden Konstanten.
+Des Weiteren beinhaltet das Paket die Definition der Kommandozeilenparameter und von spielrelevanten und klassenübergreifenden Konstanten.
 
 \subsubsection{Server Communication}
 In diesem Bereich wird die Kommunikation zwischen Programm und Server abgebildet. Es wird eine Verbindung zum Server aufgebaut und auf jede Nachricht reagiert. Eine vollständige Spezifikation welche Nachrichten der Server versendet gibt es in der Spezifikation des Wahlpflichtfach: Client-K.I.s für Brettspiele (ReversiXT).
 
-Die Initialisierung Phase besteht aus der Registrierung unseres Programms am Server, der Zuweisung der zugehörigen Spieler-Nummer und des Aufbaus des Spielfelds. Hier wird zunächst eine Verbindung zum Server aufgebaut und dieser vergibt die Spieler-Nummer. Sobald alle Spieler eines Spielfelds registriert sind, beginnt der Server das Spielfeld zu versenden. Das Spielfeld besteht aus einem String der an die Funktion \texttt{parseRawMap} im Bereich \texttt{Environment} weiter gegeben wird. Nachdem das Spielfeld eingelesen ist, wird auf weitere Anweisungen des Servers gewartet. Zu diesem Zeitpunkt kommen Anweisungen in Form einer Zugaufforderung oder es wird ein Spielzugs eines Gegners geschickt. In beiden Fällen wird das \texttt{Environment} benachrichtigt diese Anweisung auszuführen. Wenn der Server eine Disqualifizierung oder ein Spielende verschickt, wird das Programm beendet.
+Die Initialisierung Phase besteht aus der Registrierung unseres Programms am Server, der Zuweisung der zugehörigen Spieler-Nummer und des Aufbaus des Spielfelds. Hier wird zunächst eine Verbindung zum Server aufgebaut und dieser vergibt die Spieler-Nummer. Sobald alle Spieler eines Spielfelds registriert sind, beginnt der Server das Spielfeld zu versenden. Das Spielfeld besteht aus einem String der an die Funktion \texttt{parseRawMap} im Bereich \texttt{Environment} weitergegeben wird. Nachdem das Spielfeld eingelesen ist, wird auf weitere Anweisungen des Servers gewartet. Zu diesem Zeitpunkt kommen Anweisungen in Form einer Zugaufforderung oder es wird ein Spielzug eines Gegners geschickt. In beiden Fällen wird das \texttt{Environment} benachrichtigt diese Anweisung auszuführen. Wenn der Server eine Disqualifizierung oder ein Spielende verschickt, wird das Programm beendet.
 
 \subsubsection{Environment}
 Zum Bereich \texttt{Environment} gehören die Klassen \texttt{Environment}, \texttt{Player}, \texttt{Playground} und \texttt{Turn}. Hauptsächlich sind hier Funktionen vorhanden, die zum Spielen benötigt werden.
@@ -278,27 +280,26 @@ Zum Bereich \texttt{Environment} gehören die Klassen \texttt{Environment}, \tex
 
 \item{Jeder Spieler wird als eine eigene Instanz der Klasse \texttt{Player} angelegt. In der Klasse wird das Spieler-Symbol gespeichert. Alle weiteren Funktionen der Klasse haben in unserer Version des Programms keine Auswirkung.}
 
-\item{Die Klasse \texttt{Turn} wird verwendet um Spielzüge darzustellen, daher sind Variablen für die Position des Spielzugs und das Spieler-Symbol vorhanden. Die Variable mit dem Namen \texttt{prior} wird für die Bewertung eines Zuges verwendet. Wie hoch diese Bewertung ist entscheidet das Neuronale Netz und die Verwendung wird im Abschnitt \ref{MCTS} beschrieben. Es wird zusätzlich noch gespeichert welcher Wert auf dem Spielbrett an der Position des Spielzugs steht.}
+\item{Die Klasse \texttt{Turn} wird verwendet, um Spielzüge darzustellen, daher sind Variablen für die Position des Spielzugs und das Spieler-Symbol vorhanden. Die Variable mit dem Namen \texttt{prior} wird für die Bewertung eines Zuges verwendet. Wie hoch diese Bewertung ist entscheidet das Neuronale Netz und die Verwendung wird im Abschnitt \ref{MCTS} beschrieben. Es wird zusätzlich noch gespeichert welcher Wert auf dem Spielbrett an der Position des Spielzugs steht.}
 
-\item{In der Klasse \texttt{Playground} wird das Spielfeld, die zugehörige Höhe und Breite abgespeichert. Die Funktion \texttt{updatePlaygroundPhase1} führt einen Zug auf das Spielfeld aus, welches in der Klasse gespeichert wird. Hierzu wird ein \texttt{Turn} und ein \texttt{Player} übergeben. Damit geprüft werden kann ob ein Zug gültig anhand den Spielregeln ist wird die Funktion \texttt{validateTurnPhase1} verwendet. Dieser Funktion werden ebenso \texttt{Turn} und \texttt{Player} übergeben, der Rückgabe wert gibt an ob der Zug gespielt werden darf. Innerhalb des Programms ist es oft notwendig ein Spielfeld zu kopieren, dafür wird die Funktion \texttt{getCloneOfPlayground} verwendet.}
+\item{In der Klasse \texttt{Playground} wird das Spielfeld, die zugehörige Höhe und Breite abgespeichert. Die Funktion \texttt{updatePlaygroundPhase1} führt einen Zug auf das Spielfeld aus, welches in der Klasse gespeichert wird. Hierzu wird ein \texttt{Turn} und ein \texttt{Player} übergeben. Damit geprüft werden kann ob ein Zug gültig anhand der Spielregeln ist wird die Funktion \texttt{validateTurnPhase1} verwendet. Dieser Funktion werden ebenso \texttt{Turn} und \texttt{Player} übergeben, der Rückgabe wert gibt an ob der Zug gespielt werden darf. Innerhalb des Programms ist es oft notwendig ein Spielfeld zu kopieren, dafür wird die Funktion \texttt{getCloneOfPlayground} verwendet.}
 
 \item{Die gleichnamige Klasse \texttt{Environment} wird während der Programmausführung nur einmal global instantiiert. Hier wird immer das momentane Spielfeld gespeichert und nach jedem Spielzug, der zum Server geschickt oder empfangen wird, aktualisiert. Weiterhin wird ein Array aller \texttt{Player} Instanzen und eine Referenz auf unsere \texttt{Player} Instanz gespeichert. Damit wir den nächsten Spieler in Zugreihenfolge erhalten gibt es die Funktion \texttt{getNextPlayer}.}
 
 \end{itemize}
 
 \subsubsection{Monte Carlo Tree Search}
-Sobald unser Programm eine Zugaufforderung vom Server erhalten ruft die \texttt{Main} Funktion den MCTS (Monte Carlo Tree Search) auf. Der MCTS baut im groben einen Suchbaum auf indem verschiedene Spielzüge simuliert werden. Mithilfe eines Neuronalen Netz werden Spielzüge bewertet und somit kann der MCTS den am besten Bewerteten Spielzug zurück geben. Eine detaillierte Implementierung ist im Abschnitt \ref{MCTS} gegeben.
+Sobald unser Programm eine Zugaufforderung vom Server erhalten ruft die \texttt{Main} Funktion den MCTS (Monte Carlo Tree Search) auf. Der MCTS baut im groben einen Suchbaum auf indem verschiedene Spielzüge simuliert werden. Mithilfe eines Neuronalen Netz werden Spielzüge bewertet und somit kann der MCTS den am besten Bewerteten Spielzug zurückgeben. Eine detaillierte Implementierung ist im Abschnitt \ref{MCTS} gegeben.
 
-Für den MCTS war eine neue Klasse \texttt{Node} notwendig, die Spielzüge mit ihren zugehörigen Spielfeldern beinhaltet. Die \texttt {Nodes} repräsentieren Knoten des Suchbaum, daher ist es wichtig den vorherigen Knoten (\texttt{Node parent}) und alle nachfolgenden Knoten (\texttt{ArrayList<Node> children}) zu speichern.
+Für den MCTS war eine neue Klasse \texttt{Node} notwendig, die Spielzüge mit ihren zugehörigen Spielfeldern beinhaltet. Die \texttt {Nodes} repräsentieren Knoten des Suchbaums, daher ist es wichtig den vorherigen Knoten (\texttt{Node parent}) und alle nachfolgenden Knoten (\texttt{ArrayList<Node> children}) zu speichern.
 
 \subsubsection{Neuronales Netz}
-Das NN (Neuronale Netz) wird innerhalb des MCTS verwendet um Spielfelder und Spielzüge zu bewerten. Hierfür wird dem NN ein Spielfeld und der Spieler, der den nächsten Zug auf diesem Spielfeld hat, übergeben. Dir Rückgabe besteht aus einer Zahl zur Bewertung des Spielfeldes und einem Array mit einer Bewertungen für jede Position des Spielfeldes. 
-
+Das NN (Neuronale Netz) wird innerhalb des MCTS verwendet, um Spielfelder und Spielzüge zu bewerten. Hierfür wird dem NN ein Spielfeld und der Spieler, der den nächsten Zug auf diesem Spielfeld hat, übergeben. Die Rückgabe besteht aus einer Zahl zur Bewertung des Spielfeldes und einem Array mit einer Bewertung für jede Position des Spielfeldes. In der Klasse NeuronalNet befindet sich die Definition des Modells des neuronalen Netzes. Des Weiteren fungiert die Klasse PolicyValuePredictor als Wrapper über das neuronale Netz und bietet Schnittstellen für das Laden und Speichern von Modellen, für das Training und die Evaluation von Zuständen an. Um den Input vom MCTS für das neuronale Netz zu transformieren, wird die Klasse PlaygroundTransformer genutzt. 
 
 \subsection{Monte Carlo Tree Search}\label{MCTS}
-Um den MCTS für Reversi zu realisieren wurden die Klassen MCTS und Node angelegt. Letztere enhält zwei überladene Konstruktoren zum Anlegen von Wurzel- und Kindknoten. Ein Node enthält zusätzliche Attribute. Sowohl der Elternknoten als auch eine ArrayList vom Typ Node, die die direkten Kinder enthält, werden abgespeichert. Die Anzahl, wie oft ein Knoten besucht wurde, wird in der Variable \texttt{numVisited} hinterlegt. Außerdem gespeichert wird das Ergebnis eines simulierten Spieldurchlaufs in \texttt{simulationReward}. Der aktuelle Spielzustand, der im Playground repräsentiert wird, wird ebenfalls im Node hinterlegt. Des Weiteren wird in dem Attribut \texttt{nextPlayer} festgehalten, welcher Spieler als Nächstes an der Reihe ist und welche Züge (\texttt{nextTurns}) dieser als nächstes ausspielen kann. Für das Training werden außerdem die vom NN erhaltenen A-Priori-Wahrscheinlichkeiten abgespeichert. Dies geschieht allerdings ausschließlich, wenn der dem \texttt{Node} zugehörige \texttt{Turn} vom Agent gespielt wird.
+Um den MCTS für Reversi zu realisieren wurden die Klassen MCTS und Node angelegt. Letztere enhält zwei überladene Konstruktoren zum Anlegen von Wurzel- und Kindknoten. Ein Node enthält zusätzliche Attribute. Sowohl der Elternknoten als auch eine ArrayList vom Typ Node, die die direkten Kinder enthält, werden abgespeichert. Die Anzahl, wie oft ein Knoten besucht wurde, wird in der Variablen \texttt{numVisited} hinterlegt. Außerdem gespeichert wird das Ergebnis eines simulierten Spieldurchlaufs in \texttt{simulationReward}. Der aktuelle Spielzustand, der im Playground repräsentiert wird, wird ebenfalls im Node hinterlegt. Des Weiteren wird in dem Attribut \texttt{nextPlayer} festgehalten, welcher Spieler als Nächstes an der Reihe ist und welche Züge (\texttt{nextTurns}) dieser als nächstes ausspielen kann. Für das Training werden außerdem die vom NN erhaltenen A-Priori-Wahrscheinlichkeiten abgespeichert. Dies geschieht allerdings ausschließlich, wenn der dem \texttt{Node} zugehörige \texttt{Turn} vom Agent gespielt wird.
 
-Es gibt einen überladenen Konstruktor, der einerseits für das Anlegen einer neuen Wurzel und andererseits für das Erzeugen eines neuen Kinderknotens zuständig ist. Bei der Instanziierung durch die Konstruktoren werden sinnvolle initiale Werte vergeben. \texttt{numVisited} und \texttt{simulationReward} werden auf 0 beziehungsweise 0.0  für den \texttt{root}, und 1 beziehungsweise dem vom NN erhaltenen, übergebenen \texttt{reward} gesetzt. Für den Wurzelknoten gilt, dass er keinen Parent besitzt, für alle weiteren Knoten wird der Parent übergeben und gesetzt. Die Children werden zunächst durch eine leere Liste initialisiert. Der \texttt{nextPlayer} wird ebenfalls übergeben und gesetzt. Außerdem zu erwähnen ist die Methode \texttt{calculateUCT()}, die den Upper Confidence Bound applied to Trees (UCT) für einen Knoten berechnet. Sie ermittelt zunächst die Exploitation-Komponente, indem sie den simulationReward durch die Anzahl an Besuchen dividiert. Die Exploration berechnet sich aus dem Verhältnis, wie oft der Parent besucht wurde, geteilt durch den inkrementierten Wert, wie oft der aktuelle Knoten besucht wurde. Aus dem Quotient wird anschließend die Wurzel gezogen. Um den Kompromiss zwischen diesen beiden Komponenten zu kontrollieren, wird die Exploration mit einer festgelegten Konstante und der A-priori-Wahrscheinlichkeit, die im NN trainiert wird, für einen Zug multipliziert. Die Konstante verhält sich wie ein Hyperparameter und wurde daher manuell festgelegt. In anderen recherchierten Projekten wurden beispielsweise Werte zwischen 1 und 6 getestet, wobei sich ein Wert Nahe an 4 als ideal herausstellte \cite{MediumPart3}. Daher haben wir ebenfalls verschiedene Einstellungen getestet und konnten mit einem Wert von 3.5 das beste Ergebnis erzielen.
+Es gibt einen überladenen Konstruktor, der einerseits für das Anlegen einer neuen Wurzel und andererseits für das Erzeugen eines neuen Kinderknotens zuständig ist. Bei der Instanziierung durch die Konstruktoren werden sinnvolle initiale Werte vergeben. \texttt{numVisited} und \texttt{simulationReward} werden auf 0 beziehungsweise 0.0  für den \texttt{root}, und 1 beziehungsweise dem vom NN erhaltenen, übergebenen \texttt{reward} gesetzt. Für den Wurzelknoten gilt, dass er keinen Parent besitzt, für alle weiteren Knoten wird der Parent übergeben und gesetzt. Die Children werden zunächst durch eine leere Liste initialisiert. Der \texttt{nextPlayer} wird ebenfalls übergeben und gesetzt. Außerdem zu erwähnen ist die Methode \texttt{calculateUCT()}, die den Upper Confidence Bound applied to Trees (UCT) für einen Knoten berechnet. Sie ermittelt zunächst die Exploitation-Komponente, indem sie den simulationReward durch die Anzahl an Besuchen dividiert. Die Exploration berechnet sich aus dem Verhältnis, wie oft der Parent besucht wurde, geteilt durch den inkrementierten Wert, wie oft der aktuelle Knoten besucht wurde. Aus dem Quotienten wird anschließend die Wurzel gezogen. Um den Kompromiss zwischen diesen beiden Komponenten zu kontrollieren, wird die Exploration mit einer festgelegten Konstante und der A-priori-Wahrscheinlichkeit, die im NN trainiert wird, für einen Zug multipliziert. Die Konstante verhält sich wie ein Hyperparameter und wurde daher manuell festgelegt. In anderen recherchierten Projekten wurden beispielsweise Werte zwischen 1 und 6 getestet, wobei sich ein Wert Nahe an 4 als ideal herausstellte \cite{MediumPart3}. Daher haben wir ebenfalls verschiedene Einstellungen getestet und konnten mit einem Wert von 3.5 das beste Ergebnis erzielen.
 %TODO Quelle https://medium.com/oracledevs/lessons-from-alphazero-part-3-parameter-tweaking-4dceb78ed1e5
 %TODO Quellenverzeichnis
 
@@ -329,7 +330,7 @@ Wenn keine weiteren validen Folgezüge ermittelt werden können, bedeutet das da
 Nach Abschluss der Simulation wird der Reward zurückgegeben. Daraufhin wird in \texttt{traverse()} die Backpropagation der Ergebnisse durchgeführt, indem iterativ vom aktuellen Knoten bis hoch zur Wurzel die Anzahl an Besuchen inkrementiert und der Reward entsprechend erhöht wird.
 
 \subsection{Neuronales Netz}
-Das neuronale Netz bildet in der AlphaZero eine der Kernkomponenten, da dieses die Qualität eines bestimmten Spielzustandes und der möglichen Spielzüge erlernen und vorhersagen soll. Somit baut der komplette Spielverlauf direkt auf die Vorhersagen des neuronalen Netzes auf. Der Aufbau des implementierten neuronalen Netzes orientiert sich sehr stark am Aufbau der AlphaZero, siehe \ref{sect:theory_neuronalnet}. Im folgenden werden die Input-Transformation, das Modell, sowie die grundlegenden Konfigurationen wie gewählte Parameter erklärt. Bei der Wahl der Parameter beziehen wir uns, soweit nicht anders angegeben, auf das Paper \glqq Mastering the game of Go without human knowledge\grqq{} \cite{Silver2017}. \\
+Das neuronale Netz bildet in der AlphaZero eine der Kernkomponenten, da dieses die Qualität eines bestimmten Spielzustandes und der möglichen Spielzüge erlernen und vorhersagen soll. Somit baut der komplette Spielverlauf direkt auf die Vorhersagen des neuronalen Netzes auf. Der Aufbau des implementierten neuronalen Netzes orientiert sich sehr stark am Aufbau der AlphaZero, siehe \ref{sect:theory_neuronalnet}. Im Folgenden werden die Input-Transformation, das Modell, sowie die grundlegenden Konfigurationen wie gewählte Parameter erklärt. Bei der Wahl der Parameter beziehen wir uns, soweit nicht anders angegeben, auf das Paper \glqq Mastering the game of Go without human knowledge\grqq{} \cite{Silver2017}. \\
 
 \subsubsection{Input-Transformation}
 \begin{figure}
@@ -344,16 +345,16 @@ Auf diesem resultierenden Spielfeld führen wir eine weitere Transformation durc
 \subsubsection{Modell}
 Das Modell entspricht einem Computation Graph, also einem gerichteten Graphen, bei dem die Knoten entweder Rechenoperationen oder Variablen entsprechen. Das Modell ist sehr tief und wird daher für die Beschreibung in vier Teilblöcke aufgeteilt: der Convolutional-Block, der Residual-Tower, der Policy-Head und der Value-Head. \\
 Der Convolutional-Block, der den transformierten Input erstmalig annimmt, besteht aus einem 3-dimensionalem Convolutional-Layer mit einer Kernel-Größe von 3 und einem Stride von 1 analysiert und einen Output mit 256 Dimensionen generiert. Die Werte werden anschließend mit Hilfe der Batchnormalisierung normalisiert bevor die LeakyRelu-Funktion auf das Ergebnis angewendet wird, um kleine Werte abzuschwächen, sodass größere Werte an Bedeutung gewinnen (siehe linearer Verlauf im positiven). \\
-Der Residual-Tower sollte nach \ref{Silver2017} aus 20 bis 40 Blöcken bestehen, je mehr Blöcke verwendet werden, desto länger dauert das Training des Netzes, desto besser soll jedoch auch die zu erwartende Leistung sein. Um langfristig eine möglichst starke KI zu erhalten, haben wir uns auf die 40-Block-Variante geeinigt und haben diese umgesetzt. Der erste Block entspricht dem Convolutional Block, alle weiteren Blöcke sind ähnlich aufgebaut. Für diese werden jeweils ein Convolutional Block und ein Convolutional Block ohne Aktivierungsfunktion genutzt, für die der selbe Input verwendet wird. Das Ergebnis beider Teilblöcke wird elementweise addiert, sodass die ursprüngliche Eingabe so lange wie möglich erhalten bleibt. Auf den resultierenden Vektor wird danach nochmals die Leaky-Relu-Funktion angewendet. Daraus resultieren (1 + 39*2 = 79) Anwendungen des Convolutional Filters um die Spielsituation zu analysieren. \\
-Das Ergebnis aus dem Residual-Tower wird als Input für die verbleibenden zwei Blöcke genutzt: der Policy-Head und der Value-Head. Der Policy-Head führt einen weiteren Convolutional Filter auf dem Ergebnis aus, dabei werden die Kerne von 256 auf 2 reduziert. Auf dem Resultat  wird eine Batch-Normalisierung und die Leaky-Relu-Aktivierung ausgeführt, bevor dieses in einer Fully-Connected-Layer, bei der jeder Knoten der vorherigen Schicht mit jedem Knoten der aktuellen Schicht verbunden ist, in einen Vektor der Länge 226 transformiert wird, welcher der Anzahl der Spielfelder plus eins (für kein möglicher Zug) entspricht. Auf diesen Output wird beim Training der Cross-Entropy-Fehler berechnet, um die Wahrscheinlichkeit der korrekten Prognose des besten Zuges bestmöglich zu lernen. Alle Werte entsprechen nun den Wahrscheinlichkeiten für die verschiedenen Züge mit den Werten zwischen 0 und 1. Auf dieses Ergebnis wird in der Klasse PolicyValuePredictor zudem die Dirichlet-Funktion angewendet, diese verstärkt große Werte und schmälert die Werte für schlechtere Züge, mit der Wahl des Parameters $\theta$ kann man jedoch noch einen Temperaturparameter angeben. Liegt dieser Parameter bei $>= 1$ wird das berechnete Ergebnis so ausgegeben wie es ist. Bei Werten zwischen 0 und 1 werden manche Züge deutlich verstärkt, wobei dies auch Züge sein können, die zuvor einen schlechten Prognosewert hatten. Je weiter der Wert von 1 entfernt liegt, desto wahrscheinlicher wird es, nicht den Zug mit dem besten Prognosewert zu wählen. Als Ergebnis erhält man wieder einen Vektor, dessen Werte sich zwischen 0 und 1 befinden und sich auf 1 addieren. Dieses Feature soll die Exploration während der Lernphase erhöhen indem Zufallszüge zugelassen werden, ansonsten wird immer der gleiche Spielablauf ersichtlich, womit der Lernversuch keine Erfolge mehr schafft. Mithilfe der Wahl eines festen Parameters $\theta$ haben wir mehrmals das selbe Spielergebnis erhalten, eine Verbesserung gab sich erst, als zu Spielbeginn zufällig ein Wert  $\theta$ aus den verschiedenen willkürlichen Werten {0,1; 0,2; 0,4; 0,8} ausgewählt wird, mit denen tendenziell eine höhere Exploration erreicht wird. Außerhalb von Lernzyklen wird $\theta$ auf 1 gesetzt, um keine zufällige Exploration zuzulassen und somit stabiler zu sein, somit kann diese KI als Referenz gegenüber der lernenden KI genutzt werden. \\
-Als letzten größeren Block betrachten wir den Value-Head. Der Value-Head besteht, wie zunächst auch der Policy-Head aus einem Convolutional-Filter der die 256 Kerne auf 1 reduziert (in diesem sind nun 15x15 Werte vorhanden), einer Batchnormalisation, der Aktivierung mittels LeakyRelu sowie 2 Fully-Connected-Schichten. Bei der letzten Schicht wird das Endergebnis auf einen Wert reduziert, welches mittels der Tangenshyperbolicus-Funktion ein letztes Mal angepasst wird. Um die Abweichung der Prognose des Value-Heads im Training vom Soll zu ermitteln, um damit die realen Parameter anpassen zu können, wird der mittlere quadratische Fehler (mean-squared error, MSE) verwendet. 
+Der Residual-Tower sollte nach \ref{Silver2017} aus 20 bis 40 Blöcken bestehen, je mehr Blöcke verwendet werden, desto länger dauert das Training des Netzes, desto besser soll jedoch auch die zu erwartende Leistung sein. Um langfristig eine möglichst starke KI zu erhalten, haben wir uns auf die 40-Block-Variante geeinigt und haben diese umgesetzt. Der erste Block entspricht dem Convolutional Block, alle weiteren Blöcke sind ähnlich aufgebaut. Für diese werden jeweils ein Convolutional Block und ein Convolutional Block ohne Aktivierungsfunktion genutzt, für die derselbe Input verwendet wird. Das Ergebnis beider Teilblöcke wird elementweise addiert, sodass die ursprüngliche Eingabe so lange wie möglich erhalten bleibt. Auf den resultierenden Vektor wird danach nochmals die Leaky-Relu-Funktion angewendet. Daraus resultieren (1 + 39*2 = 79) Anwendungen des Convolutional Filters, um die Spielsituation zu analysieren. \\
+Das Ergebnis aus dem Residual-Tower wird als Input für die verbleibenden zwei Blöcke genutzt: der Policy-Head und der Value-Head. Der Policy-Head führt einen weiteren Convolutional Filter auf dem Ergebnis aus, dabei werden die Kerne von 256 auf 2 reduziert. Auf dem Resultat  wird eine Batch-Normalisierung und die Leaky-Relu-Aktivierung ausgeführt, bevor dieses in einer Fully-Connected-Layer, bei der jeder Knoten der vorherigen Schicht mit jedem Knoten der aktuellen Schicht verbunden ist, in einen Vektor der Länge 226 transformiert wird, welcher der Anzahl der Spielfelder plus eins (für kein möglicher Zug) entspricht. Auf diesen Output wird beim Training der Cross-Entropy-Fehler berechnet, um die Wahrscheinlichkeit der korrekten Prognose des besten Zuges bestmöglich zu lernen. Alle Werte entsprechen nun den Wahrscheinlichkeiten für die verschiedenen Züge mit den Werten zwischen 0 und 1. Auf dieses Ergebnis wird in der Klasse PolicyValuePredictor zudem die Dirichlet-Funktion angewendet, diese verstärkt große Werte und schmälert die Werte für schlechtere Züge, mit der Wahl des Parameters $\theta$ kann man jedoch noch einen Temperaturparameter angeben. Liegt dieser Parameter bei $>= 1$ wird das berechnete Ergebnis so ausgegeben wie es ist. Bei Werten zwischen 0 und 1 werden manche Züge deutlich verstärkt, wobei dies auch Züge sein können, die zuvor einen schlechten Prognosewert hatten. Je weiter der Wert von 1 entfernt liegt, desto wahrscheinlicher wird es, nicht den Zug mit dem besten Prognosewert zu wählen. Als Ergebnis erhält man wieder einen Vektor, dessen Werte sich zwischen 0 und 1 befinden und sich auf 1 addieren. Dieses Feature soll die Exploration während der Lernphase erhöhen indem Zufallszüge zugelassen werden, ansonsten wird immer der gleiche Spielablauf ersichtlich, womit der Lernversuch keine Erfolge mehr schafft. Mithilfe der Wahl eines festen Parameters $\theta$ haben wir mehrmals dasselbe Spielergebnis erhalten, eine Verbesserung gab sich erst, als zu Spielbeginn zufällig ein Wert  $\theta$ aus den verschiedenen willkürlichen Werten {0,1; 0,2; 0,4; 0,8} ausgewählt wird, mit denen tendenziell eine höhere Exploration erreicht wird. Außerhalb von Lernzyklen wird $\theta$ auf 1 gesetzt, um keine zufällige Exploration zuzulassen und somit stabiler zu sein, somit kann diese KI als Referenz gegenüber der lernenden KI genutzt werden. \\
+Als letzten größeren Block betrachten wir den Value-Head. Der Value-Head besteht, wie zunächst auch der Policy-Head aus einem Convolutional-Filter, der die 256 Kerne auf 1 reduziert (in diesem sind nun 15x15 Werte vorhanden), einer Batchnormalisation, der Aktivierung mittels LeakyRelu sowie 2 Fully-Connected-Schichten. Bei der letzten Schicht wird das Endergebnis auf einen Wert reduziert, welches mittels der Tangenshyperbolicus-Funktion ein letztes Mal angepasst wird. Um die Abweichung der Prognose des Value-Heads im Training vom Soll zu ermitteln, um damit die realen Parameter anpassen zu können, wird der mittlere quadratische Fehler (mean-squared error, MSE) verwendet. 
 
 \subsubsection{Grundlegende Konfiguration}
-Die Klasse NeuronalNet beinhaltet neben dem Modell des neuronalen Netzes, die grundlegende Konfiguration. Hierzu gehören das Momentum mit einem Wert von 0,9, der Optimierungsalgorithmus \glqq Stochastic Gradient Descent\grqq{} bei dem pro Trainingsiteration eine batch size von 1 verwendet wird, und die L1-Regularisierung wird auf 0,9 gesetzt. Des Weiteren werden an dieser Stelle weitere Optionen gesetzt, wie die Nutzung der Backpropagation, die Initialisierung der Gewichte im neuronalen Netz, die DeepLearning4J im Gegensatz zur Angabe im Paper nicht zufällig initialisieren kann, daher verwenden wir hier die He-Initialisierung
+Die Klasse NeuronalNet beinhaltet neben dem Modell des neuronalen Netzes, die grundlegende Konfiguration. Hierzu gehören das Momentum mit einem Wert von 0,9, der Optimierungsalgorithmus \glqq Stochastic Gradient Descent\grqq{} bei dem pro Trainingsiteration eine Batchgröße von 1 verwendet wird, und die L1-Regularisierung wird auf 0,9 gesetzt. Des Weiteren werden an dieser Stelle weitere Optionen gesetzt, wie die Nutzung der Backpropagation, die Initialisierung der Gewichte im neuronalen Netz, die DeepLearning4J im Gegensatz zur Angabe im Paper nicht zufällig initialisieren kann, daher verwenden wir hier die He-Initialisierung
 \begin{equation}
 Var(w_i) = \frac{2}{fan\_in}
 \end{equation}
-als eine Erweiterung der Xavier-Initialisierung, die sich gut mit tiefen neuronalen Netzen und der Relu-Aktivierungsfunktionen verträgt \cite{Ghatak.2019}. Hierbei ist der Wert des Gewichts abhängig von der Anzahl der eingehenden und ausgehenden Neuronen, somit sind die Werte im weitesten Sinne auch wieder zufällig gewählt und konvergieren beim Training sowieso gegen das Optimum. Die Lernrate orientiert sich am genannten Paper, hierfür können in DeepLearning4J keine automatische Anpassung integrieren. Da wir Probleme mit der Berechnung auf der GPU haben und somit nur auf CPU rechnen, betrachten wir die Lernraten für wenige Spiele. hierfür werden die Werte zwischen 0,1 und 0,001 empfohlen, nach Tests mit jeweils 50 Spielen hat die Lernrate von 0,01 als einzige von 8 getesteten Werten Lernerfolge vorgewiesen, weshalb wir nun diesen Wert fest integriert haben. Die L2-Regularisierung, die den Effekt des Overfittings, also des übergenaue Trainieren an gegebene Situationen, verringern soll, ist abhängig davon, ob der Policy-Head oder der Value-Head betrachtet wird. Zu Beginn wurde die Regularisierung für beide Komponenten, wie im Paper vorgeschlagen auf einen Wert von $10^{-4}$ gesetzt. Infolge dessen, nahmen die Werte des Value Heads nach jedem Training fast einen neuen Wert an, von dem, bis zum nächsten Training, kaum mehr abgewichen wurde, wodurch alle Zustände fast identisch bewertet wurden. Um dieses Problem zu beheben, wurde der Wert der l2-Regularisierung des Value-Heads stufenweise erhöht. Ab einem Wert von $10^{-3}$ ist eine leichte Dämpfung des beschriebenen Effekts erkennbar, bei $10^{-2}$ wirkt die Lerngeschwindigkeit annehmbar und bei $10^{-1}$ verändert sich die Prognose mit jedem Training nur minimal und ist somit auch nicht zu gebrauchen. Aus diesem Grund haben wir den Wert der L2-Regularisierung des Policy-Heads auf $10^{-2}$ eingestellt.\\
+als eine Erweiterung der Xavier-Initialisierung, die sich gut mit tiefen neuronalen Netzen und der Relu-Aktivierungsfunktionen verträgt \cite{Ghatak.2019}. Hierbei ist der Wert des Gewichts abhängig von der Anzahl der eingehenden und ausgehenden Neuronen, somit sind die Werte im weitesten Sinne auch wieder zufällig gewählt und konvergieren beim Training sowieso gegen das Optimum. Die Lernrate orientiert sich am genannten Paper, hierfür können in DeepLearning4J keine automatische Anpassung integrieren. Da wir Probleme mit der Berechnung auf der GPU haben und somit nur auf CPU rechnen, betrachten wir die Lernraten für wenige Spiele. hierfür werden die Werte zwischen 0,1 und 0,001 empfohlen, nach Tests mit jeweils 50 Spielen hat die Lernrate von 0,01 als einzige von 8 getesteten Werten Lernerfolge vorgewiesen, weshalb wir nun diesen Wert fest integriert haben. Die L2-Regularisierung, die den Effekt des Overfittings, also das übergenaue Trainieren an gegebene Situationen, verringern soll, ist abhängig davon, ob der Policy-Head oder der Value-Head betrachtet wird. Zu Beginn wurde die Regularisierung für beide Komponenten, wie im Paper vorgeschlagen auf einen Wert von $10^{-4}$ gesetzt. Infolge dessen, nahmen die Werte des Value Heads nach jedem Training fast einen neuen Wert an, von dem, bis zum nächsten Training, kaum mehr abgewichen wurde, wodurch alle Zustände fast identisch bewertet wurden. Um dieses Problem zu beheben, wurde der Wert der l2-Regularisierung des Value-Heads stufenweise erhöht. Ab einem Wert von $10^{-3}$ ist eine leichte Dämpfung des beschriebenen Effekts erkennbar, bei $10^{-2}$ wirkt die Lerngeschwindigkeit annehmbar und bei $10^{-1}$ verändert sich die Prognose mit jedem Training nur minimal und ist somit auch nicht zu gebrauchen. Aus diesem Grund haben wir den Wert der L2-Regularisierung des Policy-Heads auf $10^{-2}$ eingestellt.\\
 Die empfohlene Batchgröße von 8 konnte nicht verwendet werden, da DeepLearning4J Batches derzeit (noch) nicht in Kombination mit mehreren Outputs zulässt. Durch die Wahl des Stochastic Gradient Descent Optimierungs-Algorithmus wird generell jeder Datensatz einzeln für die Optimierung herangezogen, die einzige erkennbare Auswirkung wäre im Bereich der Batchnormalisierung zu finden gewesen, dieses sollte durch die große Anzahl an Spielen keinen nennenswerten Einfluss auf das Endergebnis haben, jedoch ist eine benötigte längere Lerndauer möglich. 
 
 \subsubsection{Schwierigkeiten}
@@ -368,10 +369,10 @@ Ein weiteres Problem war daraufhin das optimieren der Hyperparameter, da DeepLea
 % ----------------------------------------------------------------------------------
 
 \section{Training des neuronalen Netzes}
-Um die KI lernen zu lassen, ist das Training der zentrale Punkt um eine Optimierung des Spielverhaltens zu erreichen, sodass die KI immer stärkere Gegner besiegen kann.  Hierfür werden zwei Komponenten benötigt, einerseits wie das Training des Modells innerhalb des Programms aussehen soll, und andererseits, da das Programm für das Training gegen seine aktuell beste Version spielen soll, ein externes Skript, dass eine Serie von Spielen und verwaltet. Das Shell-Skript mit dem Namen *\_multigame.sh \footnote{Fundort: \url{https://gitlab.oth-regensburg.de/kec39902/hsp-ws19-g03-reversiml/-/tree/master/ReversiXT_Tools/Scripts/multigame}}, wobei das Asterisk für das verwendete Betriebssystem steht, gliedert sich in folgende Teile: Löschen von veralteten Log-Dateien, Schleife welche definiert, wie viele Spielserien mit je 2 Spielen ausgeführt werden und in der die benötigten Komponenten zwei mal aufgerufen werden, bei einem Spiel startet die lernende KI als Spieler 1 und einmal als Spieler 2, um nicht spezifisch Spieler 1 oder Spieler 2 zu lernen. Nach jedem einzelnen Spiel erfolgt eine Wartezeit, bis die lernende KI den Trainingsvorgang abgeschlossen hat. Wichtig zu wissen ist, dass wenn keine Grafikkarte genutzt wird, oder diese Nutzung nicht richtig funktioniert, in der pom.xml des AlphaZero-Clients die zwei Dependencies, die sich auf Cuda beziehen (erkennbar an der Zeile mit der genannten Cuda-Version) auskommentiert werden, ebenfalls muss in der Main-Klasse in der main-Funktion die Erlaubnis für die Verwendung von mehreren Grafikkarten \glqq CudaEnvironment.getInstance().getConfiguration().allowMultiGPU(true)\grqq{} auskommentiert werden, ebenso der import der CudaEnvironment. \\
+Um die KI lernen zu lassen, ist das Training der zentrale Punkt, um eine Optimierung des Spielverhaltens zu erreichen, sodass die KI immer stärkere Gegner besiegen kann.  Hierfür werden zwei Komponenten benötigt, einerseits wie das Training des Modells innerhalb des Programms aussehen soll, und andererseits, da das Programm für das Training gegen seine aktuell beste Version spielen soll, ein externes Skript, dass eine Serie von Spielen und verwaltet. Das Shell-Skript mit dem Namen *\_multigame.sh \footnote{Fundort: \url{https://gitlab.oth-regensburg.de/kec39902/hsp-ws19-g03-reversiml/-/tree/master/ReversiXT_Tools/Scripts/multigame}}, wobei das Asterisk für das verwendete Betriebssystem steht, gliedert sich in folgende Teile: Löschen von veralteten Log-Dateien, Schleife welche definiert, wie viele Spielserien mit je 2 Spielen ausgeführt werden und in der die benötigten Komponenten zwei Mal aufgerufen werden, bei einem Spiel startet die lernende KI als Spieler 1 und einmal als Spieler 2, um nicht spezifisch Spieler 1 oder Spieler 2 zu lernen. Nach jedem einzelnen Spiel erfolgt eine Wartezeit, bis die lernende KI den Trainingsvorgang abgeschlossen hat. Wichtig zu wissen ist, dass wenn keine Grafikkarte genutzt wird, oder diese Nutzung nicht richtig funktioniert, in der pom.xml des AlphaZero-Clients die zwei Dependencies, die sich auf Cuda beziehen (erkennbar an der Zeile mit der genannten Cuda-Version) auskommentiert werden, ebenfalls muss in der Main-Klasse in der main-Funktion die Erlaubnis für die Verwendung von mehreren Grafikkarten \glqq CudaEnvironment.getInstance().getConfiguration().allowMultiGPU(true)\grqq{} auskommentiert werden, ebenso der import der CudaEnvironment. \\
 Der Aufbau des Trainings innerhalb der KI erfolgte in mehreren Etappen, die im Folgenden beschrieben werden. \\
-Der erste Versuch war, dem neuronalen Netz bei guten Zügen einen Bonus zu übergeben, damit sich diese verbessern kann. Für DeepLearning4J konnte mit dem gewählten Modell jedoch kein geeigneter Ansatz implementiert werden, da das Netz für mehrere Outputs keine Rewards annehmen kann. Auf der Suche nach einer Lösung haben wir in \glqq Mastering the game of Go without human knowledge\grqq{} \cite{Silver2017} die Möglichkeit gefunden, vom Reinforcement Learning abzuweichen und setzen stattdessen auf den Supervised-Learning-Ansatz, indem wir in jedem Spiel eine Historie aufbauen, und das Modell am Ende des Spiels nachtrainineren. Auch hierfür gab es zwei Varianten, in beiden speichern wir für jeden real gespielten Spielzug den aktuellen Spieler, den Spielzustand, den angepassten Policy-Head, der vom MCTS generiert wird, und den angepassten Value-Head, mit den Werten -1 bei Verlust, 0 bei Patt und 1 bei Gewinn des Spiels. Somit erhalten wir nach jedem Spiel auf einem 8x8 Brett bis zu 60 Datensätze für das Training. Im ersten Versuch spielten wir immer 5 Spiele, nach welchen entschieden wurde, ob das aktuelle Modell mit 55\% Siegquote besser ist als das bisherige beste Modell, oder nicht. Parallel dazu wurde ein weiteres Modell nach jedem Spiel vortrainiert, welches das aktuelle Modell ersetzen sollte. Dieses wurde benötigt, dass sich das aktuell spielende Modell nicht verändert und somit eine Aussage ob das Modell besser/schlechter als das bisherige beste Modell gewährleistet werden kann. Als Ergebnis erhielten wir jedoch innerhalb der 5 Spiele nur identische Spielverläufe, eventuell auch dem geschuldet, dass zu diesem Zeitpunkt die Dirichlet-Funktion nicht implementiert war. Aufgrund dessen haben wir die 55\% Quote ignoriert und das Modell nach jedem Spiel direkt trainiert und mit dem besten Modell verglichen. Das Risiko ist hierbei jedoch, dass das Lernen um einen Punkt oszilliert, anstatt sich deutlich zu verbessern, dem hoffen wir mit genug Trainingsspielen und einem hohen Zufallsfaktor $\theta$ in der Dirichletfunktion entgegen zu wirken. Die Erfahrung ist nach ca. 5000 gespielten Spielen, dass hier eine deutliche Verbesserung stattfindet, da unsere AlphaZero, unter der Bedingung, dass unsere KI als zweites startet, die triviale KI bis zu einer Suchtiefe von 6 besiegen kann. Zudem gewinnen wir auf einer Suchtiefe von 3, wenn wir als erstes starten. Die niedrige Anzahl von 5000 Trainingsspielen erklärt sich über die hohe benötigte Laufzeit, denn ein Spiel dauert bei der Berechnung auf der CPU ungefähr 3 Minuten für das Spiel und weitere 5 Minuten für das nachtrainieren der KI. Zu Beginn des Trainings war beides noch nicht möglich. Bei gespielten 5000 Spielen ist dieses Ergebnis bereits annehmbar, wenn man bedenkt, dass die originale AlphaZero mehrere Millionen Spiele spielte. Zudem traten hin und wieder Probleme beim Training auf, wie ein Stopp aufgrund fehlender Speicherressourcen, oder dass die Programmkomponenten nach einer zufälligen Anzahl Iterationen nicht mehr im Prozessverzeichnis als laufenende Prozesse registriert waren (Ermittlung mittels: ps -ef\:  \textbar\: grep \glqq Name-der-Programmkomponente\grqq{}), diese Fehler konnten, da diese zu willkürlichen Zeitpunkten auftraten, noch nicht nachgestellt werden, die Vermutung liegt jedoch bei der Speicherfreigabe des ScheduledThreadPoolExecutors der die Spielzüge zeitlich terminiert, sowie ein daraufhin möglicherweise administratives Entfernen der zugehörigen Prozesse. \\
-Das Training erfolgte mit mehreren Problemen, da auf der gestellten Workstation, die Nutzung der Grafikkarten nicht möglich war. Auf einem eigenen Rechner funktioniert dies jedoch, die Unterschiede in der Nutzung sind hierbei das installierte Betriebssystem: Ubuntu 18.04 vs Ubuntu 18.04 LTS und die Version des Grafikkartentreibers: Nvidia-435 vs Nvidia-440. Jedoch war auf dem eigenen Rechner nur eine Grafikkarte vorhanden, weshalb ein Training des Modells gegen das beste Modell nicht möglich war, da hier bereits ein Modell den Speicher auf der Grafikkarte fast komplett belegt. Das Berechnen und Lernen auf der CPU kostet jedoch einiges mehr an Zeit, weshalb verhältnismäßig nur wenige Spiele gespielt werden konnten. Möglicherweise hätte hier eine noch bessere Abstimmung mit dem Administrator Prof. Kern geholfen, um entweder den korrekten Grafikkartentreiber installieren zu können, oder die Komponenten für eine ältere Version downzugraden.
+Der erste Versuch war, dem neuronalen Netz bei guten Zügen einen Bonus zu übergeben, damit sich diese verbessern kann. Für DeepLearning4J konnte mit dem gewählten Modell jedoch kein geeigneter Ansatz implementiert werden, da das Netz für mehrere Outputs keine Rewards annehmen kann. Auf der Suche nach einer Lösung haben wir in \glqq Mastering the game of Go without human knowledge\grqq{} \cite{Silver2017} die Möglichkeit gefunden, vom Reinforcement Learning abzuweichen und setzen stattdessen auf den Supervised-Learning-Ansatz, indem wir in jedem Spiel eine Historie aufbauen, und das Modell am Ende des Spiels nachzutrainineren. Auch hierfür gab es zwei Varianten, in beiden speichern wir für jeden real gespielten Spielzug den aktuellen Spieler, den Spielzustand, den angepassten Policy-Head, der vom MCTS generiert wird, und den angepassten Value-Head, mit den Werten -1 bei Verlust, 0 bei Patt und 1 bei Gewinn des Spiels. Somit erhalten wir nach jedem Spiel auf einem 8x8 Brett bis zu 60 Datensätze für das Training. Im ersten Versuch spielten wir immer 5 Spiele, nach welchen entschieden wurde, ob das aktuelle Modell mit 55\% Siegquote besser ist als das bisherige beste Modell, oder nicht. Parallel dazu wurde ein weiteres Modell nach jedem Spiel vortrainiert, welches das aktuelle Modell ersetzen sollte. Dieses wurde benötigt, dass sich das aktuell spielende Modell nicht verändert und somit eine Aussage ob das Modell besser/schlechter als das bisherige beste Modell gewährleistet werden kann. Als Ergebnis erhielten wir jedoch innerhalb der 5 Spiele nur identische Spielverläufe, eventuell auch dem geschuldet, dass zu diesem Zeitpunkt die Dirichlet-Funktion nicht implementiert war. Aufgrund dessen haben wir die 55\% Quote ignoriert und das Modell nach jedem Spiel direkt trainiert und mit dem besten Modell verglichen. Das Risiko ist hierbei jedoch, dass das Lernen um einen Punkt oszilliert, anstatt sich deutlich zu verbessern, dem hoffen wir mit genug Trainingsspielen und einem hohen Zufallsfaktor $\theta$ in der Dirichletfunktion entgegen zu wirken. Die Erfahrung ist nach ca. 5000 gespielten Spielen, dass hier eine deutliche Verbesserung stattfindet, da unsere AlphaZero, unter der Bedingung, dass unsere KI als zweites startet, die triviale KI bis zu einer Suchtiefe von 6 besiegen kann. Zudem gewinnen wir auf einer Suchtiefe von 3, wenn wir als erstes starten. Die niedrige Anzahl von 5000 Trainingsspielen erklärt sich über die hohe benötigte Laufzeit, denn ein Spiel dauert bei der Berechnung auf der CPU ungefähr 3 Minuten für das Spiel und weitere 5 Minuten für das Nachtrainieren der KI. Zu Beginn des Trainings war beides noch nicht möglich. Bei gespielten 5000 Spielen ist dieses Ergebnis bereits annehmbar, wenn man bedenkt, dass die originale AlphaZero mehrere Millionen Spiele spielte. Zudem traten hin und wieder Probleme beim Training auf, wie ein Stopp aufgrund fehlender Speicherressourcen, oder dass die Programmkomponenten nach einer zufälligen Anzahl Iterationen nicht mehr im Prozessverzeichnis als laufende Prozesse registriert waren (Ermittlung mittels: ps -ef\:  \textbar\: grep \glqq Name-der-Programmkomponente\grqq{}), diese Fehler konnten, da diese zu willkürlichen Zeitpunkten auftraten, noch nicht nachgestellt werden, die Vermutung liegt jedoch bei der Speicherfreigabe des ScheduledThreadPoolExecutors der die Spielzüge zeitlich terminiert, sowie ein daraufhin möglicherweise administratives Entfernen der zugehörigen Prozesse. \\
+Das Training erfolgte mit mehreren Problemen, da auf der gestellten Workstation, die Nutzung der Grafikkarten nicht möglich war. Auf einem eigenen Rechner funktioniert dies jedoch, die Unterschiede in der Nutzung sind hierbei das installierte Betriebssystem: Ubuntu 18.04 vs Ubuntu 18.04 LTS und die Version des Grafikkartentreibers: Nvidia-435 vs Nvidia-440. Jedoch war auf dem eigenen Rechner nur eine Grafikkarte vorhanden, weshalb ein Training des Modells gegen das beste Modell nicht möglich war, da hier bereits ein Modell den Speicher auf der Grafikkarte fast komplett belegt. Das Berechnen und Lernen auf der CPU kostet jedoch einiges mehr an Zeit, weshalb verhältnismäßig nur wenige Spiele gespielt werden konnten. Möglicherweise hätte hier eine noch bessere Abstimmung mit dem Administrator Prof. Kern geholfen, um entweder den korrekten Grafikkartentreiber installieren zu können oder die Komponenten für eine ältere Version downzugraden.
 
 
 \newpage
@@ -384,7 +385,7 @@ Das Training erfolgte mit mehreren Problemen, da auf der gestellten Workstation,
 \subsection{Team und Aufgabenverteilung}
 % Beschreiben Sie in diesem Abschnitt Ihr Team. Welche Person hat welche Aufgaben wahrgenommen, wie wurden
 % Aufgaben aufgeteilt und wie wurde kommuniziert, etc.
-Als Vierer-Team bestand unsere Gruppe aus Simon Hofmeister, Nadiia Matsko, Monika Silber und Simon Wasserburger. Anzumerken ist, dass Simona Hofmeister und Simon Wasserburger bereits im Bachelorkurs Erfahrung mit dem Implementieren einer künstlichen Intelligenz für Reversi sammeln konnten. Aus diesen Gründen griffen wir für den Aufbau dieses Projektes auf das Grundgerüst des bereits im Bachelorkurs erstellen Programms von Simon Hofmeister zurück, der dieses entsprechend an die Anforderungen des vorliegenden Projektes anpasste.
+Als Vierer-Team bestand unsere Gruppe aus Simon Hofmeister, Nadiia Matsko, Monika Silber und Simon Wasserburger, wobei Nadiia Matsko das Projekt vorzeitig beendete. Anzumerken ist, dass Simona Hofmeister und Simon Wasserburger bereits im Bachelorkurs Erfahrung mit dem Implementieren einer künstlichen Intelligenz für Reversi sammeln konnten. Aus diesen Gründen griffen wir für den Aufbau dieses Projektes auf das Grundgerüst des bereits im Bachelorkurs erstellen Programms von Simon Hofmeister zurück, der dieses entsprechend an die Anforderungen des vorliegenden Projektes anpasste.
 
 Hinsichtlich der Verteilung der Aufgaben und des zugehörigen Aufwands ergab sich für die einzelnen Teammitglieder folgendes:
 %TODO Aufdröselung in Recherche, Implementierung, Doku und Orga
@@ -395,7 +396,7 @@ Die weiteren Komponenten verteilten wir wie folgt:
 Bereiche & Zeitaufwand & Komponenten \\
 \cline{1-3}
 Recherche & 30 Std &  \\
-Implementierung & 80 Std & Grundgerüst, NN, Installation  \\
+Implementierung & 80 Std & Grundgerüst, NN, Installation, Script Training  \\
 Dokumentation & 10 Std & NN, Training, Organisation, Testumgebungen, Installation \\
 Organisation & 30 Std &  Besprechungen\\
 \end{tabular}
@@ -468,11 +469,11 @@ Um die Leistungen des Trainings der implementierten AlphaZero einschätzen oder 
 \subsubsection{Testumgebungen}
 Die hauptsächlich genutzte Umgebung, ist die von der OTH Regensburg gestellte Workstation vom Typ Alienware Aurora R7. Dieser Besitzt einen Intel i7-8700K Prozessor mit 3,7GHz Taktung, 6 Kernen mit 12 möglichen Threads und AVX2-Support. Der RAM entspricht 64GB-DDR4-Speicher, zudem sind 2 Nvidia GTX 1080 TI integriert. Installiert sind neben dem Betriebssystem Ubuntu 18.04 (64-Bit) das OpenJDK in der Version 11.0.6, Maven als Build-Tool, Git, Cuda in der Version 10.2, Cudnn in der Version 7.6.5 und der Grafikkartentreiber in der Version Nvidia-435.
 
-Zudem erfolgten Tests auf einem weiteren Rechner mit einem i7-6700K Prozessor mit 4GHz Taktung, 4 realen Kernen und AVX2-Support, 32GB-DDR4-RAM, sowie einer Nvidia GTX 1060 (6GB GDDR5-RAM). Installiert sind neben dem OS Ubuntu 18.04 LTS hierauf die selben Tools, wie auf der Workstation, nur dass sich hier der Grafikkartentreiber unterscheidet, dieser ist hier in der Version Nvidia-440 installiert. 
+Zudem erfolgten Tests auf einem weiteren Rechner mit einem i7-6700K Prozessor mit 4GHz Taktung, 4 realen Kernen und AVX2-Support, 32GB-DDR4-RAM, sowie einer Nvidia GTX 1060 (6GB GDDR5-RAM). Installiert sind neben dem OS Ubuntu 18.04 LTS hierauf dieselben Tools, wie auf der Workstation, nur dass sich hier der Grafikkartentreiber unterscheidet, dieser ist hier in der Version Nvidia-440 installiert. 
 
 %TODO: Installation
 \subsubsection{Installation}
-Für die Kompilierung des Quellcodes werden eine Java-Runtime in der Version $>= 1.8$ und maven benötigt. Für die Ausführung auf der Grafikkarte wird das Cuda-Toolkit mit dem passenden Grafikkartentreiber benötigt. Optional kann CuDNN für eine weitere Beschleunigung installiert werden.
+Für die Kompilierung des Quellcodes werden eine Java-Runtime in der Version $>= 1.8$ und Maven benötigt. Für die Ausführung auf der Grafikkarte wird das Cuda-Toolkit mit dem passenden Grafikkartentreiber benötigt. Optional kann CuDNN für eine weitere Beschleunigung installiert werden.
 \begin{table}
 \begin{tabularx}{\textwidth}{ | X | X | X | }
 	\hline
@@ -487,7 +488,7 @@ Für die Kompilierung des Quellcodes werden eine Java-Runtime in der Version $>=
 \label{tab:cuda-cudnn}
 \end{table}
 
-Im folgenden wird die Installation der benötigten Komponenten im Detail erklärt. Zu Beginn wird für Java das OpenJDK, danach Maven, sowie bei Grafikkartenverwendung Cuda und optional Cudnn installiert. Anschließend daran befindet sich eine kurze Einführung in das Texteditor-Programm vi, welches auf Linux-Umgebungen genutzt werden kann, um die benötigten Dateiänderungen durchzuführen.\\
+Im Folgenden wird die Installation der benötigten Komponenten im Detail erklärt. Zu Beginn wird für Java das OpenJDK, danach Maven, sowie bei Grafikkartenverwendung Cuda und optional Cudnn installiert. Anschließend daran befindet sich eine kurze Einführung in das Texteditor-Programm vi, welches auf Linux-Umgebungen genutzt werden kann, um die benötigten Dateiänderungen durchzuführen.\\
 
 Bevor die Installation an sich beginnt, werden die Pakete des Paketmanagers auf den neuesten Stand gebracht.
 \begin{flalign*}
@@ -506,6 +507,8 @@ Nun kann die Installation des OpenJDKs erfolgen.
 & \hspace{1 cm} \text{export PATH=\$JAVA\_HOME/bin:\$PATH} \\
 & \text{// Logout und erneuten Login durchführen.} \\
 & \text{// Verifizierung der Installation:} \\
+\end{flalign*}
+\begin{flalign*}
 & \text{echo \$JAVA\_HOME // Ausgabe: der gewollte Java-Pfad} \\
 & \text{Java --version // Ausgabe: Java-Version größer 1.8}
 \end{flalign*}
@@ -532,12 +535,14 @@ Als nächstes wird geprüft, ob die Grafikkarte für eine Cuda-Installation geei
 \begin{flalign*}
 & \hspace{2.2 cm}\text{lspci | grep -i nvidia // Ausgabe: cuda-kompatible Grafikkarten} \\
 & \hspace{2.2 cm}\text{gcc --version // Ausgabe: gcc-Version, sollte größer als 7 sein} \\
-& \hspace{3.2 cm}\text{// Bei kleinerer GCC-Version: } \\
-& \hspace{3.2 cm}\text{sudo apt-get install gcc} \\
-& \hspace{3.2 cm}\text{gcc --version // erneute Prüfung} \\
+\end{flalign*}
+\begin{flalign*}
+& \hspace{-3.5 cm}\text{// Bei kleinerer GCC-Version: } \\
+& \hspace{-3.5 cm}\text{sudo apt-get install gcc} \\
+& \hspace{-3.5 cm}\text{gcc --version // erneute Prüfung} \\
 \end{flalign*}
 
-Mögliche Änderungen müssen im Paketmanager aktualisiert werden, zudem fehlen noch mehrere Vorbedingungen für die Cuda-Installation die im nächsten Schritt installiert werden.
+Mögliche Änderungen müssen im Paketmanager aktualisiert werden, zudem fehlen noch mehrere Vorbedingungen für die Cuda-Installation, die im nächsten Schritt installiert werden.
 
 \begin{flalign*}
 & \hspace{2.3 cm}\text{sudo apt-get update} \\
@@ -551,15 +556,17 @@ Mögliche Änderungen müssen im Paketmanager aktualisiert werden, zudem fehlen 
 Im nächsten Bereich wird der Grafikkartentreiber aktualisiert und Cuda 10.2, inklusive dem Cuda-Toolkit, installiert.
 
 \begin{flalign*}
-& \hspace{3.8 cm}\text{sudo add-apt-repository ppa:graphics-drivers/ppa} \\
-& \hspace{3.8 cm}\text{sudo apt-key adv --fetch-keys} \\ 
-& \hspace{4.5 cm}\text{http://developer.download.nvidia.com/compute/cuda/repos/} \\
-& \hspace{4.5 cm}\text{ubuntu1804/x86\_64/7fa2af80.pub} \\
-& \hspace{3.8 cm}\text{echo \grqq{}deb https://developer.download.nvidia.com/compute/cuda/} \\
-& \hspace{4.5 cm}\text{repos/ubuntu1804/x86\_64 /\grqq{} | sudo tee /etc/apt/sources.list.d/} \\
-& \hspace{4.5 cm}\text{cuda.list} \\
-& \hspace{3.8 cm}\text{wget https://developer.download.nvidia.com/compute/cuda/repos/} \\
-& \hspace{4.5 cm}\text{ubuntu1804/x86\_64/cuda-ubuntu1804.pin} \\
+& \hspace{3.4 cm}\text{sudo add-apt-repository ppa:graphics-drivers/ppa} \\
+& \hspace{3.4 cm}\text{sudo apt-key adv --fetch-keys} \\ 
+& \hspace{4.1 cm}\text{http://developer.download.nvidia.com/compute/cuda/repos/} \\
+& \hspace{4.1 cm}\text{ubuntu1804/x86\_64/7fa2af80.pub} \\
+& \hspace{3.4 cm}\text{echo \grqq{}deb https://developer.download.nvidia.com/compute/cuda/} \\
+& \hspace{4.1 cm}\text{repos/ubuntu1804/x86\_64 /\grqq{} | sudo tee /etc/apt/sources.list.d/} \\
+& \hspace{4.1 cm}\text{cuda.list} \\
+& \hspace{3.4 cm}\text{wget https://developer.download.nvidia.com/compute/cuda/repos/} \\
+& \hspace{4.1 cm}\text{ubuntu1804/x86\_64/cuda-ubuntu1804.pin} \\
+\end{flalign*}
+\begin{flalign*}
 & \hspace{3.8 cm}\text{sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository} \\
 & \hspace{4.5 cm}\text{-pin-600} \\
 & \hspace{3.8 cm}\text{wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod} \\
@@ -567,32 +574,30 @@ Im nächsten Bereich wird der Grafikkartentreiber aktualisiert und Cuda 10.2, in
 & \hspace{4.5 cm}\text{\_1.0-1\_amd64.deb} \\
 & \hspace{3.8 cm}\text{sudo dpkg -i cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01\_1.0-1} \\
 & \hspace{4.5 cm}\text{\_amd64.deb} \\
-\end{flalign*}
-\begin{flalign*}
 & \hspace{3.8 cm}\text{sudo apt-key add /var/cuda-repo-10-2-local-10.2.89-440.33.01/7fa2af80} \\
 & \hspace{4.5 cm}\text{.pub} \\
-& \hspace{4.1 cm}\text{sudo apt-get update} \\
-& \hspace{4.1 cm}\text{sudo apt-get install nvidia-440 // alternativ kleinere Treiberversion,} \\
-& \hspace{4.8 cm}\text{Anpassung an die DL4J kompatiblen Cuda-Versionen siehe Tab. \ref{tab:cuda-cudnn},} \\
-& \hspace{4.8 cm}\text{Anpassung in der pom.xml des Reversi-Clients} \\
-& \hspace{4.1 cm}\text{sudo apt-get update} \\
-& \hspace{4.1 cm}\text{// Logout und erneuten Login durchführen.} \\
-& \hspace{4.1 cm}\text{sudo apt-get -o Dpkg::Options::=\grqq{}--force-overwrite\grqq{} install cuda cuda-} \\
-& \hspace{4.8 cm}\text{drivers} \\
-& \hspace{4.1 cm}\text{sudo vi /etc/profile} \\
-& \hspace{5.1 cm}\text{Um folgenden Inhalt erweitern:} \\
-& \hspace{5.1 cm}\text{export PATH=/usr/local/cuda-$<$cuda-version$>$/bin:\$PATH} \\
-& \hspace{5.1 cm}\text{export LD\_LIBRARY\_PATH=/usr/local/cuda-$<$cuda-version$>$/} \\
-& \hspace{5.1 cm}\text{lib64:\$LD\_LIBRARY\_PATH} \\
-& \hspace{5.1 cm}\text{export CUDA\_PATH=/usr/local/cuda-$<$cuda-version$>$} \\
-& \hspace{4.1 cm}\text{// Logout und erneuten Login durchführen.} \\
-& \hspace{4.1 cm}\text{sudo ldconfig} \\
-& \hspace{4.1 cm}\text{sudo apt-get -o Dpkg::Options::="--force-overwrite" install nvidia-cuda-} \\
-& \hspace{4.8 cm}\text{toolkit} \\
+& \hspace{3.8 cm}\text{sudo apt-get update} \\
+& \hspace{3.8 cm}\text{sudo apt-get install nvidia-440 // alternativ kleinere Treiberversion,} \\
+& \hspace{4.5 cm}\text{Anpassung an die DL4J kompatiblen Cuda-Versionen siehe Tab. \ref{tab:cuda-cudnn},} \\
+& \hspace{4.5 cm}\text{Anpassung in der pom.xml des Reversi-Clients} \\
+& \hspace{3.8 cm}\text{sudo apt-get update} \\
+& \hspace{3.8 cm}\text{// Logout und erneuten Login durchführen.} \\
+& \hspace{3.8 cm}\text{sudo apt-get -o Dpkg::Options::=\grqq{}--force-overwrite\grqq{} install cuda cuda-} \\
+& \hspace{4.5 cm}\text{drivers} \\
+& \hspace{3.5 cm}\text{sudo vi /etc/profile} \\
+& \hspace{4.8 cm}\text{Um folgenden Inhalt erweitern:} \\
+& \hspace{4.8 cm}\text{export PATH=/usr/local/cuda-$<$cuda-version$>$/bin:\$PATH} \\
+& \hspace{4.8 cm}\text{export LD\_LIBRARY\_PATH=/usr/local/cuda-$<$cuda-version$>$/} \\
+& \hspace{4.8 cm}\text{lib64:\$LD\_LIBRARY\_PATH} \\
+& \hspace{4.8 cm}\text{export CUDA\_PATH=/usr/local/cuda-$<$cuda-version$>$} \\
+& \hspace{3.8 cm}\text{// Logout und erneuten Login durchführen.} \\
+& \hspace{3.8 cm}\text{sudo ldconfig} \\
+& \hspace{3.8 cm}\text{sudo apt-get -o Dpkg::Options::="--force-overwrite" install nvidia-cuda-} \\
+& \hspace{4.5 cm}\text{toolkit} \\
 \end{flalign*}
 
 Falls es gewünscht ist, die Rechenzeit bestmöglich zu optimieren, kann zusätzlich das CuDNN Paket installiert werden.
-Im folgenden wird CuDNN 7.6.5 als kompatible Version zu Cuda 10.2 verwendet, siehe Tab. \ref{tab:cuda-cudnn}. Für den Download von CuDNN muss man sich kostenlos für das Cuda-Developer-Programm anmelden.
+In dieser Anleitung wird CuDNN 7.6.5 als kompatible Version zu Cuda 10.2 verwendet, siehe Tab. \ref{tab:cuda-cudnn}. Für den Download von CuDNN muss man sich kostenlos für das Cuda-Developer-Programm anmelden.
 
 \begin{flalign*}
 & \hspace{4 cm}\text{Website: \url{https://developer.nvidia.com/cudnn}} \\
@@ -618,7 +623,7 @@ Für den Test der Installation kann diese mit Beispielprojekten getestet werden.
 \end{flalign*}
 
 kompiliert. Nach der Ausführung des Programms sollte an der Ausgabe erkennbar sein, ob Cuda und CuDNN korrekt genutzt werden.
-Um die Installation sauber abzuschließen, kann dieser Ordner wieder gelöscht werden. Zudem wird der Paketmanager ein letztes Mal auf den aktuellsten Stand gebracht. 
+Um die Installation sauber abzuschließen, kann dieser Ordner wieder gelöscht werden. Zudem wird der Paketmanager ein letztes Mal auf den aktuellen Stand gebracht. 
 
 \begin{flalign*}
 & \hspace{-1.4 cm} \text{sudo apt-get update} \\
@@ -678,7 +683,7 @@ Im letzten Modus, dem Kommandozeilenmodus, werden Befehle ausgeführt, die das P
 	\end{tabularx}
 \end{table}
 
-Als Beispiel wird eine beliebige Datei bearbeitet. Hierfür öffnet man diese Datei mit \glqq vi $<$dateiname$>$ \glqq{}. Mit den Pfeiltasten kann man nun an die gewünschte Position für eine Änderung navigieren. Mit \glqq a\grqq{} wechselt man in den Editiermodus um einen gewünschten Text anzuhängen, wie beispielsweise die Pfadvariablen der Installation in der Datei /etc/profile. Mit ESC kann man in den Befehlsmodus wechseln um Schreibfehler zu löschen. Mit \glqq a\grqq{} oder \glqq i\grqq{} kann man weiter schreiben. Das Speichern und Verlassen des Programms erfolgt von hier mit \glqq :wq!\grqq{} wodurch man über den Befehlsmodus in den Kommandozeilenmodus wechselt und die Aktion von dort aus erzwingt. 
+Als Beispiel wird eine beliebige Datei bearbeitet. Hierfür öffnet man diese Datei mit \glqq vi $<$dateiname$>$ \glqq{}. Mit den Pfeiltasten kann man nun an die gewünschte Position für eine Änderung navigieren. Mit \glqq a\grqq{} wechselt man in den Einfügemodus um einen gewünschten Text anzuhängen, wie beispielsweise die Pfadvariablen der Installation in der Datei /etc/profile. Mit ESC kann man in den Befehlsmodus wechseln, um Schreibfehler zu löschen. Mit \glqq a\grqq{} oder \glqq i\grqq{} kann man weiterschreiben. Das Speichern und Verlassen des Programms erfolgt von hier mit \glqq :wq!\grqq{} wodurch man über den Befehlsmodus in den Kommandozeilenmodus wechselt und die Aktion von dort aus erzwingt. 
 
 \newpage
 % ----------------------------------------------------------------------------------
@@ -686,13 +691,13 @@ Als Beispiel wird eine beliebige Datei bearbeitet. Hierfür öffnet man diese Da
 % ----------------------------------------------------------------------------------
 \section{Fazit}
 
-Subjektiv betrachtet ist die Einarbeitung in AlphaGo Zero und AlphaZero sehr mühsam und langwierig. Die originalen Publikationen setzen einerseits teils viel Grundwissen voraus, andererseits lassen sie häufig Interpretationsfreiraum bei gegebenen Erläuterungen. Diese beiden Faktoren machen weitere Recherchen und das Aufsuchen anderweitiger Quellen unabdingbar. Zwar finden sich oftmals Blog-Einträge und dergleichen im Internet, jedoch werden dort meist unterschiedliche konkrete Umsetzungsvarianten verwendet, was einheitliche Auffassung erheblich erschwert. Nicht zu vernachlässigen ist hierbei, dass innerhalb der eigenen Recherche der Teammitglieder somit jeder etwas anderes liest und eine andere Auffassung hat. An dieser Stelle auf einen gleichen Nenner zu kommen und zu belegen, wie die tatsächlich richtige Umsetzung aussieht, gestaltet sich schwierig, besonders dann, wenn im Paper nichts konkretes dazu zu finden ist. Des Weiteren möchte man sich auf diese Internet-Quellen nicht unbedingt verlassen und ebenso lehnt man die Referenzierung in der wissenschaftlichen Ausarbeitung ab. Außerdem ähneln beziehungsweise unterscheiden sich die AlphaGo Zero und AlphaZero in manchen Punkten. Da die Publikation für AlphaZero alleine nicht vollständig ist, sondern das Nachlesen im AlphaGo Zero Paper nötig ist, wird es einem nochmals erschwert die beiden Ansätze klar zu trennen. Alle diese Aspekte führen dazu, dass die genaue Analyse des Ansatzes und der Vorgehensweise umständlich ist und einen enormen Zeitaufwand erfordert. 
+Subjektiv betrachtet ist die Einarbeitung in AlphaGo Zero und AlphaZero sehr mühsam und langwierig. Die originalen Publikationen setzen einerseits teils viel Grundwissen voraus, andererseits lassen sie häufig Interpretationsfreiraum bei gegebenen Erläuterungen. Diese beiden Faktoren machen weitere Recherchen und das Aufsuchen anderweitiger Quellen unabdingbar. Zwar finden sich oftmals Blog-Einträge und dergleichen im Internet, jedoch werden dort meist unterschiedliche konkrete Umsetzungsvarianten verwendet, was einheitliche Auffassung erheblich erschwert. Nicht zu vernachlässigen ist hierbei, dass innerhalb der eigenen Recherche der Teammitglieder somit jeder etwas anderes liest und eine andere Auffassung hat. An dieser Stelle auf einen gleichen Nenner zu kommen und zu belegen, wie die tatsächlich richtige Umsetzung aussieht, gestaltet sich schwierig, besonders dann, wenn im Paper nichts Konkretes dazu zu finden ist. Des Weiteren möchte man sich auf diese Internet-Quellen nicht unbedingt verlassen und ebenso lehnt man die Referenzierung in der wissenschaftlichen Ausarbeitung ab. Außerdem ähneln beziehungsweise unterscheiden sich die AlphaGo Zero und AlphaZero in manchen Punkten. Da die Publikation für AlphaZero alleine nicht vollständig ist, sondern das Nachlesen im AlphaGo Zero Paper nötig ist, wird es einem nochmals erschwert die beiden Ansätze klar zu trennen. Alle diese Aspekte führen dazu, dass die genaue Analyse des Ansatzes und der Vorgehensweise umständlich ist und einen enormen Zeitaufwand erfordert. 
 
 Abgesehen davon ist festzuhalten, dass die beiden Komponenten, die den Alpha(Go)-Zero-Ansatz ausmachen, das NN und der MCTS, beide für sich betrachtet bereits umfangreich und komplex sind. Bezüglich des Projektberichts, der die theoretische Auseinandersetzung und verständliche Erklärung der Komponenten erfordert, ist anzumerken, dass dies vor allem im Hinblick auf das NN schlichtweg unmöglich ist. Generelle Funktionsweise und zusätzliche Elemente, unter anderem Verlust- und Aktivierungsfunktionen, Gradientenabstiegsverfahren, sowie weitere Abwandlungen und Besonderheiten, beispielsweise residual learning oder Momentum, füllen vom Umfang eine gesamte Vorlesung über ein Semester. Beim Versuch all diese Konzepte, die nun mal im Projekt Anwendung finden und daher eine Erklärung erfordern, müssen deutliche Abstriche gemacht werden, da der Aufwand für eine detaillierte Darlegung dieser die zu erbringende Projektleistung deutlich übersteigt.
 
 Rückblickend betrachtet hätten wir die Herangehensweise an das Projekt anders gestalten sollen. Da die Analysephase viel Zeit in Anspruch nahm, wir dennoch sichtliche Fortschritte erzielen wollten, begannen wir mit der praktischen Umsetzung, bevor wir alle theoretischen Aspekte detailliert ausgearbeitet hatten. Dies führte unweigerlich dazu, dass bereits bestehende Funktionalitäten erneut überarbeitet und angepasst werden mussten, was einem Zusatzaufwand entsprach. Für die Zukunft lernen wir daraus, dass es sinnvoll ist, erst mit der Umsetzung anzufangen, sobald die gesamte Theorie behandelt und konkretisiert worden ist.
 
-Ein weiterer Punkt, in dem wir erst dazu lernen mussten, betraf die Kommunikation. Sie funktionierte zwar innerhalb der Gruppe gut, jedoch musste sie zum Dozenten verbessert werden. In diesem Punkt waren vermehrt Angaben zum Fortschritt, Adressierung von Problemstellen und Details zum geplanten Vorgehen gewünscht. Eine solche Arbeitsweise waren wir aufgrund unserer bisherigen Projekte, die auf den Dialog innerhalb des Team begrenzt war, nicht gewohnt. Aus diesem Grund hatten vernachlässigten wir diesen Aspekt offensichtlich zu sehr, aber bemühten uns jedoch im Laufe der Arbeit durch vermehrten E-Mail-Kontakt diesem besser nachzukommen, indem wir nach Treffen sämtliche Informationen zusammentrugen und kommunizierten.
+Ein weiterer Punkt, in dem wir erst dazu lernen mussten, betraf die Kommunikation. Sie funktionierte zwar innerhalb der Gruppe gut, jedoch musste sie zum Dozenten verbessert werden. In diesem Punkt waren vermehrt Angaben zum Fortschritt, Adressierung von Problemstellen und Details zum geplanten Vorgehen gewünscht. Eine solche Arbeitsweise waren wir aufgrund unserer bisherigen Projekte, die auf den Dialog innerhalb des Teams begrenzt war, nicht gewohnt. Aus diesem Grund hatten vernachlässigten wir diesen Aspekt offensichtlich zu sehr, aber bemühten uns jedoch im Laufe der Arbeit durch vermehrten E-Mail-Kontakt diesem besser nachzukommen, indem wir nach Treffen sämtliche Informationen zusammentrugen und kommunizierten.
 
 Ein weiterer als negativ empfundener Aspekt lag in der benötigten Zeit für das Training des Modells des NN. Dadurch, dass das NN stets längere Zeit brauchte, um zu lernen und sich zu verbessern, hat sich die gesamte Projektdauer verlängert.
 
@@ -818,17 +823,37 @@ Ein weiterer als negativ empfundener Aspekt lag in der benötigten Zeit für das
 %Die Quellen befinden sich in der Datei \textit{quellen.bib}. Eine Buch- und eine Online-Quelle sind beispielhaft eingefügt. [Vgl. \cite{buch}, \cite{online}]
 %
 %\pagebreak
+% ----------------------------------------------------------------------------------------------------------
+% Filter fuer Literatur und Quellen definieren
+% ----------------------------------------------------------------------------------------------------------
 
+\defbibheading{Literatur}{\section*{Literaturverzeichnis}} 
+\defbibheading{Quellen}{\section*{Quellenverzeichnis}} 
+
+%\defbibfilter{Literatur}{\not\keyword{online}} 
+%\defbibfilter{Quellen}{\keyword{online}} 
+\defbibfilter{Literatur}{\not type=online} 
+\defbibfilter{Quellen}{type=online} 
 % ----------------------------------------------------------------------------------------------------------
 % Literatur
 % ----------------------------------------------------------------------------------------------------------
-\renewcommand\refname{Literatur}
-\bibliographystyle{alpha}
-\bibliography{literatur}
-
-%\printbibliography
-
+\addcontentsline{toc}{section}{Literaturverzeichnis}
+\addtocontents{toc}{\vspace{-0.5em}}
+\lhead{Literaturverzeichnis} 
+\rhead{} 
+\printbibliography[heading=Literatur,filter=Literatur] 
 \pagebreak
+
+
+% ---------------------------------------------------------------------------------------------------------- 
+% Quellen 
+% ---------------------------------------------------------------------------------------------------------- 
+\addcontentsline{toc}{section}{Quellenverzeichnis}
+\addtocontents{toc}{\vspace{-0.5em}}
+\lhead{Quellenverzeichnis} 
+\rhead{} 
+\printbibliography[title = {Quellen}, heading=Quellen,filter=Quellen] 
+\pagebreak 
 
 % ----------------------------------------------------------------------------------------------------------
 % Anhang
@@ -837,12 +862,12 @@ Ein weiterer als negativ empfundener Aspekt lag in der benötigten Zeit für das
 \setcounter{page}{1}
 %\lhead{Anhang \thesection}
 
-\begin{appendix}
-\section*{Anhang}
-%\phantomsection
-\addcontentsline{toc}{section}{Anhang}
-\addtocontents{toc}{\vspace{-0.5em}}
-
-\end{appendix}
+%\begin{appendix}
+%\section*{Anhang}
+%%\phantomsection
+%\addcontentsline{toc}{section}{Anhang}
+%\addtocontents{toc}{\vspace{-0.5em}}
+%
+%\end{appendix}
 
 \end{document}
