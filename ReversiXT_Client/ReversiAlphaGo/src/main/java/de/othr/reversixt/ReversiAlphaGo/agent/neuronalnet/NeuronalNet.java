@@ -131,7 +131,7 @@ class NeuronalNet {
 
         graphBuilder.addLayer(conv, new ConvolutionLayer.Builder().kernelSize(kernelSize).stride(stride).convolutionMode(cMode).nIn(numOfInputPlanes).nOut(256).build(), input);
         graphBuilder.addLayer(batchNorm, new BatchNormalization.Builder().nOut(256).build(), conv);
-        graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.RELU6).build(), batchNorm);
+        graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.LEAKYRELU).build(), batchNorm);
 
         outputNameLastLayer = activation;
 
@@ -166,7 +166,7 @@ class NeuronalNet {
             //first Block of ResLayer
             graphBuilder.addLayer(conv1, new ConvolutionLayer.Builder().kernelSize(kernelSize).stride(stride).convolutionMode(cMode).nIn(256).nOut(256).build(), nameLastBlock);
             graphBuilder.addLayer(batchNorm1, new BatchNormalization.Builder().nOut(256).build(), conv1);
-            graphBuilder.addLayer(activation1, new ActivationLayer.Builder().activation(Activation.RELU6).build(), batchNorm1);
+            graphBuilder.addLayer(activation1, new ActivationLayer.Builder().activation(Activation.LEAKYRELU).build(), batchNorm1);
 
             // second Block of ResLayer
             graphBuilder.addLayer(conv2, new ConvolutionLayer.Builder().kernelSize(kernelSize).stride(stride).convolutionMode(cMode).nIn(256).nOut(256).build(), nameLastBlock);
@@ -175,7 +175,7 @@ class NeuronalNet {
 
             // merge outputs of both resBlocks
             graphBuilder.addVertex(mergeBlock, new ElementWiseVertex(ElementWiseVertex.Op.Add), activation1, batchNorm2);
-            graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.RELU6).build(), mergeBlock);
+            graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.LEAKYRELU).build(), mergeBlock);
 
             nameLastBlock = activation;
         }
@@ -192,7 +192,7 @@ class NeuronalNet {
 
         graphBuilder.addLayer(conv, new ConvolutionLayer.Builder().kernelSize(kernelSize).stride(stride).convolutionMode(cMode).nIn(256).nOut(2).build(), nameLastLayer);
         graphBuilder.addLayer(batchNorm, new BatchNormalization.Builder().nOut(2).build(), conv);
-        graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.RELU6).build(), batchNorm);
+        graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.LEAKYRELU).build(), batchNorm);
         graphBuilder.addLayer(dense, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT).l2(0.0001).l2Bias(0.0001).nIn(MAP_SIZE*MAP_SIZE*2).nOut(MAP_SIZE*MAP_SIZE+1).build(), activation);
 
         HashMap<String, InputPreProcessor> map = new HashMap<String, InputPreProcessor>();
@@ -211,7 +211,7 @@ class NeuronalNet {
 
         graphBuilder.addLayer(conv, new ConvolutionLayer.Builder().kernelSize(kernelSize).stride(stride).convolutionMode(cMode).nIn(256).nOut(1).build(), nameLastLayer);
         graphBuilder.addLayer(batchNorm, new BatchNormalization.Builder().nOut(1).build(), conv);
-        graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.RELU6).build(), batchNorm);
+        graphBuilder.addLayer(activation, new ActivationLayer.Builder().activation(Activation.LEAKYRELU).build(), batchNorm);
         graphBuilder.addLayer(dense, new DenseLayer.Builder().nIn(MAP_SIZE * MAP_SIZE).nOut(256).build(), activation);
         graphBuilder.addLayer(output, new OutputLayer.Builder(new LossMSE()).l2(0.01).l2Bias(0.01).activation(Activation.TANH).nIn(256).nOut(1).build(), dense);
 
