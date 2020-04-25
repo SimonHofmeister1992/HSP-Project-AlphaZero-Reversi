@@ -1,4 +1,62 @@
-﻿ ----------------------------------------------------------------------------------
+﻿% [12pt,a4paper,bibliography=totocnumbered,listof=totocnumbered]{scrartcl}
+\documentclass[12pt,a4paper]{article}
+\usepackage{mathtools}
+\input{includes}
+
+\begin{document}
+\input{commands}
+
+
+% ----------------------------------------------------------------------------------------------------------
+% Titelseite
+% ----------------------------------------------------------------------------------------------------------
+\MyTitlepage{}{
+\texttt{simon1.hofmeister@st.oth-regensburg.de}\\
+\texttt{nadiia1.matsko@st.oth-regensburg.de}\\
+\texttt{monika.silber@st.oth-regensburg.de}\\
+\texttt{simon.wasserburger@st.oth-regensburg.de}}
+{15.03.\the\year}
+
+\setcounter{page}{1} 
+% ----------------------------------------------------------------------------------------------------------
+% Inhaltsverzeichnis
+% ----------------------------------------------------------------------------------------------------------
+\tableofcontents
+\pagebreak
+
+
+% ----------------------------------------------------------------------------------------------------------
+% Inhalt
+% ----------------------------------------------------------------------------------------------------------
+% Abstände Überschrift
+\titlespacing{\section}{0pt}{12pt plus 4pt minus 2pt}{-6pt plus 2pt minus 2pt}
+\titlespacing{\subsection}{0pt}{12pt plus 4pt minus 2pt}{-6pt plus 2pt minus 2pt}
+\titlespacing{\subsubsection}{0pt}{12pt plus 4pt minus 2pt}{-6pt plus 2pt minus 2pt}
+
+% Kopfzeile
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+\renewcommand{\subsectionmark}[1]{}
+\renewcommand{\subsubsectionmark}[1]{}
+\lhead{Kapitel \thesection}
+\rhead{\rightmark}
+
+\onehalfspacing
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\theHsection}{\arabic{section}}
+\setcounter{section}{0}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ----------------------------------------------------------------------------------
+% Kapitel: Einleitung
+% ----------------------------------------------------------------------------------
+
+\input{chapters/01_einleitung/einleitung.tex} 
+
+
+\newpage
+
+ ----------------------------------------------------------------------------------
 % Kapitel: Related Work/Theorie
 % ----------------------------------------------------------------------------------
 \section{Theoretische Grundlagen}
