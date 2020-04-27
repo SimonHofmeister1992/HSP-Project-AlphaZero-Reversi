@@ -383,9 +383,9 @@ Das Training erfolgte mit mehreren Problemen, da auf der gestellten Workstation,
 % ----------------------------------------------------------------------------------
 \section{Endergebnis}
 %TODO Zusammenfassen, was kann das Spiel alles
-Als abschließendes Ergebnis lässt sich festhalten, dass das Programm gelernt hat Reversi auf einem quadratischen Feld der Größe 15x15 zu lernen. Gegen die von Prof. Kern zur Verfügung gestellte triviale KI wird dabei zu _ \% gewonnen. 
+Als abschließendes Ergebnis lässt sich festhalten, dass das Programm gelernt hat Reversi auf einem quadratischen Feld der Größe 15x15 zu lernen. Gegen die von Prof. Kern zur Verfügung gestellte triviale KI wird dabei zu X\% gewonnen. 
 
-Um das Spiel etwas interessanter und f\"{u}r unsere KI etwas herausfordernder zu gestalten, lassen wir derzeit Spielfeldgr\"{o}\ss en bis zu 15x15 Feldern zu, die Startposition der Anfangssteine darf hierbei beliebig sein und muss nicht mittig angelegt werden. Gr\"{o}\ss ere Spielgr\"{o}\ss en k\"{o}nnen in der Klasse AlphaGoZeroConstants in der Konstante \glqq DIMENSION\_PLAYGROUND\grqq{} gesetzt werden, der hierf\"{u}r ben\"{o}tigte Wert ist das Maximum aus der Spielfeldh\"{o}he und der -breite. Bei einer \"{A}nderung muss jedoch das Modell von Grund auf neu trainiert werden.\\
+Um das Spiel etwas interessanter und f\"{u}r unsere KI etwas herausfordernder zu gestalten, lassen wir derzeit Spielfeldgr\"{o}\ss en bis zu 15x15 Feldern zu, die Startposition der Anfangssteine darf hierbei beliebig sein und muss nicht mittig angelegt werden. Gr\"{o}\ss ere Spielgr\"{o}\ss en k\"{o}nnen in der Klasse \texttt{AlphaGoZeroConstants} in der Konstante \texttt{DIMENSION\_PLAYGROUND} gesetzt werden, der hierf\"{u}r ben\"{o}tigte Wert ist das Maximum aus der Spielfeldh\"{o}he und der -breite. Bei einer \"{A}nderung muss jedoch das Modell von Grund auf neu trainiert werden.\\
 Zudem lassen wir sogenannte L\"{o}cher im Spielfeld zu, also Felder auf die keiner der Spieler ziehen kann. Das Setzen auf anliegende Felder ist somit sicherer als mittig im Spielfeld, da die Spielsteine nicht vom Feld des Loches aus umgekehrt werden k\"{o}nnen.
 
 
