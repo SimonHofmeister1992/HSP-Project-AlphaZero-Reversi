@@ -115,6 +115,10 @@ Insgesamt wird die Baumsuche 800 mal durchlaufen\cite{SilverHubert2017}. Letztli
 
 Ferner ist anzumerken, dass Alpha(Go)Zero Kenntnis über die Spielregeln hat, die im MCTS abgerufen werden, um Spielzustände abzubilden, die aus Zügen resultieren und um Endzustände bewerten zu können \cite{Silver2017} \cite{SilverHubert2017}. 
 
+Als weiteres Konzept wendet Alpha(Go)Zero die Dirichlet-Verteilung auf die A-priori-Wahrscheinlichkeiten an. Dies geschieht allerdings nur im Wurzelknoten und dient dazu zusätzliche Exploration einzuschleusen. Bei der verwendeten Dirichlet-Funktion $Dir(\alpha)$ nimmt $\alpha$ einen Wert an, der umgekehrt proportional zur Anzahl an validen Spielzügen und zudem skaliert ist. Für beispielsweise das Spiel Go bedeutet dies, dass $\alpha = 0,03$ \cite{SilverHubert2017}. 
+
+Ebenfalls zur Steuerung der Exploration wird ein Temperatur-Parameter $\tau$ eingefügt, der für die ersten 30 Spiele den Wert 1 annimmt, wodurch zu spielende Züge proportional zur Anzahl an Besuchen ausgewählt werden und gewährleistet wird, dass verschiedene Positionen berücksichtigt werden.  Für den weiteren Spielverlauf wird $\tau \rightarrow 0$ gesetzt. Die Berechnung für den Wert der Anzahl an Besuchen wird entsprechend durch $N^{1/\tau}$ berechnet \cite{Silver2017}.
+
 \newpage
 \subsection{Neuronales Netz}
 
