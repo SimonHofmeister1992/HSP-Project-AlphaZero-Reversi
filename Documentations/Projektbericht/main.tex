@@ -159,13 +159,20 @@ L(f_\theta (x), y) = -y log f_\theta (x) - (1 - y) log(1 - f_\theta(x))
 
 Um die Parameter eines NN zu trainieren, wird das Gradientenabstiegsverfahren genutzt. Da der Output des NN und der gewünschte Wert voneinander abweichen, wie es in der Fehlerfunktion berechnet wird, ist es das Ziel aus dieser Verlustfunktion die Richtung abzuleiten, in die die Parameter angepasst werden müssen, um die Differenz zu minimieren. Die Richtung kann festgestellt werden, indem der Gradient $ \nabla $ der Verlustfunktion ermittelt wird. Dieser stellt einen Vektor da, der die partiellen Ableitungen, also die Ableitungen nach unterschiedlichen Funktionsargumenten, der Fehlerfunktion enthält. Der Gradient dient dabei zur Repräsentation des Steigungsverhaltens einer Funktion und zeigt stets in die Richtung des höchsten Anstiegs. Um Fehler zu verringern, werden Gewichte entsprechend in die entgegengesetzte Richtung verändert. Zur Reduktion der Abweichung werden nun Fehler und Gradient berechnet, woraufhin die Anpassung der Gewichte, die Backpropagation, folgt. Zur Fehlerminimierung wird dieser Prozess iterativ durchlaufen. Zur Berechnung des Fehlers des gesamten NN werden die jeweiligen einzelnen Diskrepanzen aufaddiert \cite[S. 58-60]{Kruse2015}. Ein ein ausführliches Beispiel zur Fehlerminimierung und Berechnung der partiellen Ableitungen findet sich in \cite[S. 64-68]{Kruse2015}.
 Des Weiteren ist zu berücksichtigen, dass beim Gradientenabstieg grundsätzlich nicht gewährleistet werden kann, dass ein globales Minimum gefunden wird. Lediglich die Annäherung an ein lokales Minimum kann sichergestellt werden \cite[S. 69]{Kruse2015}. Ein weiteres Problem beim vorgestellten Verfahren ist, die Wahl der optimalen Lernrate $ \theta $, die die Schrittweite angibt. Das bedeutet, je kleiner die die Lernrate ist, desto langsamer, in kleineren Schritten, approximiert man das gesuchte Minimum. Dies kann unter Umständen zu viel Zeit in Anspruch nehmen. Wählt man für die Lernrate allerdings einen großen Wert, so nähert man sich dem gewünschten Punkt in entsprechenden großen Schritten an. Auf diese Weise kann es passieren, dass das Minimum stets übersprungen wird \cite[S. 67]{Kruse2015}. 
-%TODO Grafik: Man erkennt diesen Prozess...
+
 %TODO optimale Werte für theta
 
-Eine Möglichkeit diesem Problem bei einer gleichzeitig hohen Lernrate entgegenzuwirken liegt in der Inklusion des Momentums. Dabei wird der Wert der vorangegangenen Richtung für die Berechnung der neuen Richtung berücksichtigt, wodurch Oszillationen verringert werden und das Minimum schneller erreicht wird \cite{Rumelhart1985}.
+Eine Möglichkeit diesem Problem bei einer gleichzeitig hohen Lernrate entgegenzuwirken liegt in der Inklusion des Momentums. Dabei wird der Wert der vorangegangenen Richtung für die Berechnung der neuen Richtung berücksichtigt, wodurch Oszillationen verringert werden und das Minimum schneller erreicht wird \cite{Rumelhart1985}. Zur Veranschaulichung dieses Konzeptes dient Abbildung \ref{fig:sgd_momentum}.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{pics/sgd_momentum.png}	
+\caption{Gradientenabstiegsverfahren mit beziehungsweise ohne Momentum, Abbildung entnommen aus \cite{MediumSGD}}
+\label{fig:sgd_momentum}
+\end{figure}
 
 Als Hyperparameter bezeichnet man in NN Konfigurationsparameter, durch die man das Verhalten des Netzes steuern kann. Diese Variablen werden manuell festgelegt und nicht wie die übrigen Netz-Parameter vom Programm gelernt \cite[S. 113]{Goodfellow2015}.
-%TODO Aktivierungsfunktion grafiken, tanh, relu, 
+
 Laut Nwankpa, Ijomah, Gachagan \& Marshall beeinflussen sowohl Hyperparameter als auch Aktivierungsfunktionen die Generalisierbarkeit sowie die Effektivität des Lernprozesses \cite{Nwankpa2018}. Dementsprechend wichtig ist es eine Aktivierungsfunktion auszuwählen, die möglichst gut für den spezifischen Anwendungsfall geeignet ist. Mithilfe von Aktivierungsfunktionen wird entschieden, ob ein Neuron gefeuert wird oder nicht. Der Output eines NN berechnet sich durch y = $(w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$, was grundsätzlich einem linearen Ergebnis entspricht. Für den Lernprozess werden jedoch nicht-lineare Daten benötigt, da diese differenzierbar sind. Daher bilden Aktivierungsfunktionen die Ausgabedaten eines NN innerhalb eines bestimmten Wertebereichs ab und wandeln sie in nicht-lineare Werte um. Daher ergibt sich, y = $ \alpha (w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b)$ für den Output, wobei $\alpha $ für die entsprechende Aktivierungsfunktion steht \cite{Nwankpa2018}.
 
 Ein Beispiel für eine Aktivierungsfunktion ist der tangens hyperbolicus (tanh), der durch 
@@ -203,7 +210,14 @@ Hinsichtlich dieses Problems kann jedoch die leaky ReLU (LReLU) Abhilfe schaffen
     \end{cases}
 \end{equation}
 
-Durch die Multiplikation der Konstante $\alpha$, die den Wert 0.01 annimmt, können die Gradienten während des Trainings niemals Null werden \cite{Nwankpa2018}.
+Durch die Multiplikation der Konstante $\alpha$, die den Wert 0.01 annimmt, können die Gradienten während des Trainings niemals Null werden \cite{Nwankpa2018}. Sowohl der Verlauf der ReLU als auch der LReLU können in Abbildung \ref{fig:relu} eingesehen werden.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{pics/l_relu.png}	
+\caption{ReLU und LReLU, Abbildung entnommen aus \cite{Xu2015} }
+\label{fig:relu}
+\end{figure}
 
 Für eine detaillierte Analyse bestehender Aktivierungsfunktionen sei auf Nwankpa et al. \cite{Nwankpa2018} verwiesen.
 
