@@ -126,7 +126,7 @@ Dieses Kapitel widmet sich zunächst der grundlegenden Funktionsweise neuronaler
 
 \subsubsection{Grundlagen neuronaler Netze}
 Ein NN wird durch eine Vielzahl einzelner miteinander verknüpfter Neuronen beschrieben. Dabei erhalten sie Signale von anderen Neuronen als Input, verarbeiten diese und geben sie als Output an andere weiter. Diese Eingangswerte werden als Vektor X = $\{x_{1}, x_{2}, ..., x_{n}\}$ repräsentiert. Um adäquate Ausgangswerte zu erhalten werden die einzelnen Input-Elemente durch die entsprechenden Komponenten im Vektor W = $\{w_{1}, w_{2}, ..., w_{n}\}$ gewichtet. Des Weiteren kann es zu jedem Neuron einen Bias b geben. Zur Verarbeitung der Eingangswerte wird eine Aktivierungsfunktion herangezogen, die Z = $\{w_{1}x_{1}, w_{2}x_{2}, ..., w_{n}x_{n} + b(W^{T}X + b)\}$ als Input erhält. Das sich hieraus ergebende Resultat entspricht \^{y}. Im weiteren Verlauf wird versucht die Diskrepanz zwischen dem tatsächlichen Wert y und dem geschätzten Wert \^{y} durch Anwendung einer Verlustfunktion zu minimieren. Dieser Vorgang wird als \glqq{}Backpropagation\grqq bezeichnet. Dabei werden Fehler von dem letzten bis hin zum ersten layer zurückgeleitet, um alle beteiligten Gewichte in die entsprechende Richtung anzupassen. Dies wird dadurch erreicht, dass man das Minimum der Fehlerfunktion lokalisiert, das durch Annäherung an den Gradienten der Funktion ermittelt werden kann \cite[S. 75-79]{Sewak2019}. 
-%TODO allgemein: mathemat. Funktion, die man approximiert
+
 
 Neuronale Netze bestehen aus verschiedenen Schichten. Dabei existieren stets der input layer, ein oder mehrere hidden layer und der output layer. Während der input layer über genauso viele Neuronen, wie es Eingangswerte gibt, verfügt, weist der output layer so viele Neuronen auf, wie Ausgangsmerkmale vorhanden sind. Die Neuronenzahl in den versteckten Zwischenschichten kann variieren. Sobald mehr als ein hidden layer vorliegt, spricht man von einem tiefen neuronalen Netz \cite[S. 77]{Sewak2019}. Der Aufbau wird in Abbildung \ref{fig:aufbau_nn} veranschaulicht.
 
@@ -159,8 +159,6 @@ L(f_\theta (x), y) = -y log f_\theta (x) - (1 - y) log(1 - f_\theta(x))
 
 Um die Parameter eines NN zu trainieren, wird das Gradientenabstiegsverfahren genutzt. Da der Output des NN und der gewünschte Wert voneinander abweichen, wie es in der Fehlerfunktion berechnet wird, ist es das Ziel aus dieser Verlustfunktion die Richtung abzuleiten, in die die Parameter angepasst werden müssen, um die Differenz zu minimieren. Die Richtung kann festgestellt werden, indem der Gradient $ \nabla $ der Verlustfunktion ermittelt wird. Dieser stellt einen Vektor da, der die partiellen Ableitungen, also die Ableitungen nach unterschiedlichen Funktionsargumenten, der Fehlerfunktion enthält. Der Gradient dient dabei zur Repräsentation des Steigungsverhaltens einer Funktion und zeigt stets in die Richtung des höchsten Anstiegs. Um Fehler zu verringern, werden Gewichte entsprechend in die entgegengesetzte Richtung verändert. Zur Reduktion der Abweichung werden nun Fehler und Gradient berechnet, woraufhin die Anpassung der Gewichte, die Backpropagation, folgt. Zur Fehlerminimierung wird dieser Prozess iterativ durchlaufen. Zur Berechnung des Fehlers des gesamten NN werden die jeweiligen einzelnen Diskrepanzen aufaddiert \cite[S. 58-60]{Kruse2015}. Ein ein ausführliches Beispiel zur Fehlerminimierung und Berechnung der partiellen Ableitungen findet sich in \cite[S. 64-68]{Kruse2015}.
 Des Weiteren ist zu berücksichtigen, dass beim Gradientenabstieg grundsätzlich nicht gewährleistet werden kann, dass ein globales Minimum gefunden wird. Lediglich die Annäherung an ein lokales Minimum kann sichergestellt werden \cite[S. 69]{Kruse2015}. Ein weiteres Problem beim vorgestellten Verfahren ist, die Wahl der optimalen Lernrate $ \theta $, die die Schrittweite angibt. Das bedeutet, je kleiner die die Lernrate ist, desto langsamer, in kleineren Schritten, approximiert man das gesuchte Minimum. Dies kann unter Umständen zu viel Zeit in Anspruch nehmen. Wählt man für die Lernrate allerdings einen großen Wert, so nähert man sich dem gewünschten Punkt in entsprechenden großen Schritten an. Auf diese Weise kann es passieren, dass das Minimum stets übersprungen wird \cite[S. 67]{Kruse2015}. 
-
-%TODO optimale Werte für theta
 
 Eine Möglichkeit diesem Problem bei einer gleichzeitig hohen Lernrate entgegenzuwirken liegt in der Inklusion des Momentums. Dabei wird der Wert der vorangegangenen Richtung für die Berechnung der neuen Richtung berücksichtigt, wodurch Oszillationen verringert werden und das Minimum schneller erreicht wird \cite{Rumelhart1985}. Zur Veranschaulichung dieses Konzeptes dient Abbildung \ref{fig:sgd_momentum}.
 
@@ -411,8 +409,8 @@ Das Training erfolgte mit mehreren Problemen, da auf der gestellten Workstation,
 % Kapitel: Ergebnis/Endzustand/Funktionsumfang
 % ----------------------------------------------------------------------------------
 \section{Endergebnis}
-%TODO Zusammenfassen, was kann das Spiel alles
-Als abschließendes Ergebnis lässt sich festhalten, dass das Programm gelernt hat Reversi auf einem quadratischen Feld der Größe 15x15 zu lernen. Im Vergleich zu der von Prof. Kern zur Verfügung gestellten trivialen KI lässt sich festhalten, dass das entwickelte Programm als Spieler 1 bis zu Suchtiefe 2 und als Spieler 2 bis zu Suchtiefe 5 gewinnt.
+
+Als abschließendes Ergebnis lässt sich festhalten, dass das Programm gelernt hat Reversi auf einem quadratischen Feld der Größe 15x15 zu lernen. Im Vergleich zu der von Prof. Kern zur Verfügung gestellten trivialen KI lässt sich festhalten, dass das entwickelte Programm als Spieler 1 bis zur Suchtiefe 2 und als Spieler 2 bis zur Suchtiefe 5 gewinnt.
 
 Um das Spiel etwas interessanter und f\"{u}r unsere KI etwas herausfordernder zu gestalten, lassen wir derzeit Spielfeldgr\"{o}\ss en bis zu 15x15 Feldern zu, die Startposition der Anfangssteine darf hierbei beliebig sein und muss nicht mittig angelegt werden. Gr\"{o}\ss ere Spielgr\"{o}\ss en k\"{o}nnen in der Klasse \texttt{AlphaGoZeroConstants} in der Konstante \texttt{DIMENSION\_PLAYGROUND} gesetzt werden, der hierf\"{u}r ben\"{o}tigte Wert ist das Maximum aus der Spielfeldh\"{o}he und der -breite. Bei einer \"{A}nderung muss jedoch das Modell von Grund auf neu trainiert werden.\\
 Zudem lassen wir sogenannte L\"{o}cher im Spielfeld zu, also Felder auf die keiner der Spieler ziehen kann. Das Setzen auf anliegende Felder ist somit sicherer als mittig im Spielfeld, da die Spielsteine nicht vom Feld des Loches aus umgekehrt werden k\"{o}nnen.
@@ -454,11 +452,11 @@ Organisation & 30 Std &  Besprechungen\\
 
 
 \begin{tabular}{*{3}{p{4cm}p{3cm}p{8cm}}}
-\multicolumn{3}{l}{\textbf{Simon Wasserburger (130 h):}} \\
+\multicolumn{3}{l}{\textbf{Simon Wasserburger (140 h):}} \\
 Bereiche & Zeitaufwand & Komponenten \\
 \cline{1-3}
 Recherche & 20 Std &  \\
-Implementierung & 70 Std & MCTS, Code-Refactoring Grundgerüst  \\
+Implementierung & 80 Std & MCTS, Code-Refactoring Grundgerüst  \\
 Dokumentation & 10 Std &  Grafiken MCTS, Aufbau des Programms \\
 Organisation & 30 Std &  Besprechungen\\
 \end{tabular}
@@ -470,12 +468,10 @@ In den persönlichen Treffen, in denen meist alle Teammitglieder anwesend waren,
 
 \subsection{Versionskontrolle}
 Als Versionskontrollsystem stand ein Gitlab-Repository der OTHR zur Verfügung. Zum Abrufen und Bearbeiten dessen wurde GitHub Desktop als GUI verwendet.
-%TODO welche GUI/CLI?
 
 Hinsichtlich Implementierung der Komponenten wurden eigene Branches angelegt, die vom master-Branch geklont und nach Fertigstellung entsprechend dort wieder gemergt wurden. Dabei ergaben sich eigene Branches für den MCTS, das NN sowie für den Prozess des Refactoring des ursprünglichen Codes. Die finale und alle Bestandteile umfassende Version befindet sich folglich im master-Branch.
 
 \subsection{OS, IDE und Programmiersprache}
-%TODO OS
 Als Entwicklungsumgebung wurde IntelliJ IDEA\footnote{https://www.jetbrains.com/de-de/idea/} von JetBrains genutzt. Da wir innerhalb der Gruppe bisher am meisten Erfahrung in Java hatten, wurde dies als Programmiersprache zur Implementierung des Projektes verwendet. Zur Erstellung des Programms kam maven\footnote{https://maven.apache.org/} als Build-Management-Tool zum Einsatz.
 
 Des Weiteren wurde zur Implementierung des NN die Library Eclipse deeplearning4j (DL4J) \cite{DL4J} zur Hilfe genommen. Hinsichtlich dieser Auswahl verschafften wir uns zunächst einen Überblick über vorhandene, gute Bibliotheken und recherchierten deren Vorteile und Anwendungsfälle, wobei die Entscheidung letztendlich auf die bereits genannte fiel.
@@ -491,15 +487,12 @@ Da DL4 hinsichtlich unserer individuellen Projektansprüche am besten schien, fi
 Die Library hat ihren Ursprung bei Entwicklern der Firma Konduit\footnote{https://konduit.ai/} in San Francisco und wurde unter der Apache Software Foundation License 2.0\footnote{https://www.apache.org/licenses/LICENSE-2.0} veröffentlicht.
 
 DL4J ist vollständig open source und in Java geschrieben, wobei für die zugrundeliegenden Berechnungen C, C++ und Cuda genutzt wurden. Des Weiteren unterstützt sie ND4J (N-Dimensional Arrays for Java) - eine Bibliothek für das wissenschaftliche Rechnen, die eine hohe Performanz gewährleistet\footnote{https://nd4j.org/}. Diese werden im vorliegenden Projekt anhand von \texttt{INDArrays} referenziert.
-%TODO INDArrays
 
 Außerdem werden zahlreiche, hilfreiche Features unterstützt, unter anderem Batch Normalisation, Residual Learning, CNNs. In Form eines \texttt{ComputationGraph} kann daher ein verhältnismäßig einfach ein komplexes neuronales Netz aufgebaut werden.
 
 Weitere ausschlaggebende Vorteile liegen in der ausführlichen Dokumentation\footnote{https://deeplearning4j.org/api/latest/} sowie den zahlreichen Hilfsmitteln, wie Tutorials\footnote{erreichbar über https://deeplearning4j.org/tutorials/setup}, Code-Beispiele\footnote{https://github.com/eclipse/deeplearning4j-examples} und Leitfäden zu sämtlichen Aspekten\footnote{erreichbar über https://deeplearning4j.org/docs/latest/}, die zudem alle schnell und unkompliziert über die eigene Website zu finden sind.
 
 Zuletzt können wir nach Projektabschluss festhalten, dass wir DL4J als sehr benutzerfreundlich und unkompliziert empfanden. Ebenfalls der große Funktionsumfang erleichtert die Arbeit zum Aufbau und Training des Modells. Daher sehen wir DL4J insgesamt als hilfreiches und anwenderfreundliches Tool.
-
-%TODO Alternativen, abschließenden Bewertung (Kritikpunkte?)
 
 \subsection{Testumgebungen und Installation}
 Um die Leistungen des Trainings der implementierten AlphaZero einschätzen oder nachbauen und nutzen zu können, ist es wichtig, sich mit den Rahmenbedingungen des Projektes zu beschäftigen. Hierzu werden im Folgenden die technischen Daten des Projektes wiedergegeben und die Installation der benötigten Komponenten erläutert.
@@ -509,7 +502,6 @@ Die hauptsächlich genutzte Umgebung ist die von der OTH Regensburg gestellte Wo
 
 Zudem erfolgten Tests auf einem weiteren Rechner mit einem i7-6700K Prozessor mit 4GHz Taktung, 4 realen Kernen und AVX2-Support, 32GB-DDR4-RAM sowie einer Nvidia GTX 1060 (6GB GDDR5-RAM). Installiert sind neben dem OS Ubuntu 18.04 LTS hierauf dieselben Tools, wie auf der Workstation, nur dass sich hier der Grafikkartentreiber unterscheidet, dieser ist hier in der Version Nvidia-440 installiert. 
 
-%TODO: Installation
 \subsubsection{Installation}
 Für die Kompilierung des Quellcodes werden eine Java-Runtime in der Version $ \geq 1.8$ und Maven benötigt. Für die Ausführung auf der Grafikkarte wird das Cuda-Toolkit mit dem passenden Grafikkartentreiber benötigt. Optional kann CuDNN für eine weitere Beschleunigung installiert werden.
 \begin{table}
@@ -739,13 +731,6 @@ Ein weiterer Punkt, in dem wir erst dazu lernen mussten, betraf die Kommunikatio
 
 Ein weiterer als negativ empfundener Aspekt lag in der benötigten Zeit für das Training des Modells des NN. Dadurch, dass das NN stets längere Zeit brauchte, um zu lernen und sich zu verbessern, hat sich die gesamte Projektdauer verlängert.
 
-%TODO Zeitaufwand konkret
-%TODO Abschließendes Fazit
-
-% Beschreiben Sie in diesem Abschnitt u.a.\ was Ihnen an diesem Fach gefallen hat und welche
-% Verbesserungsvorschläge Sie für künftige Veranstaltungen haben. Was konnten Sie dazulernen, in welchen
-% Bereichen haben Sie sich verbessert. Welche Problemsituationen gab es während der Projekterstellung, wie
-% sind Sie diese angegangen und wie haben Sie diese gelöst. Was haben Sie evtl.\ vermisst.
 
 \pagebreak
 
