@@ -45,7 +45,7 @@ public class PolicyValuePredictor {
         return PVP;
     }
 
-    private PolicyValuePredictor() {
+    public PolicyValuePredictor() {
         this.playgroundTransformer = new PlaygroundTransformer();
     }
     public void setEnvironment(Environment environment){

@@ -26,14 +26,16 @@ public class Main {
     private static int port = 7777;
     private static int groupNumber = 3;
     public static boolean LEARNER_MODE = Boolean.FALSE;
+    public static boolean ONLY_MCTS = Boolean.FALSE;
 
     public static void main(String[] args) throws InterruptedException {
 
         /* *******************************
          *       Enable training on multi-gpu
          */
-
-        CudaEnvironment.getInstance().getConfiguration().allowMultiGPU(true);
+        if (!ONLY_MCTS) {
+            CudaEnvironment.getInstance().getConfiguration().allowMultiGPU(true);
+        }
 
         /* ********************************
          *         Commandline options
@@ -48,11 +50,12 @@ public class Main {
 
         ServerCommunicator serverCommunicator = new ServerCommunicator(groupNumber);
         Environment environment = new Environment();
-
-        // Initialize singleton neuronal net before connecting to server (time intensive)
-        PolicyValuePredictor pvp = PolicyValuePredictor.getInstance();
-        pvp.setEnvironment(environment);
-
+        PolicyValuePredictor pvp = new PolicyValuePredictor();
+        if (!ONLY_MCTS) {
+            // Initialize singleton neuronal net before connecting to server (time intensive)
+            pvp = PolicyValuePredictor.getInstance();
+            pvp.setEnvironment(environment);
+        }
         /* *********************************
          *         Connect to server
          */
@@ -123,9 +126,9 @@ public class Main {
 
         if (!QUIET_MODE && environment.isPlayerDisqualified(serverCommunicator.getPlayerIcon())) {
             System.err.println("Agent got disqualified");
-        } else if (Main.LEARNER_MODE) {
-	    updateStatisticsAndNeuronalNetworks(environment);
-            trainNetwork(pvp, agentCallable);        
+        } else if (Main.LEARNER_MODE && !ONLY_MCTS) {
+	        updateStatisticsAndNeuronalNetworks(environment);
+	        trainNetwork(pvp, agentCallable);
         }
 
 
@@ -142,6 +145,7 @@ public class Main {
         if (cli.hasOption(ICLIOptions.IP_ADDRESS)) ip = cli.getOptionValue(ICLIOptions.IP_ADDRESS);
         if (cli.hasOption(ICLIOptions.PORT)) port = Integer.parseInt(cli.getOptionValue(ICLIOptions.PORT));
         if (cli.hasOption(ICLIOptions.LEARNER_MODE)) LEARNER_MODE = Boolean.TRUE;
+        if (cli.hasOption(ICLIOptions.ONLY_MCTS)) ONLY_MCTS = Boolean.TRUE;
     }
 
     private static void serverInit(String IP, int port, ServerCommunicator serverComm, Environment environment) {

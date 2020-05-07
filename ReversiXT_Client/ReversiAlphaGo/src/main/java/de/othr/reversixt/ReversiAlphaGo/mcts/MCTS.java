@@ -11,6 +11,7 @@ import de.othr.reversixt.ReversiAlphaGo.general.AlphaGoZeroConstants;
 import de.othr.reversixt.ReversiAlphaGo.general.Main;
 import org.deeplearning4j.nn.api.Layer;
 import org.nd4j.shade.yaml.snakeyaml.scanner.Constant;
+import org.opencv.ximgproc.SelectiveSearchSegmentation;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,11 +20,13 @@ import java.util.Random;
 
 import static de.othr.reversixt.ReversiAlphaGo.general.Main.LEARNER_MODE;
 import static de.othr.reversixt.ReversiAlphaGo.general.Main.QUIET_MODE;
+import static de.othr.reversixt.ReversiAlphaGo.general.Main.ONLY_MCTS;
 
 
 public class MCTS implements ITurnChoiceAlgorithm {
 
     private static final int NR_SIMULATIONS = 800;
+    private static final int NR_VISITED_NODES = 1000;
 
     private Environment environment;
     private char ourPlayerSymbol;
@@ -37,6 +40,8 @@ public class MCTS implements ITurnChoiceAlgorithm {
     // Training
     private ArrayList<Node> turnHistory = new ArrayList<>();
 
+    // MCTS without NN
+    private ArrayList<Node> leafNodes;
 
     public MCTS(Environment environment) {
         this.environment = environment;
@@ -58,7 +63,9 @@ public class MCTS implements ITurnChoiceAlgorithm {
             turnHistory.add(bestNode);
         }
         //bestNode is next root-node of tree
-        setNewRootNode(bestNode);
+        if (!ONLY_MCTS) {
+            setNewRootNode(bestNode);
+        }
         Turn bestTurn = bestNode.getCurTurn();
         if (!QUIET_MODE) System.out.println("bestTurn: " + bestTurn.getColumn() + ", " + bestTurn.getRow());
         return bestTurn;
@@ -66,7 +73,24 @@ public class MCTS implements ITurnChoiceAlgorithm {
 
     @Override
     public void chooseTurnPhase1() {
-        searchBestTurn();
+        if (!QUIET_MODE) {
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
+            Date date = new Date(System.currentTimeMillis());
+            System.out.println("Start: " + formatter.format(date));
+        }
+        if (ONLY_MCTS) {
+            if (!QUIET_MODE) {
+                System.out.println("MCTS without NN is started!");
+            }
+            //create new root node
+            //keep existing tree is not implemented
+            this.root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
+            this.leafNodes = new ArrayList<Node>();
+            leafNodes.add(root);
+            searchBestTurnWithoutNN();
+        } else {
+            searchBestTurn();
+        }
     }
 
     @Override
@@ -81,19 +105,21 @@ public class MCTS implements ITurnChoiceAlgorithm {
      */
     @Override
     public void enemyTurn(Turn turn) {
-        int newRootNodeFound = 0;
-        for (Node node : root.getChildren()) {
-            if (node.getCurTurn().getRow() == turn.getRow() && node.getCurTurn().getColumn() == turn.getColumn()) {
-                System.out.println("RootNode updated");
-                setNewRootNode(node);
-                newRootNodeFound = 1;
+        if (!ONLY_MCTS) {
+            int newRootNodeFound = 0;
+            for (Node node : root.getChildren()) {
+                if (node.getCurTurn().getRow() == turn.getRow() && node.getCurTurn().getColumn() == turn.getColumn()) {
+                    System.out.println("RootNode updated");
+                    setNewRootNode(node);
+                    newRootNodeFound = 1;
+                }
             }
-        }
-        //enemy turn was not explored -> new root node
-        if (newRootNodeFound == 0) {
-            if (!QUIET_MODE) System.out.println("Discard tree");
-            root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
-            firstCall = Boolean.TRUE;
+            //enemy turn was not explored -> new root node
+            if (newRootNodeFound == 0) {
+                if (!QUIET_MODE) System.out.println("Discard tree");
+                root = new Node(environment.getPlayground().getCloneOfPlayground(), environment.getOurPlayer());
+                firstCall = Boolean.TRUE;
+            }
         }
     }
 
@@ -127,9 +153,7 @@ public class MCTS implements ITurnChoiceAlgorithm {
         ArrayList<Turn> validTurns = new ArrayList<>();
         for (int row = 0; row < playground.getPlaygroundHeight(); row++) {
             for (int col = 0; col < playground.getPlaygroundWidth(); col++) {
-
                 turn = new Turn(playerIcon, row, col, 0);
-
                 if (playground.validateTurnPhase1(turn, player)) {
                     //System.out.println("Valid Turn: row " + row + " col " + col);
                     //if(environment.getPlayground().getSymbolOnPlaygroundPosition(row, col)=='b') turn.setSpecialFieldInfo(21);
@@ -163,12 +187,6 @@ public class MCTS implements ITurnChoiceAlgorithm {
      * and simulates random playouts starting in each child node (which are eventually backpropagated)
      */
     public void searchBestTurn() {
-        if (!QUIET_MODE) {
-            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
-            Date date = new Date(System.currentTimeMillis());
-            System.out.println("Start: " + formatter.format(date));
-        }
-
         if (firstCall) {
             if (!QUIET_MODE) {
                 System.out.println("create new root node");
@@ -210,58 +228,6 @@ public class MCTS implements ITurnChoiceAlgorithm {
     }
 
     /**
-     * DEPRECATED
-     * <p>
-     * expands the tree with the corresponding child nodes (as possible next moves)
-     * and simulates random playouts starting in each child node (which are eventually backpropagated)
-     */
-    public void searchBestTurn_deprecated() {
-        if (!QUIET_MODE) {
-            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
-            Date date = new Date(System.currentTimeMillis());
-            System.out.println("Start: " + formatter.format(date));
-        }
-        int countExpands = 0;
-        Node chosenNode = root;
-        double chosenNodeUCT;
-        double nodeUCT;
-        double reward;
-
-        if (!QUIET_MODE) {
-            System.out.println("-- evaluateRootLeaf --");
-        }
-        evaluateLeaf(chosenNode); //expand
-        //while (!leafNodes.isEmpty()) {
-        if (Thread.currentThread().isInterrupted()) {
-            return;
-        }
-        chosenNodeUCT = Double.MIN_VALUE;
-
-        for (Node child : chosenNode.getChildren()) {
-            if (!QUIET_MODE) {
-                System.out.println("-- evaluateLeaf --");
-            }
-            reward = evaluateLeaf(child); //call NeuronalNet
-            //backpropagate(child, reward);
-            setBestTurn();
-        }
-
-        //set bestUCTNode
-            /*for (Node node : leafNodes) {
-                nodeUCT = node.calculateUCT();
-                if (nodeUCT > chosenNodeUCT) {
-                    chosenNodeUCT = nodeUCT;
-                    chosenNode = node;
-                }
-            }*/
-
-        if (!QUIET_MODE) {
-            System.out.println("Next chosen Turn; row: " + chosenNode.getCurTurn().getRow() + " col: " + chosenNode.getCurTurn().getColumn());
-        }
-        //}
-    }
-
-    /**
      * go through the whole tree and looks for next Node to explore further
      * IMPORTANT: Set bestUCT to Double.MIN_VALUE before call searchBestUCT
      *
@@ -300,23 +266,6 @@ public class MCTS implements ITurnChoiceAlgorithm {
             }
         }
         return bestTurn;
-    }
-
-    /**
-     * reward of node will be set on each parent
-     * each parent will also increase the number of visits
-     *
-     * @param node
-     */
-    private void backpropagate(Node node) {
-        double reward = node.getSimulationReward();
-        //Backpropagate the reward and numVisited to all parents
-        Node nodeBP = node.getParent();
-        while (nodeBP != root) {
-            nodeBP.incNumVistited();
-            nodeBP.addReward(reward);
-            nodeBP = nodeBP.getParent();
-        }
     }
 
     /**
@@ -365,107 +314,180 @@ public class MCTS implements ITurnChoiceAlgorithm {
     }
 
     /**
-     * DEPRECATED
-     * <p>
-     * hand over the leaf node to the neuronal net to evaluate game state
-     * reward represents the evaluation of the current game state, i.e. the probability of winning being in the current
-     * state
-     * to consider only valid turns (instead of all playground positions) the possible turns are obtained
-     * priors array holds the prior probabilities for every move/for every position in the playground,
-     * if it is a valid turn a child node is created and the corresponding prior is saved
-     * otherwise it is not a valid move, therefore it is not added to the list of child nodes
-     * priors is a one dimensional array representing the playground (a two dimensional array), therefore row and col
-     * are calculated using the value for the dimension of the playground deposited in AlphaGoZeroConstants
-     * <p>
-     * eventually the new child node is added to the array of leaf nodes and the node received as a parameter
-     * (chosenNode) is removed from it
+     * reward of node will be set on each parent
+     * each parent will also increase the number of visits
      *
-     * @param chosenNode is the node to be evaluated
+     * @param node
      */
-    private double evaluateLeaf(Node chosenNode) {
-        Playground playground = chosenNode.getPlayground().getCloneOfPlayground();
-        OutputNeuronalNet outputNN = PolicyValuePredictor.getInstance().evaluate(playground, chosenNode.getNextPlayer());
-        double reward = outputNN.getOutputValueHead().toDoubleVector()[0];
-        double[] priors = outputNN.getOutputPolicyHead().toDoubleVector();
+    private void backpropagate(Node node) {
+        double reward = node.getSimulationReward();
+        //Backpropagate the reward and numVisited to all parents
+        Node nodeBP = node.getParent();
+        while (nodeBP != root) {
+            nodeBP.incNumVistited();
+            nodeBP.addReward(reward);
+            nodeBP = nodeBP.getParent();
+        }
+    }
 
+    public ArrayList<Node> getTurnHistory() {
+        return turnHistory;
+    }
+
+    /********************************************************************************************************/
+    /** BEGIN ******************************** WITHOUT NEURONAL NET *****************************************/
+    /********************************************************************************************************/
+
+    /**
+     * WITHOUT NN
+     * <p>
+     * expands the tree with the corresponding child nodes (as possible next moves)
+     * and simulates random playouts starting in each child node (which are eventually backpropagated)
+     */
+    public void searchBestTurnWithoutNN() {
         if (!QUIET_MODE) {
-            System.out.println("predicted reward: " + reward);
-            playground.printPlayground();
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss z");
+            Date date = new Date(System.currentTimeMillis());
+            System.out.println("Start: " + formatter.format(date));
         }
-
-        ArrayList<Turn> validTurns = getPossibleTurns(chosenNode.getPlayground(), chosenNode.getNextPlayer()); //row col
-        for (Turn turn : validTurns) {
-            int i = turn.getColumn() + turn.getRow() * AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
-            turn.setPrior(priors[i]);
+        //Without NN
+        Node chosenNode = root;
+        double chosenNodeUCT;
+        double nodeUCT;
+        int count = 0;
+        while (!leafNodes.isEmpty() && count < NR_VISITED_NODES) {
+            count++;
+            //Check if Thread was interrupted
+            if (Thread.currentThread().isInterrupted()) {
+                return;
+            }
+            //search best UCT in every loop of while
+            chosenNodeUCT = Double.MIN_VALUE;
+            //System.out.println("LeafNodeSize: " + leafNodes.size());
+            expand(chosenNode);
+            //System.out.println("LeafNodeSize after expand: " + leafNodes.size());
+            traverse(chosenNode);
+            //System.out.println("LeafNodeSize after traverse: " + leafNodes.size());
+            setBestTurn();
+            //System.out.println("SetBestTurn finished!");
+            //chose the next node which should be explored
+            for (Node node : leafNodes) {
+                //You can optimize here!!
+                nodeUCT = (node.getSimulationReward() / Double.valueOf(node.getNumVisited()));
+                //nodeUCT = node.calculateUCT();
+                if (nodeUCT > chosenNodeUCT) {
+                    chosenNodeUCT = nodeUCT;
+                    chosenNode = node;
+                    if (!QUIET_MODE) {
+                        System.out.println("Best UCT: " + chosenNodeUCT);
+                    }
+                }
+            }
         }
-
-        for (Turn turn : validTurns) {
-            int i = turn.getColumn() + turn.getRow() * AlphaGoZeroConstants.DIMENSION_PLAYGROUND;
-            playground = chosenNode.getPlayground().getCloneOfPlayground();
-            environment.updatePlayground(turn, playground);
-            //Node child = new Node(playground, chosenNode, environment.getNextPlayer(turn.getPlayerIcon()), turn);
-            //chosenNode.getChildren().add(child);
-            //leafNodes.add(child);
-        }
-
-        //leafNodes.remove(chosenNode);
-        return reward;
     }
 
     /**
-     * DEPRECATED
+     * WITHOUT NN
      * <p>
      * from each child node random playouts (meaning choosing random moves until and end state is reached) are simulated
      * when there are no more possible moves the end state is reached and the reward for this outcome is calculated
      * eventually the simulation results are backpropagated to the root node (number how often the node was visited and the the simulation reward are updated)
      */
     private void traverse(Node traverseNode) {
+        for (Node child : traverseNode.getChildren()) {
+            //clone map to "complete" the map
+            Playground playground = child.getPlayground().getCloneOfPlayground();
+            //Simulate one path to get a reward
+            child.setSimulationReward(simulate(playground, child.getNextPlayer()));
+            backpropagate(child);
+        }
+    }
 
-        if (LEARNER_MODE) {  // parallel execution on all cores
-            traverseNode.getChildren().parallelStream().forEach(child -> {
+    /**
+     * WITHOUT NN
+     * <p>
+     * calculates the reward as counting the stones one the playground from the corresponding player
+     *
+     * @param playground represents the current game state and holds the current playground
+     * @return the calculated reward (int)
+     */
+    private int rewardGameState(Playground playground) {
+        //reward = count all our stones
+        int reward = 0;
 
-                //clone map to "complete" the map
-                Playground playground = child.getPlayground().getCloneOfPlayground();
-                //Simulate one path to get a reward
-                double reward = simulate(playground, child.getNextPlayer());
-
-                //Backpropagate the reward and numVisited to all parents
-                Node nodeBP = child;
-                while (nodeBP != root) {
-                    nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
-                    //TODO save current player?
-                    if (nodeBP.getParent().getNextPlayer() == child.getParent().getNextPlayer()) {
-                        nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
-                    } else {
-                        nodeBP.setSimulationReward(nodeBP.getSimulationReward() - reward);
-                    }
-                    nodeBP = nodeBP.getParent();
-                }
-
-            });
-        } else {  // iterative execution
-            for (Node child : traverseNode.getChildren()) {
-                //clone map to "complete" the map
-                Playground playground = child.getPlayground().getCloneOfPlayground();
-                //Simulate one path to get a reward
-                double reward = simulate(playground, child.getNextPlayer());
-
-                //Backpropagate the reward and numVisited to all parents
-                Node nodeBP = child;
-                while (nodeBP != root) {
-                    nodeBP.setNumVisited(nodeBP.getNumVisited() + 1);
-                    //TODO save current player?
-                    if (nodeBP.getParent().getNextPlayer() == child.getParent().getNextPlayer()) {
-                        nodeBP.setSimulationReward(nodeBP.getSimulationReward() + reward);
-                    } else {
-                        nodeBP.setSimulationReward(nodeBP.getSimulationReward() - reward);
-                    }
-                    nodeBP = nodeBP.getParent();
+        for (int x = 0; x < playground.getPlaygroundHeight(); x++) {
+            for (int y = 0; y < playground.getPlaygroundWidth(); y++) {
+                if (playground.getSymbolOnPlaygroundPosition(y, x) == this.ourPlayerSymbol) {
+                    reward++;
                 }
             }
         }
-
+        //System.out.println("The reward is " + reward);
+        return reward;
     }
+
+    /**
+     * WITHOUT NN
+     * <p>
+     * function to simulate the full game by playing random moves till the end
+     *
+     * @param playground represents a cloned map which will calculated till end
+     * @param currPlayer represents the current player
+     * @return the reward of the simulated game
+     */
+    private double simulate(Playground playground, Player currPlayer) {
+        if (!QUIET_MODE) {
+            System.out.println("Simulate with Start Player: " + currPlayer.getSymbol());
+            playground.printPlayground();
+        }
+        ArrayList<Turn> possTurns = getPossibleTurns(playground, currPlayer);
+        //
+        while (!possTurns.isEmpty()) {
+            // determine next random turn and update playground
+            int index = new Random().nextInt(possTurns.size());
+            environment.updatePlayground(possTurns.get(index), playground);
+            currPlayer = environment.getNextPlayer(currPlayer.getSymbol());
+            possTurns = getPossibleTurns(playground, currPlayer);
+        }
+        return (double) rewardGameState(playground);
+    }
+
+    /**
+     * WITHOUT NN
+     * <p>
+     * expand the tree such that all possible next moves are added as child nodes for the current node
+     * each child receives their own deep copy of an environment
+     * the map is updated according to the possible move
+     * also the unvisited child nodes are added to the list of leaf nodes
+     */
+    private void expand(Node expandNode) {
+        if (!QUIET_MODE) {
+            System.out.println("Expand Playground with next Player: " + expandNode.getNextPlayer().getSymbol());
+            expandNode.getPlayground().printPlayground();
+        }
+        ArrayList<Turn> possibleTurns = getPossibleTurns(expandNode.getPlayground(), expandNode.getNextPlayer());
+        //for each Turn:
+        // clone the playground and make a single turn -> create newNode with updated map
+        // insert newNode in children of expandNode and in leafNodes
+        for (Turn turn : possibleTurns) {
+            Playground playground = expandNode.getPlayground().getCloneOfPlayground();
+            environment.updatePlayground(turn, playground);
+            Node child = new Node(playground, expandNode, environment.getNextPlayer(turn.getPlayerIcon()), turn, new ArrayList<Turn>(), 0);
+            expandNode.getChildren().add(child);
+            leafNodes.add(child);
+            if (!QUIET_MODE) {
+                System.out.println("Leaf Node added: " + child.getNextPlayer().getSymbol());
+                child.getPlayground().printPlayground();
+            }
+        }
+        //expandNode is expanded and can be removed from Leaf Nodes
+        //expandNode is not included in UCT anymore
+        leafNodes.remove(expandNode);
+    }
+
+    /********************************************************************************************************/
+    /** END ********************************** WITHOUT NEURONAL NET *****************************************/
+    /********************************************************************************************************/
 
     /**
      * counts the number of stones on the playground for the corresponding player
@@ -520,76 +542,4 @@ public class MCTS implements ITurnChoiceAlgorithm {
         }
     }
 
-    /**
-     * DEPRECATED
-     * <p>
-     * calculates the reward as counting the stones one the playground from the corresponding player
-     *
-     * @param playground represents the current game state and holds the current playground
-     * @return the calculated reward (int)
-     */
-    private int rewardGameState(Playground playground) {
-        //reward = count all our stones
-        int reward = 0;
-
-        for (int x = 0; x < playground.getPlaygroundHeight(); x++) {
-            for (int y = 0; y < playground.getPlaygroundWidth(); y++) {
-                if (playground.getSymbolOnPlaygroundPosition(y, x) == this.ourPlayerSymbol) {
-                    reward++;
-                }
-            }
-        }
-        return reward;
-    }
-
-    /**
-     * DEPRECATED
-     * <p>
-     * function to simulate the full game by playing random moves till the end
-     *
-     * @param playground represents a cloned map which will calculated till end
-     * @param currPlayer represents the current player
-     * @return the reward of the simulated game
-     */
-    private double simulate(Playground playground, Player currPlayer) {
-        ArrayList<Turn> possTurns = getPossibleTurns(playground, currPlayer);
-        //
-        while (!possTurns.isEmpty()) {
-            // determine next random turn and update playground
-            int index = new Random().nextInt(possTurns.size());
-            environment.updatePlayground(possTurns.get(index), playground);
-            currPlayer = environment.getNextPlayer(currPlayer.getSymbol());
-            possTurns = getPossibleTurns(playground, currPlayer);
-        }
-        return (double) rewardGameState(playground);
-    }
-
-    /**
-     * DEPRECATED
-     * <p>
-     * expand the tree such that all possible next moves are added as child nodes for the current node
-     * each child receives their own deep copy of an environment
-     * the map is updated according to the possible move
-     * also the unvisited child nodes are added to the list of leaf nodes
-     */
-    private void expand(Node expandNode) {
-        ArrayList<Turn> possibleTurns = getPossibleTurns(expandNode.getPlayground(), expandNode.getNextPlayer());
-        //for each Turn:
-        // clone the playground and make a single turn -> create newNode with updated map
-        // insert newNode in children of expandNode and in leafNodes
-        for (Turn turn : possibleTurns) {
-            Playground playground = expandNode.getPlayground().getCloneOfPlayground();
-            environment.updatePlayground(turn, playground);
-            //Node child = new Node(playground, expandNode, environment.getNextPlayer(turn.getPlayerIcon()), turn, 1);
-            //expandNode.getChildren().add(child);
-            //leafNodes.add(child);
-        }
-        //expandNode is expanded and can be removed from Leaf Nodes
-        //expandNode is not included in UCT anymore
-        //leafNodes.remove(expandNode);
-    }
-
-    public ArrayList<Node> getTurnHistory() {
-        return turnHistory;
-    }
 }

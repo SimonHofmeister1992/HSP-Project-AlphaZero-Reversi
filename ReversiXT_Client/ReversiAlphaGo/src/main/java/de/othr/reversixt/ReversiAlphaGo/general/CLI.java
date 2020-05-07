@@ -19,6 +19,7 @@ class CLI {
         options.addOption("a", ICLIOptions.IP_ADDRESS, true, "ip address of server");
         options.addOption("p", ICLIOptions.PORT, true, "port of server");
         options.addOption("l", ICLIOptions.LEARNER_MODE, false, "defines that the agent learns");
+        options.addOption("m", ICLIOptions.ONLY_MCTS, false, "actives the only mcts mode (without NN)");
     }
 
     private void parseCommandLine(String[] args) {

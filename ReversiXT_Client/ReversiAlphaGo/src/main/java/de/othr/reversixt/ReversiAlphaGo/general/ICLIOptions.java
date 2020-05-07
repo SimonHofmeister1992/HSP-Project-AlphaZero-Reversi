@@ -6,5 +6,6 @@ public interface ICLIOptions {
     String PORT = "port";
     String IP_ADDRESS = "ipaddress";
     String LEARNER_MODE = "learnerMode";
+    String ONLY_MCTS = "onlyMCTSMode";
 }
 
