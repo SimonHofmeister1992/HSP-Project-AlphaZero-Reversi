@@ -282,7 +282,7 @@ Hinsichtlich des Aufbaus des Programms ist festzuhalten, dass sich dieses in fü
 \subsubsection{General}
 Das Paket \texttt{General} beinhaltet die Grundfunktionalität des Programms sowie verbindende Elemente zwischen mehreren Paketen.
 So befindet sich hierin unter anderem die \texttt{Main}-Klasse mit der das Programm gestartet wird, mitsamt der zugehörigen Grundfunktionalität. Hier wird der Standardablauf des Spielstarts und eines Spielzuges definiert sowie die weiteren benötigten Klassen initialisiert. Des Weiteren k\"{u}mmert sich die Klasse um die Nutzung der Grafikkarte (ob mehrere Grafikkarten genutzt werden d\"{u}rfen) und um den Aufbau des Trainings des Neuronalen Netzes am Spielende.\\
-Des Weiteren beinhaltet das Paket die Definition spielrelevanter und klassenübergreifender Konstanten, sowie der Kommandozeilenparameter. Die verfügbaren fünf Kommandozeilenparameter sind in Tabelle \ref{tab:cmd_params} dargestellt. Die Parameter q und l sind vom Typ boolean und werden entweder angegeben oder weggelassen. Der Parameter q bewirkt, dass nur die nötigsten Informationen ausgegeben werden, während der Parameter l veranlasst, dass die KI nach jedem Spiel nachtrainiert. Die restlichen drei Parameter müssen in der Regel nicht angegeben werden, da die KI üblicherweise am selben Rechner wie der Server gestartet wird, zudem kann der Server mit mehreren identischen Gruppennummern von umgehen, dieser ist reine Kosmetik um die Clients als Mensch differenziert beim Spiel beobachten zu können.
+Des Weiteren beinhaltet das Paket die Definition spielrelevanter und klassenübergreifender Konstanten, sowie der Kommandozeilenparameter. Die verfügbaren fünf Kommandozeilenparameter sind in Tabelle \ref{tab:cmd_params} dargestellt. Die Parameter q, l und m sind vom Typ boolean und werden entweder angegeben oder weggelassen. Der Parameter q bewirkt, dass nur die nötigsten Informationen ausgegeben werden, während der Parameter l veranlasst, dass die KI nach jedem Spiel nachtrainiert. Bei der Angabe des Parameters m wird der Client ohne die Verwendung des Neuronalen Netzes ausgeführt. Die restlichen drei Parameter müssen in der Regel nicht angegeben werden, da die KI üblicherweise am selben Rechner wie der Server gestartet wird, zudem kann der Server mit mehreren identischen Gruppennummern von umgehen, dieser ist reine Kosmetik um die Clients als Mensch differenziert beim Spiel beobachten zu können.
 
 \begin{table}[h]
 	\caption{Kommandozeilenparameter des AlphaZero-Clients}
@@ -294,7 +294,8 @@ Des Weiteren beinhaltet das Paket die Definition spielrelevanter und klassenübe
 		q & Unterdrückt unnötige Ausgaben &  \\ \hline
 		a & IP-Addresse des Servers & Localhost  \\ \hline
 		p & Port des Servers & 7777 \\ \hline
-		l & Wenn angegeben, trainiert der Client nach dem Spiel &  \\ \hline
+		l & Der Client trainiert nach dem Spiel &  \\ \hline
+		m & Der MCTS wird ohne Neuronales Netz verwendet. & \\ \hline
 	\end{tabularx}
 \end{table}
 
@@ -595,25 +596,25 @@ Im nächsten Bereich wird der Grafikkartentreiber aktualisiert und Cuda 10.2, in
 & \hspace{4.1 cm}\text{cuda.list} \\
 & \hspace{3.4 cm}\text{wget https://developer.download.nvidia.com/compute/cuda/repos/} \\
 & \hspace{4.1 cm}\text{ubuntu1804/x86\_64/cuda-ubuntu1804.pin} \\
+& \hspace{3.4 cm}\text{sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository} \\
+& \hspace{4.1 cm}\text{-pin-600} \\
+& \hspace{3.4 cm}\text{wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod} \\
+& \hspace{4.1 cm}\text{/local\_installers/cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01} \\
+& \hspace{4.1 cm}\text{\_1.0-1\_amd64.deb} \\
+& \hspace{3.4 cm}\text{sudo dpkg -i cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01\_1.0-1} \\
+& \hspace{4.1 cm}\text{\_amd64.deb} \\
+& \hspace{3.4 cm}\text{sudo apt-key add /var/cuda-repo-10-2-local-10.2.89-440.33.01/7fa2af80} \\
+& \hspace{4.1 cm}\text{.pub} \\
+& \hspace{3.4 cm}\text{sudo apt-get update} \\
+& \hspace{3.4 cm}\text{sudo apt-get install nvidia-440 // alternativ kleinere Treiberversion,} \\
+& \hspace{4.1 cm}\text{Anpassung an die DL4J kompatiblen Cuda-Versionen siehe Tab. \ref{tab:cuda-cudnn},} \\
+& \hspace{4.1 cm}\text{Anpassung in der pom.xml des Reversi-Clients} \\
+& \hspace{3.4 cm}\text{sudo apt-get update} \\
+& \hspace{3.4 cm}\text{// Logout und erneuten Login durchführen.} \\
+& \hspace{3.4 cm}\text{sudo apt-get -o Dpkg::Options::=\grqq{}--force-overwrite\grqq{} install cuda cuda-} \\
+& \hspace{4.1 cm}\text{drivers} \\
 \end{flalign*}
 \begin{flalign*}
-& \hspace{3.8 cm}\text{sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository} \\
-& \hspace{4.5 cm}\text{-pin-600} \\
-& \hspace{3.8 cm}\text{wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod} \\
-& \hspace{4.5 cm}\text{/local\_installers/cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01} \\
-& \hspace{4.5 cm}\text{\_1.0-1\_amd64.deb} \\
-& \hspace{3.8 cm}\text{sudo dpkg -i cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01\_1.0-1} \\
-& \hspace{4.5 cm}\text{\_amd64.deb} \\
-& \hspace{3.8 cm}\text{sudo apt-key add /var/cuda-repo-10-2-local-10.2.89-440.33.01/7fa2af80} \\
-& \hspace{4.5 cm}\text{.pub} \\
-& \hspace{3.8 cm}\text{sudo apt-get update} \\
-& \hspace{3.8 cm}\text{sudo apt-get install nvidia-440 // alternativ kleinere Treiberversion,} \\
-& \hspace{4.5 cm}\text{Anpassung an die DL4J kompatiblen Cuda-Versionen siehe Tab. \ref{tab:cuda-cudnn},} \\
-& \hspace{4.5 cm}\text{Anpassung in der pom.xml des Reversi-Clients} \\
-& \hspace{3.8 cm}\text{sudo apt-get update} \\
-& \hspace{3.8 cm}\text{// Logout und erneuten Login durchführen.} \\
-& \hspace{3.8 cm}\text{sudo apt-get -o Dpkg::Options::=\grqq{}--force-overwrite\grqq{} install cuda cuda-} \\
-& \hspace{4.5 cm}\text{drivers} \\
 & \hspace{3.8 cm}\text{sudo vi /etc/profile} \\
 & \hspace{4.8 cm}\text{Um folgenden Inhalt erweitern:} \\
 & \hspace{4.8 cm}\text{export PATH=/usr/local/cuda-$<$cuda-version$>$/bin:\$PATH} \\
@@ -641,6 +642,8 @@ In dieser Anleitung wird CuDNN 7.6.5 als kompatible Version zu Cuda 10.2 verwend
 & \hspace{4 cm}\text{sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda-10.2/lib64/} \\
 & \hspace{4 cm}\text{sudo chmod a+r /usr/local/cuda-10.2/lib64/libcudnn*} \\
 & \hspace{4 cm}\text{Rechner neu starten.} \\
+\end{flalign*}
+\begin{flalign*}
 & \hspace{4 cm}\text{// Verifizierung der Installation:} \\
 & \hspace{4 cm}\text{nvidia-smi // Ausgabe: Tabelle mit Treiber-Version und Cuda-Version} \\
 & \hspace{4 cm}\text{nvcc --version // Ausgabe: Cuda-Version} \\
@@ -656,10 +659,10 @@ kompiliert. Nach der Ausführung des Programms sollte an der Ausgabe erkennbar s
 Um die Installation sauber abzuschließen, kann dieser Ordner wieder gelöscht werden. Zudem wird der Paketmanager ein letztes Mal auf den aktuellen Stand gebracht. 
 
 \begin{flalign*}
-& \hspace{-0.1 cm} \text{sudo apt-get update} \\
-& \hspace{-0.1 cm} \text{sudo apt-get upgrade} \\
-& \hspace{-0.1 cm} \text{sudo apt-get autoremove} \\
-& \hspace{-0.1 cm} \text{// Logout und erneuten Login durchführen.} \\
+& \hspace{-0.6 cm} \text{sudo apt-get update} \\
+& \hspace{-0.6 cm} \text{sudo apt-get upgrade} \\
+& \hspace{-0.6 cm} \text{sudo apt-get autoremove} \\
+& \hspace{-0.6 cm} \text{// Logout und erneuten Login durchführen.} \\
 \end{flalign*}
 
 Die Installation der benötigten Tools ist hiermit abgeschlossen. \\
